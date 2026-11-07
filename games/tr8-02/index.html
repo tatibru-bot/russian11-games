@@ -139,7 +139,14 @@ function showFinish(){
  el("play").hidden=true;el("finish").hidden=false;
  el("save").onclick=()=>{
   const errors={};wrong.forEach(x=>{const name=CFG.names[x.card.kind];errors[name]=(errors[name]||0)+1});
-  const data={v:1,type:"game_result",gameId:CFG.id,attemptId,correct,total:15,errors};
+  // Передаём не только ошибки, но и реально проверенные правила.
+  // Иначе бот не сможет отличить идеальный ответ от правила, которого не было в раунде.
+  const tested={};
+  cards.forEach(c=>{
+   const name=CFG.names[c.kind];
+   tested[name]=(tested[name]||0)+1;
+  });
+  const data={v:1,type:"game_result",gameId:CFG.id,attemptId,correct,total:15,errors,tested};
   if(!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function"){
    el("saveStatus").textContent="Для записи результата открой игру кнопкой «🎮 Тренажёры» внутри Telegram.";
    return;
