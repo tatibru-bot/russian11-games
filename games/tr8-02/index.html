@@ -116,7 +116,7 @@ function render(){
  el("progress").textContent=(pos+1)+" / 15";
  el("bar").style.width=((pos+1)/15*100).toFixed(1)+"%";
  el("sentence").textContent=card.text;
- el("expand").hidden=card.text.length<155;
+ el("expand").hidden=false;
  const buttons=CFG.groups.map((k,i)=>'<button type="button" class="choice'+(answer===k?' selected':'')+'" data-kind="'+k+'" aria-pressed="'+(answer===k)+'" title="'+esc(CFG.names[k])+'"><span class="num">'+(i+1)+'</span><span>'+esc(CFG.short[k])+'</span></button>').join("");
  el("choices").innerHTML=buttons;
  el("choices").querySelectorAll("button").forEach(btn=>btn.addEventListener("click",()=>{answers[pos]=btn.dataset.kind;render()}));
