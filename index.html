@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f5f7ff">
+<title>ЕГЭ № 8 — проверка Telegram Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#202b46;background:#f4f7ff;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;padding:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));line-height:1.45}
+main{max-width:680px;margin:0 auto}.panel{background:white;border:1px solid #dee5f7;border-radius:18px;padding:19px;box-shadow:0 3px 16px #13295e12;margin-bottom:12px}
+h1{font-size:23px;margin:4px 0 5px}h2{font-size:19px}p{margin:8px 0}.sub{color:#5c6d8c;font-size:14px}.pill{font-size:13px;color:#3957a3;font-weight:700}
+.question{font-size:20px;font-weight:650;margin:18px 0;line-height:1.52}.answers{display:grid;gap:10px;margin-top:14px}
+button{font:inherit;border-radius:12px;padding:13px 14px;min-height:52px;border:1px solid #d6dff0;background:#f9fbff;color:#202b46;text-align:left;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.6}button.primary{background:#425bd9;color:white;border-color:#425bd9;text-align:center;font-weight:750}button:focus-visible{outline:3px solid #ffd176}button.correct{background:#e6f8ef;border-color:#55a77c}button.wrong{background:#fff0ee;border-color:#e5a1a0}
+.feedback{background:#f3f7ff;padding:14px;border-radius:12px;margin:14px 0;font-size:15px}.hidden{display:none!important}.error{color:#a33636}.success{color:#166a48}.bar{background:#e5e9f3;border-radius:100px;height:9px;overflow:hidden;margin:12px 0}.bar>div{height:100%;background:#425bd9;width:0;transition:width .25s}
+</style>
+</head>
+<body>
+<main>
+<section class="panel">
+  <div class="pill">ТЕХНИЧЕСКАЯ ПРОВЕРКА · 5 ВОПРОСОВ</div>
+  <h1>ЕГЭ № 8 — ошибки в предложениях</h1>
+  <p class="sub">Короткий пробный тренажёр. Проверяем игру на iPhone и автоматический учёт результата в боте.</p>
+  <div id="telegramStatus" class="sub" role="status"></div>
+</section>
+<section class="panel" id="quizPanel">
+  <div id="counter" class="pill"></div><div class="bar"><div id="fill"></div></div>
+  <div id="question" class="question"></div>
+  <div id="answers" class="answers"></div>
+  <div id="feedback" class="feedback hidden"></div>
+  <button id="next" type="button" class="primary hidden" style="width:100%;margin-top:12px">Следующее задание</button>
+</section>
+<section class="panel hidden" id="finishPanel">
+  <h2>Тренировка завершена 🎯</h2>
+  <p id="result"></p>
+  <p id="repeat" class="sub"></p>
+  <button id="send" type="button" class="primary" style="width:100%">Сохранить результат в мой кабинет</button>
+  <p id="sendMessage" class="sub" role="status"></p>
+  <button id="restart" type="button" style="width:100%;text-align:center">Пройти ещё раз</button>
+</section>
+</main>
+<script>
+(function(){'use strict';
+const tg=(window.Telegram&&window.Telegram.WebApp)||null;
+if(tg){try{tg.ready();tg.expand();}catch(e){}}
+const $=id=>document.getElementById(id);
+$('telegramStatus').textContent=tg&&tg.platform&&tg.platform!=='unknown'?'Открыто в Telegram ✓':'Если открыть обычной ссылкой в браузере, результат в бота не отправится. Запускай из кнопки «Тренажёры».';
+const choices=['Деепричастный оборот','Управление','Причастный оборот','Однородные члены','Несогласованное приложение'];
+const questions=[
+{sentence:'Выехав из рощи, дорога круто повернула вправо.',key:0,explain:'Действие, названное деепричастием, должно относиться к тому же действующему лицу, что и сказуемое. Исправление: Выехав из рощи, мы увидели, что дорога круто повернула вправо.'},
+{sentence:'Сразу по приезду в губернский город Чичиков попытался установить деловые связи с местными чиновниками.',key:1,explain:'В значении «после прибытия» требуется форма предложного падежа: по приезде.'},
+{sentence:'Туристы увидели разожжённый костёр кем-то на другом берегу реки.',key:2,explain:'Зависимые слова причастного оборота нельзя разделять определяемым словом. Исправление: разожжённый кем-то костёр.'},
+{sentence:'Задолго до рассвета хозяйка не только затопила печь, а также испекла хлеб.',key:3,explain:'Нарушена парная конструкция союза: не только..., но и...'},
+{sentence:'Комментарии Ю. М. Лотмана к роману «Евгению Онегину» помогают читателю лучше понять эпоху А. С. Пушкина.',key:4,explain:'Название романа после родового слова не склоняется: к роману «Евгений Онегин».'}
+];
+let index=0,correct=0,errors={};
+function render(){
+ const q=questions[index];$('counter').textContent='Вопрос '+(index+1)+' / '+questions.length;
+ $('fill').style.width=(index/questions.length*100)+'%';$('question').textContent=q.sentence;
+ $('answers').innerHTML='';$('feedback').classList.add('hidden');$('next').classList.add('hidden');
+ choices.forEach((choice,j)=>{const b=document.createElement('button');b.textContent=choice;b.type='button';b.onclick=()=>answer(j);$('answers').appendChild(b);});
+}
+function answer(j){
+ const q=questions[index];const ok=j===q.key;if(ok)correct++;
+ else{const k=choices[q.key];errors[k]=(errors[k]||0)+1;}
+ [...$('answers').children].forEach((b,i)=>{b.disabled=true;if(i===q.key)b.classList.add('correct');else if(i===j)b.classList.add('wrong');});
+ $('feedback').textContent=(ok?'✅ Верно. ':'❌ Правильная категория: '+choices[q.key]+'. ')+q.explain;
+ $('feedback').classList.remove('hidden');$('next').textContent=index===questions.length-1?'Завершить':'Следующее задание';$('next').classList.remove('hidden');
+}
+$('next').onclick=()=>{index++;if(index<questions.length){render();return;}finish();};
+function finish(){
+ $('quizPanel').classList.add('hidden');$('finishPanel').classList.remove('hidden');
+ $('result').textContent='Верно: '+correct+' из '+questions.length+' ('+Math.round(correct*100/questions.length)+'%).';
+ const k=Object.keys(errors);$('repeat').textContent=k.length?'Повторить: '+k.join(', '):'Ошибок нет — отличная работа!';
+}
+$('send').onclick=()=>{
+ const id=(window.crypto&&window.crypto.randomUUID)?window.crypto.randomUUID():(Date.now().toString(36)+'_'+Math.random().toString(36).slice(2));
+ const data={v:1,type:'game_result',gameId:'TR8_PILOT',attemptId:id,correct:correct,total:questions.length,errors:errors};
+ // В Telegram sendData доступно только для Web App, запущенных из Reply Keyboard.
+ if(!tg||!tg.platform||tg.platform==='unknown'||typeof tg.sendData!=='function'){
+   $('sendMessage').textContent='Отправка возможна только при запуске через кнопку Mini App в личном чате бота.';return;
+ }
+ try{$('send').disabled=true;tg.sendData(JSON.stringify(data));$('sendMessage').textContent='Результат отправлен в бот.';}
+ catch(err){$('send').disabled=false;$('sendMessage').textContent='Не удалось отправить: '+String(err.message||err);}
+};
+$('restart').onclick=()=>{index=0;correct=0;errors={};$('finishPanel').classList.add('hidden');$('quizPanel').classList.remove('hidden');$('send').disabled=false;render();};
+render();
+})();
+</script>
+</body>
+</html>
