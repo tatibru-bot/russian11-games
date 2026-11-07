@@ -196,7 +196,7 @@ function saveGame22(){
  }));
  const total=Object.values(tested).reduce((n,x)=>n+x,0);
  if(total!==5){status.textContent='Не удалось проверить завершённый раунд.';return;}
- const data={v:1,type:'game_result',gameId:'TR22_BASE',attemptId,correct:totalCorrect,total,errors,tested};
+ const data={v:1,type:'game_result',gameId:'TR22',attemptId,correct:totalCorrect,total,errors,tested};
  try{$('saveGame22').disabled=true;tg.sendData(JSON.stringify(data));gameSaved=true;status.textContent='Результат отправлен боту.';}
  catch(e){$('saveGame22').disabled=false;status.textContent='Не удалось отправить: '+String(e.message||e);}
 }
