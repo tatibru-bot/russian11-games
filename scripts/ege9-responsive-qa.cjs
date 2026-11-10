@@ -24,9 +24,9 @@ const path = require('path');
         return {viewport:[w,h],bodyX:document.documentElement.scrollWidth-w,bodyY:document.documentElement.scrollHeight-h,
           actionTop:Math.round(r.top),actionBottom:Math.round(r.bottom),
           contentExtra:c?Math.round(c.scrollHeight-c.clientHeight):0,
-          btnHeight:Math.round(r.height),buttonsOutside:[...document.querySelectorAll('.opt')].filter(x=>x.getBoundingClientRect().bottom>h+1).length};
+          btnHeight:Math.round(r.height),buttonsOutside:[...document.querySelectorAll('.opt')].filter(x=>x.getBoundingClientRect().bottom>h+1).length,wordsOutside:[...document.querySelectorAll('.opt .words')].filter(x=>{const a=x.getBoundingClientRect(),p=x.closest('.opt').getBoundingClientRect();return a.top<p.top-1||a.bottom>p.bottom+1||x.scrollHeight>x.clientHeight+1}).length};
       },selector);
-      const bad=!!m.error||m.bodyX>1||m.actionBottom>size.height+1||m.actionTop<0||m.contentExtra>1||m.buttonsOutside>0||m.btnHeight<43;
+      const bad=!!m.error||m.bodyX>1||m.actionBottom>size.height+1||m.actionTop<0||m.contentExtra>1||m.buttonsOutside>0||m.wordsOutside>0||m.btnHeight<43;
       if(bad)failures.push({size:size.name,stage,...m});
       return m;
     }
