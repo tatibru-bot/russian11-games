@@ -9,7 +9,7 @@ const path = require('path');
   const problems=[];
   for(const [name,width,height] of sizes){
     const page=await browser.newPage({viewport:{width,height},isMobile:width<700,hasTouch:width<700});
-    const errors=[];
+    const errors=[]; page.setDefaultTimeout(4500);
     page.on('pageerror',e=>errors.push(String(e.message)));
     await page.route('https://telegram.org/**',route=>route.fulfill({status:200,contentType:'application/javascript',body:''}));
     await page.goto('file://'+path.resolve('games/slovar11/index.html'));
