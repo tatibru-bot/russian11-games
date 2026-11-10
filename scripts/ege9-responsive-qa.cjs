@@ -38,6 +38,10 @@ const path = require('path');
     }
     await page.click('#commit-exam');
     await check('exam-next','#commit-exam');
+    await page.click('#home');await page.click('#start-exam');
+    for(let k=0;k<5;k++) await page.click('#commit-exam');
+    if(await page.locator('#fill-next').count()){await check('fill-input','#fill-next');await page.locator('.fill-input').first().fill('а');await page.click('#fill-next');await check('fill-review','#fill-next');}
+    else if(await page.locator('#send-result').count()){console.log('Unexpected perfect exam without selections');}
     await page.click('#home');await page.click('#open-training');
     await page.locator('[data-cat]').first().click();
     await check('word-practice','#check-word');
