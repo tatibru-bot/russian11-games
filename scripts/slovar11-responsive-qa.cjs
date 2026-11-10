@@ -74,6 +74,19 @@ const path = require('path');
     });
     if(after.overflow>1||after.feedbackTop<after.paneTop||after.feedbackBottom>after.paneBottom)
       problems.push({size:name,phase:'feedback',...after});
+    await page.locator('#finish-session').click();
+    const finished=await page.evaluate(()=>{
+      const pane=document.querySelector('#screen-finish .finish');
+      const p=pane.getBoundingClientRect();
+      const ids=['save-telegram','finish-home','export-stats'];
+      const actions=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();
+        return {id,top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height),x:Math.round(r.left)}});
+      return {top:Math.round(p.top),bottom:Math.round(p.bottom),height:Math.round(p.height),
+        viewport:innerHeight,screenOverflow:Math.round(pane.scrollHeight-pane.clientHeight),actions};
+    });
+    if(finished.top<0||finished.bottom>height+1||finished.screenOverflow>1||
+       finished.actions.some(a=>a.top<0||a.bottom>height+1||a.height<43))
+      problems.push({size:name,phase:'finish-layout',finished});
     await page.locator('#go-home').click();
     await page.locator('#open-dict').click();
     const count=await page.locator('#word-list input[type=checkbox]').count();
@@ -85,6 +98,36 @@ const path = require('path');
     console.log(name+': inspected 426 masks/hints, answer, dictionary and search; issues='+problems.filter(p=>p.size===name).length);
     await page.close();
   }
+  // Simulate the existing Telegram keyboard Mini App contract; no actual messages sent.
+  const tgPage=await browser.newPage({viewport:{width:375,height:667},isMobile:true,hasTouch:true});
+  tgPage.setDefaultTimeout(4500);
+  await tgPage.addInitScript(()=>{
+    window.__sent=[];
+    window.Telegram={WebApp:{platform:'ios',initData:'test-stub-do-not-send',initDataUnsafe:{user:{id:99999,first_name:'QA'}},
+      ready(){},expand(){},sendData(data){window.__sent.push(data);}}};
+  });
+  await tgPage.route('https://telegram.org/**',route=>route.fulfill({status:200,contentType:'application/javascript',body:''}));
+  await tgPage.goto('file://'+path.resolve('games/slovar11/index.html'));
+  await tgPage.locator('[data-mode="all"]').click();
+  await tgPage.evaluate(()=>{queue=[8];lastId=null;nextCard();});
+  await tgPage.locator('#answer').fill('аккомпанемент');
+  await tgPage.locator('#check-answer').click();
+  await tgPage.evaluate(()=>{queue=[167];lastId=null;nextCard();});
+  await tgPage.locator('#dont-know').click();
+  await tgPage.locator('#finish-session').click();
+  await tgPage.locator('#save-telegram').click();
+  const delivery=await tgPage.evaluate(()=>({sent:window.__sent||[],status:document.getElementById('save-telegram-status').textContent}));
+  if(delivery.sent.length!==1){problems.push({size:'Telegram mock',phase:'submit',delivery});}
+  else{
+    let data;
+    try{data=JSON.parse(delivery.sent[0]);}catch(e){problems.push({size:'Telegram mock',phase:'parse',error:String(e)})}
+    if(data && (data.type!=='game_result'||data.gameId!=='SLOVAR11'||data.total!==2||
+      data.correct!==1||data.errors?.['Словарные слова']!==1||
+      data.tested?.['Словарные слова']!==2||Object.keys(data.errors).length!==1||
+      delivery.sent[0].length>4096))problems.push({size:'Telegram mock',phase:'payload',data});
+  }
+  console.log('Telegram simulated result: '+JSON.stringify({sent:delivery.sent.length,status:delivery.status}));
+  await tgPage.close();
   console.log('RESULT='+JSON.stringify({pass:problems.length===0,count:problems.length,samples:problems.slice(0,36)}));
   await browser.close();
   if(problems.length)process.exit(1);
