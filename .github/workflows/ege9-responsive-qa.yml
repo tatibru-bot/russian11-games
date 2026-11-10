@@ -1,0 +1,20 @@
+name: EGE9 responsive screen QA
+on:
+  push:
+    paths:
+      - 'games/ege9-roots/**'
+      - 'scripts/ege9-responsive-qa.cjs'
+      - '.github/workflows/ege9-responsive-qa.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/ege9-responsive-qa.cjs
