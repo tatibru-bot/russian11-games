@@ -1,0 +1,19 @@
+name: Slovar11 responsive QA
+on:
+  push:
+    paths:
+      - 'games/slovar11/**'
+      - 'scripts/slovar11-responsive-qa.cjs'
+      - '.github/workflows/slovar11-responsive-qa.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: node scripts/slovar11-responsive-qa.cjs
