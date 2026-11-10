@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 (async () => {
-  const browser = await chromium.launch({headless:true});
+  const browser = await chromium.launch({headless:true,channel:'chrome'});
   const sizes = [
     {name:'iPhone SE',width:320,height:568},
     {name:'iPhone 375',width:375,height:667},
