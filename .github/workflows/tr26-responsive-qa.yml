@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/tr26-*
+      - main
     paths:
       - "games/tr26-links/**"
       - ".github/workflows/tr26-responsive-qa.yml"
@@ -24,8 +25,8 @@ jobs:
       - name: Install Playwright
         run: |
           npm install --no-package-lock
-          npx playwright install chromium --with-deps
+          npx playwright install chromium webkit --with-deps
       - name: Validate task bank
         run: npm run test:bank
-      - name: Test mobile and desktop interaction
+      - name: Test Chromium and WebKit mobile and desktop interaction
         run: npm run test:responsive
