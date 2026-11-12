@@ -85,7 +85,7 @@ for(const engine of engines){
   await page.goto(address,{waitUntil:"load"});
   await page.getByRole("button",{name:/Начать 5 заданий/}).click();
   for(let i=0;i<5;i++){
-   const id=await page.locator(".source").textContent().then(x=>x.match(/карточка ([RS]\\d+)/)?.[1]);
+   const id=await page.locator(".source").textContent().then(x=>x.match(/карточка ([RS]\d+)/)?.[1]);
    assert.ok(id,"Telegram contract test: missing task ID");
    const keys=await page.evaluate(id=>window.TR26_TASKS.find(t=>t.id===id).a,id);
    for(const n of keys)await page.locator('.sentence[data-choice="'+n+'"]').click();
