@@ -23,6 +23,9 @@ for(const t of bank) {
   for(const n of t.a)assert.ok(n>t.lo&&n<=t.hi,t.id+': answer outside extract');
   assert.ok(typeof t.why==='string'&&t.why.length>=4,t.id+': no explanation');
 }
+// Regression checks for two wrong keys found in manual answer audit.
+assert.deepEqual(Array.from(bank.find(x=>x.id==='R1899').a),[10]);
+assert.deepEqual(Array.from(bank.find(x=>x.id==='R4115').a),[34]);
 vm.runInNewContext(read('reference.js'),ctx);
 assert.ok(ctx.window.TR26_REFERENCE.includes('Лексический повтор'));
 assert.ok(ctx.window.TR26_REFERENCE.includes('Притяжательные местоимения'));
