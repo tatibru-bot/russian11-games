@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 import { pathToFileURL } from "node:url";
 
 const address=pathToFileURL(new URL("./index.html",import.meta.url).pathname).href;
-const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+const engines=[chromium,webkit];
 const sizes=[{width:320,height:568},{width:375,height:667},{width:390,height:844},{width:1280,height:800}];
-try{
+for(const engine of engines){
+ const browser=await engine.launch(engine===chromium?{headless:true,args:["--no-sandbox"]}:{headless:true});
+ try{
  for(const viewport of sizes){
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
@@ -57,7 +59,8 @@ try{
   assert.equal(await page.locator(".stat strong").nth(1).textContent(),"1","right counter did not increase");
   assert.equal(await page.locator(".stat strong").nth(2).textContent(),"4","wrong counter did not decrease");
   await noOuterScroll("after correction");
-  console.log("PASS "+viewport.width+"x"+viewport.height+": menu, exam, reference, five wrong, error retry, corrected stats, no outer scroll.");
+  console.log("PASS "+engine.name()+" "+viewport.width+"x"+viewport.height+": menu, exam, reference, five wrong, error retry, corrected stats, no outer scroll.");
   await context.close();
  }
-}finally{await browser.close();}
+ }finally{await browser.close();}
+}
