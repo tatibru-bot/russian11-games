@@ -61,7 +61,7 @@ footer button{border:0;background:none;color:var(--aqua);font-weight:850;padding
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="./data.js"></script>
+<script src="./data.js?v=source-realignment-20261112"></script>
 <script src="./reference.js"></script>
 </head>
 <body>
@@ -80,7 +80,9 @@ const main=document.getElementById("main");
 const tg=window.Telegram && window.Telegram.WebApp;
 try{if(tg){tg.ready();tg.expand();}}catch(e){}
 const user=tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? String(tg.initDataUnsafe.user.id) : "browser";
-const localKey="russian11:tr26:progress:v1:"+user,cloudKey="r11_tr26_progress_v1";
+const localKey="russian11:tr26:progress:v2:"+user,cloudKey="r11_tr26_progress_v2";
+const legacyLocalKey="russian11:tr26:progress:v1:"+user,legacyCloudKey="r11_tr26_progress_v1";
+const resetKeys=new Set(TASKS.filter(function(t){return t.id.startsWith("S");}).map(function(t){return t.id;}).concat(["R50341","R1899","R4115","R4544","R341","R455","R113"]));
 const store=(function(){try{return window.localStorage;}catch(e){return null;}})();
 let status={},scene="menu",returnScene="menu",session=null,cloudBusy=false,cloudDirty=false,changedHere=false,notice="";
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x];});}
@@ -93,8 +95,26 @@ function sanitize(raw){
  for(const k of Object.keys(raw)){if(byId.has(k)&&(raw[k]==="ok"||raw[k]==="error"))s[k]=raw[k];}
  return s;
 }
-try{if(store)status=sanitize(JSON.parse(store.getItem(localKey)||"{}"));}catch(e){}
-function cloudPayload(){return JSON.stringify({c:Object.keys(status).filter(function(k){return status[k]==="ok";}).join(","),e:Object.keys(status).filter(function(k){return status[k]==="error";}).join(",")});}
+function migrateOld(raw){
+ const previous=sanitize(raw);
+ for(const id of resetKeys)delete previous[id];
+ return previous;
+}
+try{
+ if(store){
+  const current=store.getItem(localKey);
+  if(current!==null)status=sanitize(JSON.parse(current));
+  else {
+   const older=sanitize(JSON.parse(store.getItem(legacyLocalKey)||"{}"));
+   status=migrateOld(older);
+   store.setItem(localKey,JSON.stringify(status));
+   if(Object.keys(older).length!==Object.keys(status).length)
+    notice="База исправлена: результаты по заданиям с прежними неверными текстами или ключами сброшены, остальные сохранены.";
+  }
+ }
+}catch(e){}
+
+function cloudPayload(){return JSON.stringify({v:2,c:Object.keys(status).filter(function(k){return status[k]==="ok";}).join(","),e:Object.keys(status).filter(function(k){return status[k]==="error";}).join(",")});}
 function cloudWrite(){
  const cs=tg&&tg.CloudStorage;if(!cs||typeof cs.setItem!=="function")return;
  cloudDirty=true;if(cloudBusy)return;cloudBusy=true;
@@ -104,13 +124,32 @@ function cloudWrite(){
  catch(e){cloudBusy=false;}
 }
 function persist(){changedHere=true;try{if(store)store.setItem(localKey,JSON.stringify(status));}catch(e){}cloudWrite();}
+function decodeCloud(raw,legacy){
+ const data=JSON.parse(raw),s={};
+ (data.c||"").split(",").forEach(function(k){if(byId.has(k))s[k]="ok";});
+ (data.e||"").split(",").forEach(function(k){if(byId.has(k))s[k]="error";});
+ return legacy?migrateOld(s):s;
+}
+function applyCloud(raw,legacy){
+ if(!raw||changedHere)return;
+ try{
+  const saved=decodeCloud(raw,legacy);
+  status=legacy?Object.assign({},saved,status):saved;
+  if(store)store.setItem(localKey,JSON.stringify(status));
+  if(scene==="menu")renderMenu();
+  if(legacy)cloudWrite();
+ }catch(e){}
+}
 function cloudLoad(){
  const cs=tg&&tg.CloudStorage;if(!cs||typeof cs.getItem!=="function")return;
- try{cs.getItem(cloudKey,function(err,val){
-  if(err||!val||changedHere)return;
-  try{const v=JSON.parse(val),s={};(v.c||"").split(",").forEach(function(k){if(byId.has(k))s[k]="ok";});(v.e||"").split(",").forEach(function(k){if(byId.has(k))s[k]="error";});
-  status=s;if(store)store.setItem(localKey,JSON.stringify(status));if(scene==="menu")renderMenu();
-  }catch(e){}
+ try{cs.getItem(cloudKey,function(err,value){
+  if(changedHere)return;
+  if(!err&&value){applyCloud(value,false);return;}
+  try{cs.getItem(legacyCloudKey,function(oldErr,oldValue){
+   if(changedHere)return;
+   if(!oldErr&&oldValue)applyCloud(oldValue,true);
+   else if(Object.keys(status).length)cloudWrite();
+  });}catch(e){}
  });}catch(e){}
 }
 function renderMenu(){

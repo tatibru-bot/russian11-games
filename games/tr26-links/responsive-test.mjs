@@ -110,3 +110,26 @@ for(const engine of engines){
   await context.close();
  } finally {await browser.close();}
 }
+
+/* Old results for shifted Shkolkovo passages must not survive the repair. */
+{
+ const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ try{
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  await page.goto(address,{waitUntil:"load"});
+  await page.evaluate(()=>{
+   localStorage.removeItem("russian11:tr26:progress:v2:browser");
+   localStorage.setItem("russian11:tr26:progress:v1:browser",
+    JSON.stringify({R2548:"ok",S150576:"ok",R50341:"error"}));
+  });
+  await page.reload();
+  assert.equal(await page.locator(".stat strong").first().textContent(),"342");
+  assert.equal(await page.locator(".stat strong").nth(1).textContent(),"1","unaffected R answer was lost");
+  assert.equal(await page.locator(".stat strong").nth(2).textContent(),"0","stale S/R errors not invalidated");
+  const migrated=await page.evaluate(()=>JSON.parse(localStorage.getItem("russian11:tr26:progress:v2:browser")));
+  assert.deepEqual(migrated,{R2548:"ok"});
+  console.log("PASS v1->v2 personal progress: kept unaffected R2548; invalidated shifted S150576 and corrected R50341.");
+  await context.close();
+ }finally{await browser.close();}
+}
