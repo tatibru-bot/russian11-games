@@ -64,3 +64,49 @@ for(const engine of engines){
  }
  }finally{await browser.close();}
 }
+
+/* Telegram Reply Keyboard WebApp contract: no real users or bot messages are sent. */
+{
+ const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ try {
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  await context.addInitScript(()=>{
+   window.__tr26Payloads=[];
+   window.Telegram={WebApp:{
+    platform:"ios",
+    initDataUnsafe:{user:{id:99110026}},
+    ready(){},expand(){},
+    sendData(raw){window.__tr26Payloads.push(raw);},
+    CloudStorage:{getItem(_k,cb){cb(null,"");},setItem(_k,_v,cb){cb(null,true);}}
+   }};
+  });
+  const page=await context.newPage();
+  await page.route("https://telegram.org/js/telegram-web-app.js",route=>route.abort());
+  await page.goto(address,{waitUntil:"load"});
+  await page.getByRole("button",{name:/Начать 5 заданий/}).click();
+  for(let i=0;i<5;i++){
+   const id=await page.locator(".source").textContent().then(x=>x.match(/карточка ([RS]\\d+)/)?.[1]);
+   assert.ok(id,"Telegram contract test: missing task ID");
+   const keys=await page.evaluate(id=>window.TR26_TASKS.find(t=>t.id===id).a,id);
+   for(const n of keys)await page.locator('.sentence[data-choice="'+n+'"]').click();
+   await page.getByRole("button",{name:"Проверить ответ"}).click();
+   await page.getByText("Верно!").waitFor();
+   await page.getByRole("button",{name:i===4?"Завершить":"Следующее →"}).click();
+  }
+  await page.getByRole("button",{name:"Сохранить результат в Telegram"}).click();
+  const sent=await page.evaluate(()=>window.__tr26Payloads.slice());
+  assert.equal(sent.length,1,"Telegram sendData should fire exactly once");
+  const payload=JSON.parse(sent[0]);
+  assert.equal(payload.v,1);
+  assert.equal(payload.type,"game_result");
+  assert.equal(payload.gameId,"TR26");
+  assert.match(payload.attemptId,/^tr26-[A-Za-z0-9-]+$/);
+  assert.equal(payload.correct,5);
+  assert.equal(payload.total,5);
+  assert.equal(payload.tested["Связь предложений"],5);
+  assert.deepEqual(payload.wrongRows,[]);
+  assert.ok(await page.getByRole("button",{name:"Результат отправлен"}).isDisabled(),"duplicate send not blocked");
+  console.log("PASS Telegram WebApp contract: 5/5, correct payload and duplicate submission guarded.");
+  await context.close();
+ } finally {await browser.close();}
+}
