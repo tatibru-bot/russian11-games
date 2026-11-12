@@ -1,0 +1,31 @@
+name: EGE26 responsive QA
+on:
+  push:
+    branches:
+      - feature/tr26-*
+    paths:
+      - "games/tr26-links/**"
+      - ".github/workflows/tr26-responsive-qa.yml"
+  pull_request:
+    paths:
+      - "games/tr26-links/**"
+      - ".github/workflows/tr26-responsive-qa.yml"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: games/tr26-links
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm install --no-package-lock
+          npx playwright install chromium --with-deps
+      - name: Validate task bank
+        run: npm run test:bank
+      - name: Test mobile and desktop interaction
+        run: npm run test:responsive
