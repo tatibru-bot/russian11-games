@@ -22,10 +22,44 @@ for(const t of bank) {
   }
   for(const n of t.a)assert.ok(n>t.lo&&n<=t.hi,t.id+': answer outside extract');
   assert.ok(typeof t.why==='string'&&t.why.length>=4,t.id+': no explanation');
+  assert.doesNotMatch(t.why, /Разобрать с репетитором|\\nКурсы\\n|Всё необходимое для достижения цели/i,t.id+': advertising/footer in explanation');
+  const statedAnswer=t.why.match(/(?:^|\\n)Ответ\\s*:\\s*([\\d\\s,;]+)/i)?.[1];
+  if(statedAnswer)assert.equal(statedAnswer.replace(/[^\\d]/g,''),t.a.join(''),t.id+': explanation answer disagrees with key');
 }
 // Regression checks for six wrong keys found in independent contextual answer audit.
 for(const [id,expected] of [['R1899',10],['R4115',34],['R4544',5],['R341',21],['R455',8],['R113',21]]){
   assert.deepEqual(Array.from(bank.find(x=>x.id===id).a),[expected],id+': regression in corrected key');
+}
+
+// Regression against independently reconstructed Google Docs source assignments.
+// Every S-identifier must retain its own numbered passage; previously all 76 were shifted by one task.
+const fingerprints=JSON.parse(read('school-source-fingerprints.json'));
+const school=bank.filter(t=>t.id.startsWith('S'));
+assert.equal(school.length,76,'unexpected Shkolkovo task count');
+assert.equal(Object.keys(fingerprints.passages).length,76,'fingerprint fixture incomplete');
+function fnv32(x){
+  const s=JSON.stringify(x);let h=2166136261;
+  for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619)>>>0;
+  return h.toString(16).padStart(8,'0');
+}
+for(const t of school){
+  assert.equal(fnv32(t.s),fingerprints.passages[t.id],t.id+': wrong/shifted source passage');
+}
+const get=id=>bank.find(t=>t.id===id);
+assert.equal(get('S150576').s.find(s=>s[0]===16)[1].includes('дом'),true,'S150576: source context must mention the house');
+assert.match(get('S150576').s.find(s=>s[0]===17)[1],/^Отчего он такой тихий сейчас\?/,'S150576: personal pronoun on sentence 17');
+assert.deepEqual(Array.from(get('S150576').a),[17]);
+assert.deepEqual(Array.from(get('R50341').a),[13,15],'R50341 has two valid answers');
+
+// Minimal lexical evidence: every answer requested to contain a personal pronoun
+// must actually contain a personal-pronoun form. This alone does not establish anaphoric link.
+const personal=/(?:^|[^\p{L}])(?:я|мы|ты|вы|он|она|оно|они|меня|мне|мной|мною|нас|нам|нами|тебя|тебе|тобой|тобою|вас|вам|вами|его|него|ему|нему|ним|им|ей|её|нее|ней|нею|ними|их|них|ими)(?=$|[^\p{L}])/iu;
+for(const t of bank){
+  if(!/личн\w*\s+местоимен/i.test(t.prompt))continue;
+  for(const n of t.a){
+    const sentence=t.s.find(x=>x[0]===n)?.[1]||'';
+    assert.match(sentence,personal,t.id+': key '+n+' has no personal pronoun');
+  }
 }
 vm.runInNewContext(read('reference.js'),ctx);
 assert.ok(ctx.window.TR26_REFERENCE.includes('Лексический повтор'));
