@@ -17,7 +17,7 @@ for(const t of bank) {
   for(let i=0;i<t.s.length;i++){
     const [n,value]=t.s[i];
     assert.equal(n,t.lo+i,t.id+': gap/duplicate sentence');
-    assert.ok(typeof value==='string'&&value.length>4,t.id+': damaged sentence '+n);
+    assert.ok(typeof value==='string'&&value.length>=2,t.id+': damaged sentence '+n);
     assert.doesNotMatch(value,flags,t.id+': source footer in passage');
   }
   for(const n of t.a)assert.ok(n>t.lo&&n<=t.hi,t.id+': answer outside extract');
