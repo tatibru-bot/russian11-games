@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1725">
+<title>ЕГЭ №26 · Нити текста</title>
+<style>
+:root{--bg:#081725;--panel:#122b3b;--panel2:#1b3b4b;--line:#3b5a66;--ink:#f3f7f6;--muted:#afc5ce;--aqua:#93e8d9;--gold:#f6d38c;--red:#ff9ca8;--good:#b3f0c0}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden}
+body{background:radial-gradient(ellipse at 8% 0%,#24434a 0%,transparent 45%),radial-gradient(ellipse at 94% 100%,#1c3657 0%,transparent 45%),var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-text-size-adjust:100%;line-height:1.42}
+button{font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}
+#app{height:100%;height:100dvh;max-width:1220px;margin:0 auto;padding:calc(7px + env(safe-area-inset-top,0px)) clamp(8px,1.4vw,20px) calc(5px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px}
+header{display:flex;justify-content:space-between;align-items:center;gap:9px;min-height:40px;flex:none}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}.emblem{display:grid;place-items:center;width:39px;height:39px;flex:none;border-radius:13px;background:#143447;border:1px solid #79baad;color:var(--aqua);font-size:23px;font-weight:900}
+.brandtext{min-width:0}.eyebrow{color:var(--aqua);font-weight:850;text-transform:uppercase;letter-spacing:.12em;font-size:10px}.brandtitle{font-size:clamp(17px,2.2vw,24px);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-btn,.btn{background:#1b384b;color:var(--ink);border:1px solid #51707a;border-radius:12px;min-height:44px;padding:9px 13px;font-weight:750}.top-btn{font-size:13px;flex:none}.btn.primary{background:linear-gradient(120deg,#a9efe3,#75dcbf);color:#0a2935;border:0}.btn.gold{background:linear-gradient(120deg,#ffe6a1,#f4c789);color:#2f281b;border:0}.btn.outline{background:transparent}.btn:active,.top-btn:active,.sentence:active{transform:scale(.994)}
+main{min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden}
+footer{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;flex:none;color:#a2bac3;font-size:11px}
+footer button{border:0;background:none;color:var(--aqua);font-weight:850;padding:3px 8px;min-height:27px}
+.menu{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.7vh,17px);overflow:auto}
+.hero{text-align:center}.hero h1{font-size:clamp(29px,6vw,58px);letter-spacing:-.05em;line-height:1.04;margin:0 0 5px}.hero h1 span{color:var(--aqua)}.hero p{color:var(--muted);font-size:clamp(12px,1.65vw,17px);margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.stat{background:#112d3d;border:1px solid #466472;border-radius:14px;padding:clamp(8px,1.4vh,15px) 7px;text-align:center;min-width:0}
+.stat strong{display:block;font-size:clamp(21px,3.5vw,36px);line-height:1.1;font-variant-numeric:tabular-nums}.stat span{display:block;color:var(--muted);font-size:clamp(10px,1.2vw,13px);margin-top:5px}
+.stat:nth-child(2) strong{color:var(--good)}.stat:nth-child(3) strong{color:var(--red)}
+.menugrid{display:grid;grid-template-columns:1fr;gap:8px;max-width:740px;width:100%;margin:0 auto}
+.menucard{min-height:56px;width:100%;border:1px solid #5d7d87;color:var(--ink);background:#19394b;border-radius:15px;padding:10px 15px;display:flex;align-items:center;gap:12px;text-align:left}
+.menucard .emoji{font-size:25px;width:31px;flex:none}.menucard .info{flex:1;min-width:0}.menucard b{font-size:clamp(15px,1.6vw,19px);display:block}.menucard small{font-size:clamp(11px,1vw,13px);color:var(--muted);display:block}.menucard.highlight{background:linear-gradient(110deg,#1f5d60,#2c5364);border-color:#85c6b8}
+.menu-foot{text-align:center;color:var(--muted);font-size:12px;margin:0}
+.exam{height:100%;min-height:0;display:flex;flex-direction:column;gap:7px}
+.examtop{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px}.examtop b{font-size:14px;color:var(--gold)}.examtop span{font-size:12px;color:var(--muted)}
+.track{height:4px;flex:none;border-radius:20px;background:#264252;overflow:hidden}.track>div{height:100%;background:var(--aqua);transition:width .2s}
+.prompt{flex:none;max-height:min(24vh,150px);overflow:auto;background:#15313e;border-left:4px solid var(--aqua);padding:9px 12px;border-radius:9px;font-size:clamp(13px,1.45vw,18px);font-weight:750}
+.prompt .source{font-size:11px;color:var(--muted);font-weight:450;margin-top:4px}
+.reading{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;border:1px solid #3e6070;border-radius:13px;padding:8px;background:#0f2634;scrollbar-width:thin}
+.sentence{display:flex;align-items:flex-start;gap:11px;width:100%;min-height:47px;padding:10px 11px;margin:0 0 6px;border:1px solid #355566;border-radius:11px;background:#1a3343;color:var(--ink);text-align:left;font-size:clamp(14px,1.4vw,18px);line-height:1.47}
+.sentence:last-child{margin-bottom:0}.num{display:grid;place-items:center;min-width:35px;height:35px;padding:0 5px;border-radius:10px;background:#294657;color:#bcd4d7;font-weight:900;font-size:14px}
+.sentence.selected{border-color:#afefd5;background:#1e514c}.sentence.selected .num{background:var(--aqua);color:#113338}
+.sentence.correct{border-color:var(--good);background:#204b3e}.sentence.correct .num{background:var(--good);color:#11372c}
+.sentence.wrong{border-color:var(--red);background:#4b2c3b}.sentence.wrong .num{background:var(--red);color:#431a2b}
+.sentence:disabled{opacity:1;cursor:default}.answerbar{flex:none;min-height:23px;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actionbar{flex:none;display:flex;gap:7px;align-items:center}.actionbar .btn{flex:1}
+.feedback{flex:none;background:#143342;border:1px solid #416774;border-radius:12px;padding:9px 11px;display:flex;gap:8px;align-items:center;justify-content:space-between;min-height:55px}
+.feedback strong{font-size:14px}.feedback p{font-size:12px;color:var(--muted);margin:2px 0 0}.feedback .btn{padding:7px 10px;font-size:12px;min-height:40px;flex:none}
+.feedback.good{border-color:#6bbca0}.feedback.bad{border-color:#b86b83}
+.results{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2vh,19px);text-align:center;overflow:auto}.medal{font-size:clamp(49px,10vh,89px)}
+.results h1{font-size:clamp(28px,5.2vw,48px);margin:0}.results .score{font-size:clamp(27px,6.4vw,55px);color:var(--aqua);font-weight:950}
+.results p{color:var(--muted);margin:0;font-size:13px}.result-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:min(650px,100%)}.result-actions .btn{min-height:48px}.result-actions .wide{grid-column:span 2}
+.refscreen{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px}.refscroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;background:#112b39;border:1px solid var(--line);border-radius:13px;padding:clamp(12px,2.2vw,25px)}
+.reference{max-width:860px;margin:auto}.reference h2{font-size:clamp(21px,3.8vw,33px);margin:0 0 11px}.reference h3{font-size:clamp(18px,2.5vw,23px);margin:24px 0 10px;color:var(--gold)}.reference h4{font-size:16px;margin:15px 0 5px;color:var(--aqua)}
+.reference p,.reference li{font-size:clamp(14px,1.35vw,17px);line-height:1.6}.reference p{margin:0 0 11px}.reference li{margin:6px 0}.reference em{color:#f4e0bd}
+.ref-note{border-left:3px solid var(--gold);background:#203647;padding:12px 13px;border-radius:8px;margin:14px 0!important}
+.reference table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:14px}.reference th,.reference td{border-bottom:1px solid #4b6771;padding:8px;text-align:left}.reference th{color:var(--gold)}
+.errorlist{height:100%;min-height:0;display:flex;flex-direction:column;gap:9px}.errorhead h2{font-size:clamp(24px,4vw,34px);margin:0}.errorhead p{color:var(--muted);font-size:13px;margin:3px 0}.erroritems{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:7px}.erroritem{border:1px solid #496472;background:#173241;border-radius:12px;padding:9px 12px;text-align:left;color:var(--ink);min-height:55px}.erroritem strong{font-size:13px;color:var(--gold)}.erroritem span{font-size:13px;display:block;margin-top:3px}
+.empty{margin:auto;text-align:center}.empty h2{font-size:25px}.empty p{color:var(--muted);font-size:14px}
+.modalback{position:fixed;inset:0;background:#030b13dc;z-index:50;display:flex;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.modalback.hidden{display:none}.modal{background:#152f40;border:1px solid #6b8891;border-radius:17px;width:min(700px,100%);max-height:100%;display:flex;flex-direction:column;gap:9px;padding:15px}.modalhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.modalhead h2{margin:0;font-size:21px}.modalbody{overflow:auto;min-height:0;line-height:1.57;font-size:15px}.modalbody p{margin:0 0 10px}.modalhead .btn{padding:7px 11px;min-height:40px}
+@media(max-width:430px){#app{gap:5px}header{min-height:34px}.emblem{width:33px;height:33px;font-size:20px}.brandtitle{font-size:17px}.top-btn{min-height:38px;padding:6px 8px;font-size:12px}.hero h1{font-size:32px}.prompt{padding:8px 9px;font-size:13px}.reading{padding:6px}.sentence{font-size:14px;padding:8px 9px;gap:8px;margin-bottom:5px}.num{min-width:31px;height:32px;font-size:12px}.actionbar .btn{padding:7px 8px;font-size:13px}.menu{gap:8px}.menucard{min-height:56px;padding:8px 11px}.stats{gap:5px}.stat{padding:9px 4px}.stat strong{font-size:23px}.stat span{font-size:10px}.reference h3{margin-top:17px}}
+@media(max-height:600px){#app{gap:4px}.hero h1{font-size:26px}.hero p{font-size:11px}.menu{gap:5px}.stat{padding:6px 4px}.stat strong{font-size:21px}.menucard{min-height:49px;padding:5px 10px}.menucard .emoji{font-size:20px}.menucard b{font-size:14px}.menucard small{font-size:11px}.prompt{max-height:21vh}.feedback{min-height:47px;padding:5px 8px}.reading{padding:5px}footer{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="./data.js"></script>
+<script src="./reference.js"></script>
+</head>
+<body>
+<div id="app">
+<header><div class="brand"><span class="emblem" aria-hidden="true">↔</span><div class="brandtext"><div class="eyebrow">ЕГЭ · Задание 26</div><div class="brandtitle">Нити текста</div></div></div><button id="referenceTop" class="top-btn" type="button">📚 Справочник</button></header>
+<main id="main" aria-live="polite"></main>
+<footer><span id="footerText">11 «К» · средства связи предложений</span><button type="button" id="homeTop">В меню</button></footer>
+</div>
+<div class="modalback hidden" id="modalBack" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modalhead"><h2 id="modalTitle">Разбор</h2><button class="btn" type="button" id="modalClose">Закрыть</button></div><div id="modalBody" class="modalbody"></div></div></div>
+<script>
+(function(){
+"use strict";
+const TASKS=Array.isArray(window.TR26_TASKS)?window.TR26_TASKS:[];
+const byId=new Map(TASKS.map(function(t){return [t.id,t];}));
+const main=document.getElementById("main");
+const tg=window.Telegram && window.Telegram.WebApp;
+try{if(tg){tg.ready();tg.expand();}}catch(e){}
+const user=tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? String(tg.initDataUnsafe.user.id) : "browser";
+const localKey="russian11:tr26:progress:v1:"+user,cloudKey="r11_tr26_progress_v1";
+const store=(function(){try{return window.localStorage;}catch(e){return null;}})();
+let status={},scene="menu",returnScene="menu",session=null,cloudBusy=false,cloudDirty=false,changedHere=false,notice="";
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x];});}
+function btn(id,label,cl){return '<button type="button" id="'+id+'" class="btn '+(cl||"")+'">'+label+'</button>';}
+function on(id,fn){const e=document.getElementById(id);if(e)e.addEventListener("click",fn);}
+function randomList(a){const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=x[i];x[i]=x[j];x[j]=t;}return x;}
+function count(v){return Object.values(status).filter(function(x){return x===v;}).length;}
+function sanitize(raw){
+ const s={};if(!raw||typeof raw!=="object")return s;
+ for(const k of Object.keys(raw)){if(byId.has(k)&&(raw[k]==="ok"||raw[k]==="error"))s[k]=raw[k];}
+ return s;
+}
+try{if(store)status=sanitize(JSON.parse(store.getItem(localKey)||"{}"));}catch(e){}
+function cloudPayload(){return JSON.stringify({c:Object.keys(status).filter(function(k){return status[k]==="ok";}).join(","),e:Object.keys(status).filter(function(k){return status[k]==="error";}).join(",")});}
+function cloudWrite(){
+ const cs=tg&&tg.CloudStorage;if(!cs||typeof cs.setItem!=="function")return;
+ cloudDirty=true;if(cloudBusy)return;cloudBusy=true;
+ const serialized=cloudPayload();
+ if(serialized.length>4000){cloudBusy=false;return;}
+ try{cs.setItem(cloudKey,serialized,function(){cloudBusy=false;if(cloudDirty){cloudDirty=false;const updated=cloudPayload();if(updated!==serialized)cloudWrite();}});}
+ catch(e){cloudBusy=false;}
+}
+function persist(){changedHere=true;try{if(store)store.setItem(localKey,JSON.stringify(status));}catch(e){}cloudWrite();}
+function cloudLoad(){
+ const cs=tg&&tg.CloudStorage;if(!cs||typeof cs.getItem!=="function")return;
+ try{cs.getItem(cloudKey,function(err,val){
+  if(err||!val||changedHere)return;
+  try{const v=JSON.parse(val),s={};(v.c||"").split(",").forEach(function(k){if(byId.has(k))s[k]="ok";});(v.e||"").split(",").forEach(function(k){if(byId.has(k))s[k]="error";});
+  status=s;if(store)store.setItem(localKey,JSON.stringify(status));if(scene==="menu")renderMenu();
+  }catch(e){}
+ });}catch(e){}
+}
+function renderMenu(){
+ scene="menu";session=session&&session.index<session.items.length?session:null;
+ const total=TASKS.length,ok=count("ok"),bad=count("error"),newCount=total-ok-bad;
+ main.innerHTML='<section class="menu"><div class="hero"><div class="eyebrow">Практикум по средствам связи</div><h1>Нити <span>текста</span></h1><p>Внимательно читай отрывок и выбирай номера предложений</p></div>'+
+ '<div class="stats" aria-label="Личная статистика"><div class="stat"><strong>'+total+'</strong><span>Всего заданий в базе</span></div><div class="stat"><strong>'+ok+'</strong><span>Решено верно</span></div><div class="stat"><strong>'+bad+'</strong><span>Надо перерешить</span></div></div>'+
+ '<div class="menugrid"><button id="startNew" class="menucard highlight"><span class="emoji">🎯</span><span class="info"><b>'+(newCount?"Начать 5 заданий":"Повторить 5 заданий")+'</b><small>'+(newCount?"Ещё не решено: "+newCount+" · каждый раунд — 5 заданий":"Все задания уже встречались")+'</small></span></button>'+
+ '<button id="goErrors" class="menucard"><span class="emoji">🔁</span><span class="info"><b>Мои ошибки</b><small>Перерешать '+bad+' '+word(bad,"задание","задания","заданий")+' и перенести верные в освоенные</small></span></button>'+
+ '<button id="goRef" class="menucard"><span class="emoji">📚</span><span class="info"><b>Справочник</b><small>Все средства связи, разборы и типичные ловушки</small></span></button></div>'+
+ '<p class="menu-foot">'+(notice?esc(notice):"Прогресс сохраняется на устройстве; в Telegram используется облачная синхронизация, когда она доступна.")+'</p></section>';
+ on("startNew",function(){startRound("new");});on("goErrors",showErrors);on("goRef",showReference);
+}
+function word(n,a,b,c){const d=n%10,h=n%100;return h>=11&&h<=14?c:d===1?a:d>=2&&d<=4?b:c;}
+function startRound(mode,chosenId){
+ const newItems=randomList(TASKS.filter(function(t){return !status[t.id];}));
+ const right=randomList(TASKS.filter(function(t){return status[t.id]==="ok";}));
+ const wrong=randomList(TASKS.filter(function(t){return status[t.id]==="error";}));
+ let items=[];
+ if(mode==="error"){items=chosenId?[byId.get(chosenId)].filter(Boolean):wrong.slice(0,5);}
+ else{items=newItems.slice(0,5);if(items.length<5)items=items.concat(right.filter(function(t){return !items.includes(t);}).slice(0,5-items.length));if(items.length<5)items=items.concat(wrong.filter(function(t){return !items.includes(t);}).slice(0,5-items.length));}
+ if(!items.length){notice="Заданий в выбранном разделе пока нет.";renderMenu();return;}
+ session={mode,items,index:0,selected:[],answers:[],sent:false,attemptId:"tr26-"+Date.now()+"-"+Math.random().toString(36).slice(2,10)};
+ renderExam();
+}
+function renderExam(){
+ scene="exam";const t=session.items[session.index],done=!!session.answers[session.index],result=session.answers[session.index];
+ const chosen=new Set(done?result.chosen:session.selected);
+ const sentenceHtml=t.s.map(function(s){
+   const n=s[0],label=s[1],pressed=chosen.has(n),cl=done?(t.a.includes(n)?"correct":pressed?"wrong":""):pressed?"selected":"";
+   return '<button type="button" class="sentence '+cl+'" data-choice="'+n+'" aria-pressed="'+(pressed?"true":"false")+'" '+(done?"disabled":"")+'><span class="num">'+n+'</span><span>'+esc(label)+'</span></button>';
+ }).join("");
+ const answered=session.answers.length;
+ const feedback=done?'<div class="feedback '+(result.ok?"good":"bad")+'"><div><strong>'+(result.ok?"✓ Верно!":"✕ Нужно повторить")+'</strong><p>Правильный ответ: '+t.a.join(", ")+'</p></div>'+btn("openWhy","Разбор","outline")+'</div>':'';
+ main.innerHTML='<section class="exam"><div class="examtop"><b>'+(session.mode==="error"?"Отработка ошибок":"Раунд из 5 заданий")+'</b><span>Задание '+(session.index+1)+' из '+session.items.length+'</span></div>'+
+ '<div class="track"><div style="width:'+(answered/session.items.length*100)+'%"></div></div>'+
+ '<div class="prompt">'+esc(t.prompt)+'<div class="source">'+esc(t.source)+' · карточка '+esc(t.id)+' · предложения '+t.lo+'–'+t.hi+'</div></div>'+
+ '<div id="reading" class="reading" aria-label="Предложения для выбора">'+sentenceHtml+'</div>'+
+ '<div id="answerBar" class="answerbar">'+(done?"Ответ сохранён в личном прогрессе.":selectedLabel())+'</div>'+
+ feedback+'<div class="actionbar">'+(done?btn("nextTask",session.index+1===session.items.length?"Завершить":"Следующее →","primary"):btn("checkTask","Проверить ответ","primary"))+
+ btn("referenceInside","Справочник","outline")+'</div></section>';
+ if(!done){main.querySelectorAll("[data-choice]").forEach(function(el){el.addEventListener("click",function(){
+   const n=Number(el.getAttribute("data-choice")),pos=session.selected.indexOf(n);
+   if(pos>=0)session.selected.splice(pos,1);else session.selected.push(n);
+   session.selected.sort(function(a,b){return a-b;});
+   el.classList.toggle("selected",pos<0);el.setAttribute("aria-pressed",pos<0?"true":"false");
+   document.getElementById("answerBar").textContent=selectedLabel();
+   const check=document.getElementById("checkTask");if(check)check.disabled=!session.selected.length;
+ });});on("checkTask",submitAnswer);const check=document.getElementById("checkTask");if(check)check.disabled=!session.selected.length;}
+ else{on("nextTask",nextTask);on("openWhy",function(){showModal("Разбор · "+t.id,t.why);});}
+ on("referenceInside",showReference);
+}
+function selectedLabel(){return session.selected.length?"Выбрано: "+session.selected.join(", ")+" · можно выбрать несколько":"Нажми на номер каждого подходящего предложения";}
+function submitAnswer(){
+ if(!session||session.answers[session.index]||!session.selected.length)return;
+ const t=session.items[session.index],chosen=session.selected.slice().sort(function(a,b){return a-b;});
+ const ok=chosen.length===t.a.length&&t.a.every(function(n){return chosen.includes(n);});
+ session.answers[session.index]={id:t.id,chosen,ok};
+ status[t.id]=ok?"ok":"error";persist();
+ const old=document.getElementById("reading"),scroll=old?old.scrollTop:0;
+ renderExam();const r=document.getElementById("reading");if(r)r.scrollTop=scroll;
+}
+function nextTask(){if(session.index+1>=session.items.length){renderResults();return;}session.index++;session.selected=[];renderExam();}
+function renderResults(){
+ scene="results";const total=session.answers.length,score=session.answers.filter(function(x){return x.ok;}).length,full=total===5,telegram=!!(tg&&tg.platform&&tg.platform!=="unknown"&&typeof tg.sendData==="function");
+ main.innerHTML='<section class="results"><span class="medal" aria-hidden="true">'+(score===total?"🏆":"🧩")+'</span><div><div class="eyebrow">'+(session.mode==="error"?"ОТРАБОТКА ЗАВЕРШЕНА":"РАУНД ЗАВЕРШЁН")+'</div><h1>Связь найдена!</h1><div class="score">'+score+' из '+total+'</div></div>'+
+ '<p>Всего в базе: '+TASKS.length+' · решено верно: '+count("ok")+' · надо перерешить: '+count("error")+'</p>'+
+ '<div class="result-actions">'+btn("resultMenu","В меню","outline")+btn("resultErrors","Мои ошибки","outline")+btn("resultNew","Ещё 5 заданий","gold")+
+ (full?btn("sendTelegram",session.sent?"Результат отправлен":"Сохранить результат в Telegram","primary wide"):"")+'</div>'+
+ '<p id="sendStatus">'+(!full?"Отработка меньше пяти заданий обновляет личный прогресс, но не отправляется как раунд из пяти.":telegram?"Завершённый раунд можно отправить в статистику бота.":"Для записи в статистику открой тренажёр через Telegram-бота.")+'</p></section>';
+ on("resultMenu",renderMenu);on("resultErrors",showErrors);on("resultNew",function(){startRound("new");});on("sendTelegram",sendTelegram);
+ const send=document.getElementById("sendTelegram");if(send)send.disabled=!telegram||session.sent;
+}
+function sendTelegram(){
+ if(!session||session.sent||session.answers.length!==5||!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function")return;
+ const all=session.answers,correct=all.filter(function(a){return a.ok;}).length,skills="Связь предложений";
+ const payload={v:1,type:"game_result",gameId:"TR26",attemptId:session.attemptId,correct,total:5,errors:{},tested:{},wrongRows:all.filter(function(x){return !x.ok;}).map(function(x){return {taskId:x.id,chosen:x.chosen,expected:byId.get(x.id).a};})};
+ payload.errors[skills]=5-correct;payload.tested[skills]=5;
+ try{tg.sendData(JSON.stringify(payload));session.sent=true;renderResults();const e=document.getElementById("sendStatus");if(e)e.textContent="Результат передан боту."; }
+ catch(e){const el=document.getElementById("sendStatus");if(el)el.textContent="Не удалось отправить: "+String(e);}
+}
+function showErrors(){
+ scene="errors";const errors=TASKS.filter(function(t){return status[t.id]==="error";});
+ if(!errors.length){main.innerHTML='<div class="empty"><div style="font-size:60px">✨</div><h2>Ошибок пока нет</h2><p>Неверно решённые задания будут появляться здесь.</p>'+btn("emptyStart","Начать 5 заданий","primary")+'</div>';on("emptyStart",function(){startRound("new");});return;}
+ main.innerHTML='<section class="errorlist"><div class="errorhead"><h2>Мои ошибки · '+errors.length+'</h2><p>Нажми на карточку для повторного решения. Верный ответ переместит её в «Решено верно».</p></div><div class="erroritems">'+errors.map(function(t){
+  return '<button type="button" class="erroritem" data-retry="'+esc(t.id)+'"><strong>'+esc(t.id)+' · предложения '+t.lo+'–'+t.hi+'</strong><span>'+esc(t.prompt)+'</span></button>';
+ }).join("")+'</div>'+btn("errorFive","Перерешать до 5 ошибок","primary")+'</section>';
+ main.querySelectorAll("[data-retry]").forEach(function(el){el.addEventListener("click",function(){startRound("error",el.getAttribute("data-retry"));});});
+ on("errorFive",function(){startRound("error");});
+}
+function showReference(){if(scene!=="reference")returnScene=scene;scene="reference";main.innerHTML='<section class="refscreen"><div class="refscroll">'+(window.TR26_REFERENCE||"Справочник пока недоступен.")+'</div>'+btn("refBack","← Назад","outline")+'</section>';on("refBack",backReference);}
+function backReference(){if(returnScene==="exam"&&session)renderExam();else if(returnScene==="results"&&session)renderResults();else if(returnScene==="errors")showErrors();else renderMenu();}
+function showModal(title,body){
+ document.getElementById("modalTitle").textContent=title;
+ document.getElementById("modalBody").innerHTML=String(body||"Для этого задания в источнике дан только ключ ответа. Посмотрите справочник.").split(/\n+/).filter(Boolean).map(function(x){return "<p>"+esc(x)+"</p>";}).join("");
+ document.getElementById("modalBack").classList.remove("hidden");document.getElementById("modalClose").focus();
+}
+function closeModal(){document.getElementById("modalBack").classList.add("hidden");}
+on("modalClose",closeModal);document.getElementById("modalBack").addEventListener("click",function(e){if(e.target.id==="modalBack")closeModal();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeModal();});
+on("referenceTop",showReference);on("homeTop",renderMenu);
+cloudLoad();renderMenu();
+})();
+</script>
+</body>
+</html>
