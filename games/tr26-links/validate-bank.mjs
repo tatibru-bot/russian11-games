@@ -51,16 +51,37 @@ assert.match(get('S150576').s.find(s=>s[0]===17)[1],/^Отчего он тако
 assert.deepEqual(Array.from(get('S150576').a),[17]);
 assert.deepEqual(Array.from(get('R50341').a),[13,15],'R50341 has two valid answers');
 
-// Minimal lexical evidence: every answer requested to contain a personal pronoun
-// must actually contain a personal-pronoun form. This alone does not establish anaphoric link.
-const personal=/(?:^|[^\p{L}])(?:я|мы|ты|вы|он|она|оно|они|меня|мне|мной|мною|нас|нам|нами|тебя|тебе|тобой|тобою|вас|вам|вами|его|него|ему|нему|ним|им|ей|её|нее|ней|нею|ними|их|них|ими)(?=$|[^\p{L}])/iu;
+// Necessary lexical evidence for all answer sentences with the named grammatical marker.
+// This detects impossible keys, not all possible semantic mistakes of antecedent reference.
+const person=/(?:^|[^\p{L}])(?:я|мы|ты|вы|он|она|оно|они|меня|мне|мной|мною|нас|нам|нами|тебя|тебе|тобой|тобою|вас|вам|вами|его|него|ему|нему|ним|им|ей|её|ее|нее|ней|нею|ними|их|них|ими)(?=$|[^\p{L}])/iu;
+const possessive=/(?:^|[^\p{L}])(?:мой|моя|моё|мои|моего|моему|моим|моей|мою|моих|моими|твой|твоя|твоё|твои|твоему|твоей|твоих|свой|свою|своё|свои|своих|своего|своей|своему|своими|наш|наша|наше|наши|нашего|нашей|наших|нашему|нашими|ваш|ваша|ваше|ваши|вашего|вашей|ваших|вашему|вашими|его|её|ее|их)(?=$|[^\p{L}])/iu;
+const demonstrative=/(?:^|[^\p{L}])(?:этот|эта|это|эти|этом|этим|этой|этого|эту|этих|этими|тому|тот|та|то|те|того|той|ту|тем|тех|теми|такой|такая|такое|такие|такого|такую|таким|таких|такими|столько|сей|сия)(?=$|[^\p{L}])/iu;
+const words=x=>(x.toLowerCase().match(/[а-яё]+/g)||[]);
+const stopWords=new Set('не и а но да ли же бы в на по под над из к от с со для при где как что был была были есть уже за об у до то лишь вот'.split(' '));
+let cases=0;
 for(const t of bank){
-  if(!/личн\w*\s+местоимен/i.test(t.prompt))continue;
-  for(const n of t.a){
-    const sentence=t.s.find(x=>x[0]===n)?.[1]||'';
-    assert.match(sentence,personal,t.id+': key '+n+' has no personal pronoun');
+ const p=t.prompt.toLowerCase();
+ for(const n of t.a){
+  const current=t.s.find(x=>x[0]===n)?.[1]||'';
+  const previous=t.s.find(x=>x[0]===n-1)?.[1]||'';
+  const check=(result,type)=>{cases++;assert.ok(result,t.id+': answer '+n+' lacks required '+type);};
+  if(/личн[а-яё]*\s+местоимен/u.test(p))check(person.test(current),'personal pronoun');
+  if(/притяжательн[а-яё]*\s+местоимен/u.test(p))check(possessive.test(current),'possessive pronoun');
+  if(/указательн[а-яё]*\s+местоимен/u.test(p))check(demonstrative.test(current),'demonstrative pronoun');
+  if(/лексическ[а-яё]*\s+повтор/u.test(p)){
+   const prev=words(previous);
+   check(words(current).some(w=>!stopWords.has(w)&&prev.includes(w)),'lexical repetition');
   }
+  if(/противительн[а-яё]*\s+союз/u.test(p)){
+   const initial=/^\s*[—–-]?\s*(?:а|но|зато|однако|да)(?=$|[^\p{L}])/iu.test(current);
+   const postpositive=/(?:^|[^\p{L}])же(?=$|[^\p{L}])/iu.test(current);
+   check(initial||postpositive,'adversative conjunction');
+  }
+  if(/вводн[а-яё]*\s+слов/u.test(p))
+   check(/конечно|наверное|вероятно|может быть|кажется|по-видимому|к сожалению|к счастью|кстати|итак|следовательно|разумеется|видимо|действительно|по-моему|например/iu.test(current),'introductory word');
+ }
 }
+assert.ok(cases>=300,'too few lexical checks: '+cases);
 vm.runInNewContext(read('reference.js'),ctx);
 assert.ok(ctx.window.TR26_REFERENCE.includes('Лексический повтор'));
 assert.ok(ctx.window.TR26_REFERENCE.includes('Притяжательные местоимения'));
@@ -70,4 +91,4 @@ assert.ok(match,'app script missing');
 new vm.Script(match[1]);
 for(const needle of ['100dvh','CloudStorage','"game_result"','gameId:"TR26"','"error"','"ok"','Мои ошибки','Справочник'])
  assert.ok(page.includes(needle),'missing feature '+needle);
-console.log('EGE26 QA PASSED: '+bank.length+' cards, exact numbered ranges, answers, JS syntax, reference and UI feature hooks.');
+console.log('EGE26 QA PASSED: '+bank.length+' cards; 76 source fingerprints; '+cases+' required grammatical marker checks; all explanations and corrected keys; UI syntax.');
