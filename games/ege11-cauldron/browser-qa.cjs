@@ -54,6 +54,17 @@ async function engineCheck(engine,name,base){
     const n=await page.evaluate(()=>window.__CAULDRON_QA.counts());
     assert.equal(n.tasks,276);
     assert.equal(Object.values(n.rulePools).filter(c=>c>=5).length,23,"all 23 rules drillable");
+    await page.locator('[data-action="guide"]').click();
+    assert.equal(await page.locator('section.ruleBox').count(),23,"all handbook topics are visible");
+    assert.equal(await page.locator('.ruleIllustration svg').count(),2,"bird and house diagrams render");
+    const guideText=await page.locator('.reference .scroll').innerText();
+    for(const expected of ["ПРАВИЛО ДОМИКА","ПТИЧЬИ СУФФИКСЫ","ДЖаЗиСТа ЧИКа","ЗатмЕвать","ПЕНЗ","ПЕНЗ".toLowerCase(),"ЗАСЕЯТЬ","РАСКЛАНЯТЬСЯ","СМОТРИ НА ОСНОВУ"]){
+      if(expected==="СМОТРИ НА ОСНОВУ")assert(!guideText.includes(expected),"removed misleading heading");
+      else if(expected==="ПЕНЗ"||expected==="пенз")assert(guideText.toLowerCase().includes("пензенский")||guideText.includes("пензЕНСКий"),"exception Penzensky");
+      else assert(guideText.includes(expected),"missing mnemonic or exception "+expected);
+    }
+    await page.locator('[data-action="back-guide"]').click();
+    
     await page.locator('[data-action="start-exam"]').click();
     page._expectedSlots=10;
     await checkFit(page,name+" "+width+"x"+height+" exam");
