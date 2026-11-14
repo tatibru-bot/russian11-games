@@ -1,0 +1,133 @@
+{
+  "sources": [
+    "https://docs.google.com/document/d/1pao97LxsZ8aILfVO1mzFKWu9ztXHFM0DH128YSq_Qmo",
+    "https://docs.google.com/document/d/1unj7pT4gBvR9qPfO2lm4gNxEfnPMJEr7yua4TF4LUos",
+    "https://docs.google.com/document/d/1Fn4qxvHvS-9zmG1NOYDJGzUGBnPXh1G1Y41K-81rsM8"
+  ],
+  "total": 276,
+  "distinctWords": 1208,
+  "logs": [
+    {
+      "doc": 0,
+      "sourceTasks": 139,
+      "accepted": 117,
+      "excluded": 22,
+      "excludedIds": [
+        "14655",
+        "14869",
+        "14897",
+        "14958",
+        "17032",
+        "18074",
+        "18210",
+        "28357",
+        "34155",
+        "41225",
+        "54096",
+        "60244",
+        "60928",
+        "61496",
+        "61524",
+        "67285",
+        "51246",
+        "14510",
+        "14517",
+        "14523",
+        "51518",
+        "51655"
+      ],
+      "categoryCounts": {
+        "verb-ova": 257,
+        "noun-echk": 14,
+        "hissing": 185,
+        "other": 178,
+        "adj-ivev": 248,
+        "noun-abstract": 29,
+        "adj-small": 27,
+        "adj-other": 88,
+        "noun-ikek": 13,
+        "noun-icec": 56,
+        "adj-ksk": 13,
+        "adj-an": 22,
+        "verb-obes": 13,
+        "noun-ink": 15,
+        "noun-agent": 10,
+        "after-ts": 2
+      },
+      "bytes": 284473
+    },
+    {
+      "doc": 1,
+      "sourceTasks": 111,
+      "accepted": 102,
+      "excluded": 9,
+      "excludedIds": [
+        "205915",
+        "143710",
+        "143714",
+        "143722",
+        "143728",
+        "143717",
+        "143723",
+        "143725",
+        "143727"
+      ],
+      "categoryCounts": {
+        "hissing": 202,
+        "verb-ova": 203,
+        "noun-icec": 40,
+        "adj-ivev": 193,
+        "noun-ink": 15,
+        "other": 135,
+        "noun-agent": 25,
+        "noun-ikek": 13,
+        "adj-other": 47,
+        "noun-abstract": 22,
+        "noun-echk": 15,
+        "adj-ksk": 34,
+        "after-ts": 8,
+        "adj-small": 19,
+        "adj-an": 32,
+        "verb-obes": 17
+      },
+      "bytes": 372214
+    },
+    {
+      "doc": 2,
+      "sourceTasks": 60,
+      "accepted": 57,
+      "excluded": 3,
+      "excludedIds": [
+        "205727",
+        "205728",
+        "206245"
+      ],
+      "categoryCounts": {
+        "adj-ivev": 44,
+        "hissing": 120,
+        "other": 107,
+        "adj-an": 15,
+        "adj-other": 38,
+        "adj-small": 13,
+        "noun-ikek": 15,
+        "noun-icec": 29,
+        "noun-echk": 14,
+        "noun-abstract": 15,
+        "noun-ink": 21,
+        "noun-agent": 19,
+        "verb-ova": 82,
+        "noun-agent2": 1,
+        "verb-obes": 17,
+        "after-ts": 20
+      },
+      "bytes": 225818
+    }
+  ],
+  "verifiedAt": "2026-11-14",
+  "checks": [
+    "word reconstruction equals source explanation",
+    "answer key recomputed from filled words",
+    "row context and word order preserved",
+    "ambiguous or no-letter slots excluded"
+  ]
+}
