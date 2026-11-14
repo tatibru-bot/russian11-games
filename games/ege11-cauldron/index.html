@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#180b22">
+<meta name="color-scheme" content="dark">
+<title>Адский суффиксный котёл · ЕГЭ № 11</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="./rules.js"></script>
+<script src="./data-0.js"></script>
+<script src="./data-1.js"></script>
+<script src="./data-2.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff3e7;background:#150a1c;--gold:#ffd28c;--glow:#ff793f;--border:#8c554f;--panel:rgba(35,17,42,.92);--muted:#c8aebc;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+body{background:radial-gradient(ellipse 105% 75% at 50% 120%,#a23924 0%,#54202a 25%,transparent 66%),radial-gradient(ellipse at 15% -15%,#49264e 0%,transparent 50%),linear-gradient(150deg,#120a20 0%,#260e23 55%,#17091b 100%);line-height:1.32}
+body:before,body:after{position:fixed;pointer-events:none;z-index:0;content:"";bottom:-36px;left:-8%;width:115%;height:150px;opacity:.35;background:radial-gradient(ellipse at 12% 90%,#fc8b38,transparent 29%),radial-gradient(ellipse at 55% 115%,#fa431b,transparent 29%),radial-gradient(ellipse at 92% 92%,#e98636,transparent 28%);filter:blur(18px)}
+body:after{height:100%;bottom:0;opacity:.16;background-image:radial-gradient(#ffad67 1px,transparent 1.3px),radial-gradient(#e87468 1px,transparent 1.3px);background-size:74px 91px,119px 131px;background-position:17px 45px,0 0;filter:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;border:1px solid #9c695f;border-radius:12px;background:linear-gradient(145deg,#563044,#3c203a);min-height:42px;padding:8px 11px;font-weight:700}
+button:focus-visible{outline:3px solid #ffe0a3;outline-offset:2px}
+button:disabled{opacity:.46;cursor:default}
+button.primary{background:linear-gradient(135deg,#ffbe68,#ed673c);border:1px solid #ffdd91;color:#291322;text-shadow:none;box-shadow:0 4px 18px #fe66332e}
+button.ghost{background:#29172c;border-color:#744655}
+button.soft{background:#452338;border-color:#b15f51}
+button.back{font-size:12px;min-height:35px;padding:4px 9px}
+button.important{border-color:#ffc882}
+.app{position:relative;z-index:1;margin:0 auto;width:100%;max-width:780px;height:100%;height:100dvh;padding:calc(7px + env(safe-area-inset-top,0px)) 9px calc(7px + env(safe-area-inset-bottom,0px));display:grid;grid-template-rows:auto minmax(0,1fr);gap:7px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:39px}
+.brand{min-width:0;display:flex;align-items:center;gap:8px}
+.brand .mark{font-size:27px;filter:drop-shadow(0 0 10px #ff873c)}
+.brand strong{font-size:clamp(15px,3.7vw,20px);font-weight:900;letter-spacing:.15px;display:block;line-height:1.05;color:#ffe4bb}
+.brand small{font-size:10px;color:#d3aeb6;display:block;font-weight:700}
+.status{border-radius:99px;border:1px solid #88565b;background:#341c34;padding:5px 9px;font-size:11px;color:var(--gold);white-space:nowrap;font-weight:850}
+.screen{min-height:0;height:100%;overflow:hidden}
+.panel{background:var(--panel);border:1px solid #9b605b;box-shadow:0 9px 28px #10051677,inset 0 1px #ffd7b51b;border-radius:18px}
+.home,.selector,.reference,.finished,.feedback{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.homeTop{display:grid;grid-template-columns:94px 1fr;gap:10px;align-items:center;padding:12px}
+.avatar{height:88px;width:88px;display:block;filter:drop-shadow(0 0 15px #ff7a4c65)}
+.avatar .face{fill:#b96252;stroke:#ffe3a6;stroke-width:2.4}
+.avatar .horn{fill:#e6af76;stroke:#492032;stroke-width:2}
+.avatar .eye{fill:#ffe5a0}
+.avatar .mouth{stroke:#381220;stroke-width:4;fill:none;stroke-linecap:round}
+.avatar .flame{fill:#fc7f31;opacity:.8}
+.avatar.rank1 .face{fill:#ce625b}.avatar.rank1 .eye{fill:#d1ff99}
+.avatar.rank2 .face{fill:#a64665}.avatar.rank2 .eye{fill:#87fff1}
+.avatar.rank3 .face{fill:#682644}.avatar.rank3 .eye{fill:#ffe27d}.avatar.rank3{filter:drop-shadow(0 0 20px #ffba66a8)}
+.homeTop h1{font-size:clamp(21px,5vw,29px);line-height:1.04;margin:0 0 7px;color:#ffd9a6}
+.subtitle{font-size:12px;color:#edd1ce}
+.rankTitle{font-size:clamp(13px,3vw,16px);font-weight:900;color:#ffe1a2}
+.metric{font-size:12px;color:#e4c0bd;margin-top:3px}
+.menu{flex:1;min-height:0;display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:8px}
+.menu button{min-height:0;text-align:left;padding:7px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(105deg,#522a44d6,#2b1933ed)}
+.menu .menuName{font-size:clamp(13px,3.2vw,17px);font-weight:850;color:#ffe8ca;display:block}
+.menu .menuDesc{font-size:clamp(10px,2.6vw,12px);font-weight:450;color:#dbbec5;display:block;margin-top:3px}
+.menu .symbol{font-size:27px;filter:drop-shadow(0 0 8px #ff743c66)}
+.miniNote{font-size:10px;color:#dec4ba;text-align:center;padding:0 5px}
+.play{height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px}
+.playHead{padding:7px 12px;display:flex;align-items:center;gap:9px;justify-content:space-between;min-height:42px}
+.playHead .mode{color:#ffe0aa;font-size:clamp(12px,2.8vw,15px);font-weight:850}
+.playHead .tip{color:#d7b6bd;font-size:11px}
+.pips{display:flex;gap:4px;flex-shrink:0}
+.pips b{height:8px;width:17px;border:1px solid #ac6751;border-radius:9px;background:#552937}
+.pips b.done{background:#ffb366}
+.pips b.active{background:#fff0ab;box-shadow:0 0 9px #ff9639}
+.rows{display:grid;grid-template-rows:repeat(5,minmax(0,1fr));min-height:0;gap:5px}
+.qrow{min-height:0;padding:3px 8px;display:flex;align-items:center;gap:7px;overflow:hidden;background:rgba(40,22,46,.95);border:1px solid #744753;border-radius:12px}
+.rowNo{flex:0 0 20px;display:grid;place-items:center;width:20px;height:22px;background:#723b49;border-radius:6px;color:#ffe7bd;font-size:12px;font-weight:900}
+.line{flex:1;min-width:0;font-size:clamp(11px,2.85vw,15.5px);font-weight:650;line-height:1.19;overflow-wrap:anywhere}
+.slot{display:inline-grid;place-items:center;vertical-align:middle;margin:0 1px;padding:0;width:25px;min-width:25px;height:29px;min-height:29px;border-radius:6px;border:1.5px solid #c17d54;background:#1b1429;color:#fbe6bd;font-size:14px;font-weight:900;line-height:1;box-shadow:inset 0 -2px #56283a}
+.slot.active{border:2px solid #ffe0a1;background:#7b3445;box-shadow:0 0 12px #ffb15885}
+.slot.filled{color:#ffe29e;background:#693343}
+.keyboard{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:8px;background:#231329;border:1px solid #875058;border-radius:13px}
+.keyboard button{min-width:0;min-height:37px;height:37px;padding:0;border-radius:8px;background:linear-gradient(155deg,#834653,#5d2a43);font-size:clamp(13px,3.4vw,18px);font-weight:900}
+.keyboard .erase{background:#38253b;color:#ffe2ae}
+.controls{display:flex;gap:7px;min-height:43px}
+.controls button{flex:1;min-height:43px}
+.controls .tiny{flex:0 0 auto;font-size:12px}
+.feedbackHead,.finishHead{padding:12px 14px}
+.feedbackHead h2,.finishHead h2{margin:3px 0;font-size:clamp(18px,4.4vw,25px);color:#ffddad}
+.feedbackHead p,.finishHead p{font-size:12px;color:#efc6bf;margin:4px 0}
+.scroll{overflow:auto;min-height:0;flex:1;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 1px 8px}
+.feedbackItem{padding:9px 12px;margin-bottom:6px;border:1px solid #a95f4d;border-radius:12px;background:#422232}
+.feedbackItem strong{display:block;font-size:13px;color:#ffe0a6;margin-bottom:3px}
+.feedbackItem p{font-size:12px;line-height:1.36;color:#edd3ce;margin:3px 0}
+.ruleTag{color:#ffc685;font-size:11px;font-weight:800}
+.successNote{padding:18px 14px;text-align:center;color:#ffe1af;font-weight:800}
+.toolbar{display:flex;gap:6px;flex:0 0 auto}
+.toolbar button{flex:1;min-height:44px}
+.selectorHead{padding:11px 14px}
+.selectorHead h2,.referenceHead h2{margin:0;font-size:21px;color:#ffdfb0}
+.selectorHead p,.referenceHead p{margin:5px 0 0;color:#e4c3c3;font-size:12px}
+.ruleChoice{display:flex;align-items:center;gap:9px;justify-content:space-between;padding:10px 11px;width:100%;margin-bottom:6px;text-align:left}
+.ruleChoice strong{font-size:13px;color:#ffe0b3;display:block}
+.ruleChoice small{font-size:11px;color:#d3bac8;font-weight:400}
+.ruleChoice .count{white-space:nowrap;font-size:11px;border-radius:9px;padding:5px;background:#562b3b}
+.referenceHead{padding:11px 13px}
+.ruleBox{margin-bottom:8px;background:#321c37;border:1px solid #87565b;border-radius:13px;padding:10px 12px}
+.ruleBox h3{color:#ffdaa2;font-size:15px;margin:0 0 5px}
+.ruleBox p{color:#efced0;font-size:12px;line-height:1.48;margin:5px 0}
+.ruleBox .mnemonic{font-weight:900;color:#ffbf78}
+.ruleBox button{font-size:12px;min-height:35px;margin-top:6px}
+.finishBody{padding:10px 12px}
+.finishBody .scoreBig{font-size:clamp(38px,9vw,55px);font-weight:950;color:#ffdf91;line-height:1}
+.finishBody p{font-size:12px;color:#ead0cc}
+.finishAvatar{display:flex;gap:13px;align-items:center}
+.note{font-size:11px;color:#cfb4c2;padding:6px 0}
+.empty{padding:26px 18px;font-size:13px;color:#f2d9cf}
+@media(max-width:360px){.app{gap:5px;padding-left:6px;padding-right:6px}.top{min-height:34px}.brand strong{font-size:14px}.brand small{font-size:9px}.play{gap:5px}.playHead{padding:5px 8px;min-height:38px}.qrow{padding:2px 5px;gap:4px}.rowNo{flex-basis:17px;width:17px;font-size:11px}.line{font-size:11px}.slot{width:23px;min-width:23px;height:26px;min-height:26px}.keyboard{gap:3px;padding:5px}.keyboard button{min-height:35px;height:35px}}
+@media(max-height:620px){.app{gap:4px}.top{min-height:32px}.brand .mark{font-size:22px}.play{gap:4px}.playHead{min-height:34px;padding:4px 8px}.qrow{padding-top:2px;padding-bottom:2px}.keyboard{padding:5px}.keyboard button{min-height:34px;height:34px}.controls,.controls button{min-height:40px}.menu{gap:5px}.homeTop{padding:7px}.avatar{width:72px;height:72px}.homeTop{grid-template-columns:75px 1fr}}
+@media(max-height:520px){.brand small{display:none}.top{min-height:27px}.playHead .tip{display:none}.keyboard button{height:30px;min-height:30px}.keyboard{gap:3px;padding:3px}.slot{height:22px;min-height:22px}.controls,.controls button{min-height:36px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+ <header class="top"><div class="brand"><span class="mark" aria-hidden="true">🔥</span><div><strong>Адский суффиксный котёл</strong><small>ЕГЭ № 11 · Вставь буквы. Выживи.</small></div></div><span class="status" id="topStatus">0 / 5</span></header>
+ <main id="screen" class="screen" aria-live="polite"></main>
+</div>
+<script>
+(function(){
+"use strict";
+const DB=Array.isArray(window.CAULDRON_DB)?window.CAULDRON_DB:[];
+const RULES=(window.CAULDRON_RULES||[]).map(function(a){return {id:a[0],title:a[1],anchor:a[2],text:a[3],example:a[4]}});
+const byId=Object.fromEntries(RULES.map(function(r){return [r.id,r]}));
+const tg=window.Telegram&&window.Telegram.WebApp||null;
+try{tg&&tg.ready();tg&&tg.expand();}catch(e){}
+const user=String(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.id||"browser");
+const KEY="russian11:ege11:hell:v1:"+user;
+const norm=function(x){return String(x||"").toLocaleLowerCase("ru").replace(/ё/g,"е").trim()};
+const esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")};
+const screen=document.getElementById("screen"),topStatus=document.getElementById("topStatus");
+const randomId=function(){return "e11-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)};
+function memoryRead(){try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"?x:{}}catch(e){return {}}}
+let mem=memoryRead();mem.history=Array.isArray(mem.history)?mem.history:[];mem.misses=mem.misses&&typeof mem.misses==="object"?mem.misses:{};mem.mastered=mem.mastered&&typeof mem.mastered==="object"?mem.mastered:{};
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(mem))}catch(e){}}
+function shuffled(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const x=b[i];b[i]=b[j];b[j]=x}return b}
+function smartRule(w){
+ const old=w.rule,full=norm(w.full),exp=norm(w.explanation),ctx=norm(w.context);
+ if(old==="other"||old==="exceptions"){
+  if(/наречи/.test(exp)||/^\([^)]*\)\s*(?:из|до|с|в|на|за)[а-я]*\.\./.test(ctx))return "adverbs";
+  if(/причаст|деепричаст|перед -н|перед суффиксом -н/.test(exp))return "verb-part";
+  if(/прошедшего времени|перед -л-|прошедш/.test(exp)&&/(?:л|ла|ло|ли|лся|лась|лись)$/.test(full))return "verb-past";
+  if(/(?:ть|ться)$/.test(full)&&/глагол|инфинитив|неопределённой формы|суффикс/.test(exp))return "verb-infin";
+  if(/-ва-|ударным ва|ударное -ва/.test(exp)&&/в[а-я]/.test(full))return "verb-stressedva";
+  if(/суффиксы? -к-|суффиксы? -ск-/.test(exp)&&/кий$/.test(full))return "adj-ksk";
+  if(/-инств-|-енств-|-от-|-ет-/.test(exp))return "noun-abstract";
+ }
+ if(old==="noun-agent2")return "noun-agent";
+ return old in byId?old:"other";
+}
+const WORDS=[];const seen=new Set();
+DB.forEach(function(q){q.rows.forEach(function(r,ri){r.slots.forEach(function(raw,si){const w=Object.assign({},raw,{key:q.id+":"+ri+":"+si,sourceId:q.id,rule:smartRule(raw)});if(!seen.has(w.key)){WORDS.push(w);seen.add(w.key)}})})});
+const POOLS={};const uniqueByRule={};WORDS.forEach(function(w){if(!POOLS[w.rule]){POOLS[w.rule]=[];uniqueByRule[w.rule]=new Set()}const k=norm(w.full)+"|"+norm(w.context);if(!uniqueByRule[w.rule].has(k)){POOLS[w.rule].push(w);uniqueByRule[w.rule].add(k)}});
+const alphabet=shuffled([...new Set(WORDS.map(function(w){return norm(w.letter)}))].filter(function(x){return /^[а-я]$/.test(x)})).sort(function(a,b){return "аеиоуыэюясчщцткн".indexOf(a)-"аеиоуыэюясчщцткн".indexOf(b)});
+alphabet.push("⌫");
+const state={view:"home",mode:null,exam:[],examIndex:0,results:[],pack:[],values:[],active:0,feedback:null,attemptId:null,payload:null,ruleId:null,saveStatus:""};
+function avg(){if(!mem.history.length)return null;return mem.history.reduce(function(s,x){return s+(Number(x.score)||0)},0)/mem.history.length}
+function league(s){return s==null?-1:s<2?0:s<3.5?1:s<4.5?2:3}
+const TITLES=["Жалкий грешник","Подающий надежды чертёнок","Демоническая сущность","Сам Сатана"];
+function avatar(rank){const n=Math.max(0,rank);return '<svg role="img" aria-label="'+esc(TITLES[n])+'" class="avatar rank'+n+'" viewBox="0 0 100 100"><defs><linearGradient id="avflame" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe7a1"/><stop offset="1" stop-color="#f25c39"/></linearGradient></defs><path class="flame" d="M13 73 Q-3 50 26 26 Q23 52 42 41 Q49 15 62 11 Q54 32 76 44 Q80 28 91 26 Q90 61 85 76 Z"/><path class="horn" d="M23 32 Q2 20 13 1 Q18 19 37 28 Z"/><path class="horn" d="M76 32 Q96 18 87 1 Q83 21 62 28 Z"/><path class="face" d="M18 38 Q22 24 50 23 Q77 24 82 40 L85 65 Q78 90 50 91 Q22 90 15 65 Z"/><path d="M29 47 Q39 41 46 49 Q37 59 28 52 Z M54 49 Q62 40 72 47 Q72 56 62 56 Z" class="eye"/><path class="mouth" d="M34 70 Q50 82 66 70"/><path d="M39 72 L43 80 L47 74 M53 74 L57 80 L61 72" fill="#fff0d6"/>'+(n===3?'<path d="M24 27 L31 6 L44 20 L52 0 L62 20 L77 6 L82 27 Z" fill="url(#avflame)" stroke="#ffe3a6" stroke-width="2"/>':'')+'</svg>'}
+function rankLabel(){const a=avg(),n=league(a);return n<0?"Рейтинг ещё не открыт":TITLES[n]}
+function updateTop(){if(state.mode==="exam"&&state.view==="play")topStatus.textContent=(state.examIndex+1)+" / 5";else if(state.mode==="exam"&&state.view==="feedback")topStatus.textContent=(state.examIndex+1)+" / 5";else if(state.mode==="rule"||state.mode==="errors")topStatus.textContent="5 слов";else topStatus.textContent=mem.history.length?avg().toFixed(2)+" / 5":"ЕГЭ 11"}
+function heading(title,sub){return '<div class="selectorHead panel"><h2>'+esc(title)+'</h2><p>'+esc(sub)+'</p></div>'}
+function home(){
+state.view="home";state.mode=null;const a=avg(),rank=league(a);
+screen.innerHTML='<div class="home"><div class="homeTop panel">'+avatar(rank)+'<div><h1>Суффиксы не прощают ошибок</h1><div class="rankTitle">'+esc(rankLabel())+'</div><div class="metric">Средний результат: '+(a==null?"—":a.toFixed(2))+' / 5 · Раундов: '+mem.history.length+'</div><div class="subtitle">Верных словоформ: '+Object.keys(mem.mastered).length+' · На повторении: '+Object.keys(mem.misses).length+'</div></div></div><div class="menu"><button data-action="start-exam"><span><span class="menuName">🔥 Задания ЕГЭ</span><span class="menuDesc">5 номеров · оценка из 5 · статистика Telegram</span></span><span class="symbol">⚔️</span></button><button data-action="rules"><span><span class="menuName">🧪 Тренировка по правилам</span><span class="menuDesc">Выбери правило и вставь буквы в 5 слов</span></span><span class="symbol">📜</span></button><button data-action="errors"><span><span class="menuName">💀 Мои ошибки</span><span class="menuDesc">Исправь слово — оно станет верным</span></span><span class="symbol">🕯️</span></button><button data-action="guide"><span><span class="menuName">📖 Справочник</span><span class="menuDesc">Правила, образцы и кодовые слова</span></span><span class="symbol">🔮</span></button></div><div class="miniNote">В базе '+DB.length+' проверенных заданий · буквы Е и Ё считаются одинаковыми · регистр не важен</div></div>';updateTop()}
+function selectRules(){state.view="rules";state.mode=null;const counts={};Object.values(mem.misses).forEach(function(w){counts[w.rule]=(counts[w.rule]||0)+1});const list=RULES.filter(function(r){return (POOLS[r.id]||[]).length>=5}).sort(function(a,b){return (counts[b.id]||0)-(counts[a.id]||0)||a.title.localeCompare(b.title,"ru")});screen.innerHTML='<div class="selector">'+heading("Тренировка по правилам","Каждый раунд — 5 слов, результат не отправляется в бот.")+'<div class="scroll">'+list.map(function(r){return '<button class="ruleChoice" data-action="start-rule" data-rule="'+esc(r.id)+'"><span><strong>'+esc(r.title)+'</strong><small>Код: '+esc(r.anchor)+' · Слов: '+POOLS[r.id].length+'</small></span><span class="count">'+(counts[r.id]?("Ошибок: "+counts[r.id]):"Тренировать")+'</span></button>'}).join("")+'</div><div class="toolbar"><button class="ghost" data-action="home">← В котёл</button></div></div>';updateTop()}
+function guide(){state.view="guide";state.mode=null;screen.innerHTML='<div class="reference"><div class="referenceHead panel"><h2>📖 Гримуар суффиксов</h2><p>23 правила из базы заданий. Сначала запомни кодовое слово, затем прочти объяснение.</p></div><div class="scroll">'+RULES.map(function(r){return '<section class="ruleBox"><h3>'+esc(r.title)+'</h3><p class="mnemonic">🔑 '+esc(r.anchor)+'</p><p>'+esc(r.text)+'</p><p><b>Как применить:</b> '+esc(r.example)+'</p>'+((POOLS[r.id]||[]).length>=5?'<button data-action="start-rule" data-rule="'+esc(r.id)+'">Отработать 5 слов</button>':"")+'</section>'}).join("")+'</div><div class="toolbar"><button class="ghost" data-action="home">← В котёл</button></div></div>';updateTop()}
+function startExam(){state.mode="exam";state.exam=shuffled(DB).slice(0,5);state.examIndex=0;state.results=[];state.attemptId=randomId();state.payload=null;startEntry()}
+function startRule(id){const pool=POOLS[id]||[];if(pool.length<5)return;state.mode="rule";state.ruleId=id;state.pack=shuffled(pool).slice(0,5);state.attemptId=randomId();startEntry()}
+function startErrors(){const bad=Object.values(mem.misses);if(!bad.length){state.view="errors";screen.innerHTML='<div class="finished">'+heading("Мои ошибки","Все исправленные слова переходят в освоенные.")+'<div class="panel empty">Здесь пока нет слов для повторения. Пройди раунд ЕГЭ или потренируй конкретное правило.</div><div class="toolbar"><button data-action="home">← В котёл</button></div></div>';updateTop();return}state.mode="errors";state.pack=shuffled(bad).slice(0,5);state.attemptId=randomId();startEntry()}
+function getRows(){if(state.mode==="exam"){const q=state.exam[state.examIndex];return q.rows.map(function(r,i){return {raw:r.raw,slots:r.slots.map(function(w,j){return Object.assign({},w,{key:q.id+":"+i+":"+j,rule:smartRule(w)})})}})}return state.pack.map(function(w){return {raw:w.context,slots:[w]}})}
+function flat(rows){return rows.flatMap(function(r){return r.slots})}
+function startEntry(){state.view="play";state.values=new Array(flat(getRows()).length).fill("");state.active=0;state.feedback=null;renderPlay()}
+function letterButton(index,w){const value=state.values[index]||"";return '<button type="button" aria-label="Вписать букву в слово '+esc(w.full)+'" data-action="slot" data-index="'+index+'" class="slot'+(state.active===index?" active":"")+(value?" filled":"")+'">'+esc(value?value.toUpperCase():"·")+'</button>'}
+function masked(raw,slots,startIndex){let at=0,result="";for(let i=0;i<slots.length;i++){const w=slots[i],pos=raw.indexOf(w.mask,at);if(pos<0)continue;result+=esc(raw.slice(at,pos));const pivot=w.mask.indexOf("..");result+=esc(w.mask.slice(0,pivot))+letterButton(startIndex+i,w)+esc(w.mask.slice(pivot+2));at=pos+w.mask.length;}return result+esc(raw.slice(at))}
+function renderPlay(){
+state.view="play";const rows=getRows();let index=0;const content=rows.map(function(r,i){const out='<div class="qrow"><span class="rowNo">'+(i+1)+'</span><div class="line">'+masked(r.raw,r.slots,index)+'</div></div>';index+=r.slots.length;return out}).join("");
+const exam=state.mode==="exam",name=exam?"Задание № 11 · "+(state.examIndex+1)+" из 5":state.mode==="rule"?(byId[state.ruleId]?.title||"Тренировка"):"Отработка ошибок";
+const pips=exam?'<div class="pips">'+[0,1,2,3,4].map(function(x){return '<b class="'+(x<state.examIndex?"done":x===state.examIndex?"active":"")+'"></b>'}).join("")+'</div>':"";
+const keys=alphabet.map(function(k){return '<button type="button" data-action="key" data-key="'+esc(k)+'" class="'+(k==="⌫"?"erase":"")+'" aria-label="'+(k==="⌫"?"Стереть букву":("Вставить "+k))+'">'+esc(k==="е"?"Е/Ё":k.toUpperCase())+'</button>'}).join("");
+screen.innerHTML='<div class="play"><div class="playHead panel"><div><div class="mode">'+esc(name)+'</div><div class="tip">'+(exam?"Вставь по одной букве в каждый пропуск":"Пять слов · затем проверка")+'</div></div>'+pips+'</div><div class="rows">'+content+'</div><div class="keyboard" aria-label="Клавиатура для вставки букв">'+keys+'</div><div class="controls"><button class="ghost tiny" data-action="home">Меню</button><button class="primary" data-action="check" '+(state.values.every(Boolean)?"":"disabled")+'>Проверить все буквы</button></div></div>';updateTop()}
+function inputLetter(k){if(state.view!=="play")return;if(k==="⌫"||k==="Backspace"){state.values[state.active]="";renderPlay();return}const letter=norm(k);if(!/^[а-я]$/.test(letter)||!alphabet.includes(letter))return;state.values[state.active]=letter;const next=state.values.findIndex(function(v,i){return i>state.active&&!v});if(next>=0)state.active=next;else{const first=state.values.indexOf("");if(first>=0)state.active=first;}renderPlay()}
+function check(){if(state.view!=="play"||!state.values.every(Boolean))return;const rows=getRows(),words=flat(rows),wrong=[],tested={};words.forEach(function(w,i){const rule=w.rule||"other";tested[rule]=(tested[rule]||0)+1;const good=norm(state.values[i])===norm(w.letter);if(good){mem.mastered[w.key]=true;if(mem.misses[w.key])delete mem.misses[w.key];}else{const err=Object.assign({},w,{rule:rule,attempted:state.values[i]});mem.misses[w.key]=err;wrong.push(err)}});persist();state.feedback={wrong:wrong,words:words,tested:tested,perfect:wrong.length===0};if(state.mode==="exam"){state.results.push(state.feedback)}showFeedback()}
+function showFeedback(){state.view="feedback";const x=state.feedback;const title=x.perfect?"Все буквы на месте!":"Котёл разобрал твои ошибки";const subtitle=state.mode==="exam"?"Номер "+(state.examIndex+1)+": "+(x.perfect?"1 балл":"0 баллов")+" · Ошибок в словах: "+x.wrong.length:"Правильно: "+(x.words.length-x.wrong.length)+" из "+x.words.length;const list=x.wrong.length?x.wrong.map(function(w){return '<article class="feedbackItem"><strong>'+esc(w.full)+' · вместо '+esc(w.attempted.toUpperCase())+' нужно '+esc(w.letter.toUpperCase())+'</strong><div class="ruleTag">'+esc(byId[w.rule]?.title||"Суффикс")+'</div><p>'+esc(w.explanation||"Проверь образование слова и суффикс в справочнике.")+'</p></article>'}).join(""):'<div class="panel successNote">Ни одного ошибочного слова. Огонь на твоей стороне! 🔥</div>';
+screen.innerHTML='<div class="feedback"><div class="feedbackHead panel"><h2>'+esc(title)+'</h2><p>'+esc(subtitle)+'</p></div><div class="scroll">'+list+'</div><div class="toolbar"><button class="ghost" data-action="guide">📖 Правила</button><button class="primary" data-action="advance">'+(state.mode==="exam"&&state.examIndex<4?"Следующий номер →":"Завершить раунд →")+'</button></div></div>';updateTop()}
+function advance(){if(state.mode==="exam"){if(state.examIndex<4){state.examIndex++;startEntry()}else finishExam()}else finishDrill()}
+function finishExam(){const score=state.results.filter(function(x){return x.perfect}).length;const errors={},tested={};state.results.forEach(function(r){Object.entries(r.tested).forEach(function(e){tested[e[0]]=(tested[e[0]]||0)+e[1]});r.wrong.forEach(function(w){errors[w.rule]=(errors[w.rule]||0)+1})});
+state.payload={v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:state.attemptId,correct:score,total:5,errors:errors,tested:tested};
+mem.history.push({at:new Date().toISOString(),score:score,attemptId:state.attemptId,sent:false});persist();state.view="finish";
+const a=avg(),r=league(a);screen.innerHTML='<div class="finished"><div class="finishHead panel"><h2>🏆 Итоги пяти испытаний</h2><p>Баллы даются только за полностью верный номер ЕГЭ.</p></div><div class="finishBody panel"><div class="finishAvatar">'+avatar(r)+'<div><div class="scoreBig">'+score+' / 5</div><div class="rankTitle">'+esc(TITLES[r])+'</div><p>Средний результат: '+a.toFixed(2)+' / 5 за '+mem.history.length+' раунд(ов)</p></div></div><p>Слов на повторении: '+Object.keys(mem.misses).length+'. Отработка ошибок и тренировки по правилам не добавляют баллы в рейтинг.</p></div><div class="scroll"><div class="panel finishBody"><strong>Статистика раунда</strong><p>Проверено слов: '+Object.values(tested).reduce(function(s,n){return s+n},0)+' · ошибочных вставок: '+Object.values(errors).reduce(function(s,n){return s+n},0)+'</p><p>Чтобы результат появился в боте, открой игру из Telegram и нажми «Сохранить».</p></div></div><div class="toolbar"><button class="ghost" data-action="home">В меню</button><button class="primary" data-action="send" id="saveResult">📩 Сохранить в Telegram</button></div><div class="note" id="saveStatus">'+esc(state.saveStatus)+'</div></div>';updateTop()}
+function finishDrill(){state.view="drill-finish";screen.innerHTML='<div class="finished">'+heading("Тренировка завершена","Правильные ответы убраны из «Моих ошибок». Ошибочные остались для повторения.")+'<div class="panel finishBody"><div class="scoreBig">'+(state.feedback.words.length-state.feedback.wrong.length)+' / '+state.feedback.words.length+'</div><p>Из них ошибок: '+state.feedback.wrong.length+'. Рейтинг ЕГЭ не изменился.</p><p>Осталось повторить слов: '+Object.keys(mem.misses).length+'.</p></div><div class="toolbar"><button data-action="home" class="primary">Вернуться в котёл</button><button data-action="'+(state.mode==="rule"?"repeat-rule":"errors")+'" class="ghost">Ещё раунд</button></div></div>';updateTop()}
+function send(){if(!state.payload)return;const status=document.getElementById("saveStatus");if(!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function"){if(status)status.textContent="Открой через кнопку тренажёра внутри Telegram, чтобы отправить результат.";return}try{const h=mem.history.find(function(x){return x.attemptId===state.attemptId});if(h&&h.sent){if(status)status.textContent="Этот раунд уже отправлен.";return}tg.sendData(JSON.stringify(state.payload));if(h){h.sent=true;persist()}if(status)status.textContent="Результат отправлен в Telegram."}catch(e){if(status)status.textContent="Отправка не удалась: "+String(e.message||e)}}
+document.addEventListener("click",function(e){const el=e.target.closest("button[data-action]");if(!el)return;const a=el.dataset.action;if(a==="home"){home();return}if(a==="start-exam"){startExam();return}if(a==="rules"){selectRules();return}if(a==="guide"){guide();return}if(a==="errors"){startErrors();return}if(a==="start-rule"){startRule(el.dataset.rule);return}if(a==="slot"){state.active=Number(el.dataset.index);renderPlay();return}if(a==="key"){inputLetter(el.dataset.key);return}if(a==="check"){check();return}if(a==="advance"){advance();return}if(a==="repeat-rule"){startRule(state.ruleId);return}if(a==="send"){send();return}});
+document.addEventListener("keydown",function(e){if(state.view!=="play"||e.ctrlKey||e.altKey||e.metaKey)return;const key=e.key;if(key==="Backspace"||/^[а-яёА-ЯЁ]$/.test(key)){e.preventDefault();inputLetter(key)}});
+if(DB.length<200||!RULES.length){screen.innerHTML='<div class="panel empty">Не удалось загрузить базу заданий. Обнови страницу.</div>';return}
+home();
+window.__CAULDRON_QA={counts:function(){return {tasks:DB.length,words:WORDS.length,rulePools:Object.fromEntries(Object.entries(POOLS).map(function(x){return [x[0],x[1].length]}))}},startExam:startExam,startRule:startRule,getState:function(){return {view:state.view,mode:state.mode,values:state.values.slice(),active:state.active,score:state.results.length}},keyboard:alphabet.slice()};
+})();
+</script>
+</body></html>
