@@ -153,13 +153,16 @@ function smartRule(w){
  return old in byId?old:"other";
 }
 const WORDS=[];const seen=new Set();
-DB.forEach(function(q){q.rows.forEach(function(r,ri){r.slots.forEach(function(raw,si){const w=Object.assign({},raw,{key:q.id+":"+ri+":"+si,sourceId:q.id,rule:smartRule(raw)});if(!seen.has(w.key)){WORDS.push(w);seen.add(w.key)}})})});
+DB.forEach(function(q){q.rows.forEach(function(r,ri){r.slots.forEach(function(raw,si){const w=Object.assign({},raw,{key:norm(raw.full)+"|"+norm(raw.context),sourceId:q.id,rule:smartRule(raw)});if(!seen.has(w.key)){WORDS.push(w);seen.add(w.key)}})})});
 const POOLS={};const uniqueByRule={};WORDS.forEach(function(w){if(!POOLS[w.rule]){POOLS[w.rule]=[];uniqueByRule[w.rule]=new Set()}const k=norm(w.full)+"|"+norm(w.context);if(!uniqueByRule[w.rule].has(k)){POOLS[w.rule].push(w);uniqueByRule[w.rule].add(k)}});
+// Additional pools share the same source words, without changing their primary rule in statistics.
+POOLS["noun-agent2"]=WORDS.filter(function(w){return /(ник|тель)(?:а|у|е|и|ем|ями|ей)?$/i.test(w.full)&&/([ие])/.test(norm(w.letter))}).filter(function(w,i,a){return a.findIndex(function(x){return x.key===w.key})===i});
+POOLS["exceptions"]=WORDS.filter(function(w){return /^(?:намер|милостив|юродив|затмев|гуттаперч)/i.test(w.full)}).filter(function(w,i,a){return a.findIndex(function(x){return x.key===w.key})===i});
 const alphabet=shuffled([...new Set(WORDS.map(function(w){return norm(w.letter)}))].filter(function(x){return /^[а-я]$/.test(x)})).sort(function(a,b){return "аеиоуыэюясчщцткн".indexOf(a)-"аеиоуыэюясчщцткн".indexOf(b)});
 alphabet.push("⌫");
 const state={view:"home",mode:null,exam:[],examIndex:0,results:[],pack:[],values:[],active:0,feedback:null,attemptId:null,payload:null,ruleId:null,saveStatus:""};
 function avg(){if(!mem.history.length)return null;return mem.history.reduce(function(s,x){return s+(Number(x.score)||0)},0)/mem.history.length}
-function league(s){return s==null?-1:s<2?0:s<3.5?1:s<4.5?2:3}
+function league(s){return s==null?-1:s<=2?0:s<=3.5?1:s<=4.5?2:3}
 const TITLES=["Жалкий грешник","Подающий надежды чертёнок","Демоническая сущность","Сам Сатана"];
 function avatar(rank){const n=Math.max(0,rank);return '<svg role="img" aria-label="'+esc(TITLES[n])+'" class="avatar rank'+n+'" viewBox="0 0 100 100"><defs><linearGradient id="avflame" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe7a1"/><stop offset="1" stop-color="#f25c39"/></linearGradient></defs><path class="flame" d="M13 73 Q-3 50 26 26 Q23 52 42 41 Q49 15 62 11 Q54 32 76 44 Q80 28 91 26 Q90 61 85 76 Z"/><path class="horn" d="M23 32 Q2 20 13 1 Q18 19 37 28 Z"/><path class="horn" d="M76 32 Q96 18 87 1 Q83 21 62 28 Z"/><path class="face" d="M18 38 Q22 24 50 23 Q77 24 82 40 L85 65 Q78 90 50 91 Q22 90 15 65 Z"/><path d="M29 47 Q39 41 46 49 Q37 59 28 52 Z M54 49 Q62 40 72 47 Q72 56 62 56 Z" class="eye"/><path class="mouth" d="M34 70 Q50 82 66 70"/><path d="M39 72 L43 80 L47 74 M53 74 L57 80 L61 72" fill="#fff0d6"/>'+(n===3?'<path d="M24 27 L31 6 L44 20 L52 0 L62 20 L77 6 L82 27 Z" fill="url(#avflame)" stroke="#ffe3a6" stroke-width="2"/>':'')+'</svg>'}
 function rankLabel(){const a=avg(),n=league(a);return n<0?"Рейтинг ещё не открыт":TITLES[n]}
@@ -173,7 +176,7 @@ function guide(){state.guideFrom=state.view;state.view="guide";screen.innerHTML=
 function startExam(){state.mode="exam";state.exam=shuffled(DB).slice(0,5);state.examIndex=0;state.results=[];state.attemptId=randomId();state.payload=null;startEntry()}
 function startRule(id){const pool=POOLS[id]||[];if(pool.length<5)return;state.mode="rule";state.ruleId=id;state.pack=shuffled(pool).slice(0,5);state.attemptId=randomId();startEntry()}
 function startErrors(){const bad=Object.values(mem.misses);if(!bad.length){state.view="errors";screen.innerHTML='<div class="finished">'+heading("Мои ошибки","Все исправленные слова переходят в освоенные.")+'<div class="panel empty">Здесь пока нет слов для повторения. Пройди раунд ЕГЭ или потренируй конкретное правило.</div><div class="toolbar"><button data-action="home">← В котёл</button></div></div>';updateTop();return}state.mode="errors";state.pack=shuffled(bad).slice(0,5);state.attemptId=randomId();startEntry()}
-function getRows(){if(state.mode==="exam"){const q=state.exam[state.examIndex];return q.rows.map(function(r,i){return {raw:r.raw,slots:r.slots.map(function(w,j){return Object.assign({},w,{key:q.id+":"+i+":"+j,rule:smartRule(w)})})}})}return state.pack.map(function(w){return {raw:w.context,slots:[w]}})}
+function getRows(){if(state.mode==="exam"){const q=state.exam[state.examIndex];return q.rows.map(function(r,i){return {raw:r.raw,slots:r.slots.map(function(w,j){return Object.assign({},w,{key:norm(w.full)+"|"+norm(w.context),sourceId:q.id,rule:smartRule(w)})})}})}return state.pack.map(function(w){return {raw:w.context,slots:[w]}})}
 function flat(rows){return rows.flatMap(function(r){return r.slots})}
 function startEntry(){state.view="play";state.values=new Array(flat(getRows()).length).fill("");state.active=0;state.feedback=null;renderPlay()}
 function letterButton(index,w){const value=state.values[index]||"";return '<button type="button" aria-label="Вписать букву в слово '+esc(w.full)+'" data-action="slot" data-index="'+index+'" class="slot'+(state.active===index?" active":"")+(value?" filled":"")+'">'+esc(value?value.toUpperCase():"·")+'</button>'}
@@ -199,7 +202,7 @@ document.addEventListener("click",function(e){const el=e.target.closest("button[
 document.addEventListener("keydown",function(e){if(state.view!=="play"||e.ctrlKey||e.altKey||e.metaKey)return;const key=e.key;if(key==="Backspace"||/^[а-яёА-ЯЁ]$/.test(key)){e.preventDefault();inputLetter(key)}});
 if(DB.length<200||!RULES.length){screen.innerHTML='<div class="panel empty">Не удалось загрузить базу заданий. Обнови страницу.</div>';return}
 home();
-window.__CAULDRON_QA={counts:function(){return {tasks:DB.length,words:WORDS.length,rulePools:Object.fromEntries(Object.entries(POOLS).map(function(x){return [x[0],x[1].length]}))}},startExam:startExam,startRule:startRule,getState:function(){return {view:state.view,mode:state.mode,values:state.values.slice(),active:state.active,score:state.results.length}},keyboard:alphabet.slice()};
+window.__CAULDRON_QA={counts:function(){return {tasks:DB.length,words:WORDS.length,rulePools:Object.fromEntries(Object.entries(POOLS).map(function(x){return [x[0],x[1].length]}))}},startExam:startExam,startRule:startRule,getState:function(){return {view:state.view,mode:state.mode,values:state.values.slice(),active:state.active,score:state.results.length}},currentSlots:function(){return flat(getRows()).map(function(w){return {full:w.full,letter:w.letter,key:w.key,rule:w.rule}})},keyboard:alphabet.slice()};
 })();
 </script>
 </body></html>
