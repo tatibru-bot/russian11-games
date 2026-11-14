@@ -8,6 +8,7 @@
 <title>Адский суффиксный котёл · ЕГЭ № 11</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="./rules.js"></script>
+<script src="./rank-art.js"></script>
 <script src="./data-0.js"></script>
 <script src="./data-1.js"></script>
 <script src="./data-2.js"></script>
@@ -38,6 +39,13 @@ button.important{border-color:#ffc882}
 .home,.selector,.reference,.finished,.feedback{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:hidden}
 .homeTop{display:grid;grid-template-columns:94px 1fr;gap:10px;align-items:center;padding:12px}
 .avatar{height:88px;width:88px;display:block;filter:drop-shadow(0 0 15px #ff7a4c65)}
+/* Four commissioned portraits live in one compact sprite, ordered by rank. */
+.avatar.avatarArt{flex:0 0 auto;overflow:hidden;border-radius:14px;border:2px solid #db936b;background-color:#3b1b32;background-image:var(--rank-art);background-repeat:no-repeat;background-size:200% 200%;box-shadow:0 4px 16px #ff69353f;filter:drop-shadow(0 0 9px #ff7a4c65)}
+.avatarArt.rank0{background-position:0 0}
+.avatarArt.rank1{background-position:100% 0}
+.avatarArt.rank2{background-position:0 100%}
+.avatarArt.rank3{background-position:100% 100%;border-color:#ffca5f;box-shadow:0 0 16px #ffb24370}
+
 .avatar .face{fill:#b96252;stroke:#ffe3a6;stroke-width:2.4}
 .avatar .horn{fill:#e6af76;stroke:#492032;stroke-width:2}
 .avatar .eye{fill:#ffe5a0}
@@ -171,7 +179,8 @@ const state={view:"home",mode:null,exam:[],examIndex:0,results:[],pack:[],values
 function avg(){if(!mem.history.length)return null;return mem.history.reduce(function(s,x){return s+(Number(x.score)||0)},0)/mem.history.length}
 function league(s){return s==null?-1:s<=2?0:s<=3.5?1:s<=4.5?2:3}
 const TITLES=["Жалкий грешник","Подающий надежды чертёнок","Демоническая сущность","Сам Сатана"];
-function avatar(rank){const n=Math.max(0,rank);return '<svg role="img" aria-label="'+esc(TITLES[n])+'" class="avatar rank'+n+'" viewBox="0 0 100 100"><defs><linearGradient id="avflame" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe7a1"/><stop offset="1" stop-color="#f25c39"/></linearGradient></defs><path class="flame" d="M13 73 Q-3 50 26 26 Q23 52 42 41 Q49 15 62 11 Q54 32 76 44 Q80 28 91 26 Q90 61 85 76 Z"/><path class="horn" d="M23 32 Q2 20 13 1 Q18 19 37 28 Z"/><path class="horn" d="M76 32 Q96 18 87 1 Q83 21 62 28 Z"/><path class="face" d="M18 38 Q22 24 50 23 Q77 24 82 40 L85 65 Q78 90 50 91 Q22 90 15 65 Z"/><path d="M29 47 Q39 41 46 49 Q37 59 28 52 Z M54 49 Q62 40 72 47 Q72 56 62 56 Z" class="eye"/><path class="mouth" d="M34 70 Q50 82 66 70"/><path d="M39 72 L43 80 L47 74 M53 74 L57 80 L61 72" fill="#fff0d6"/>'+(n===3?'<path d="M24 27 L31 6 L44 20 L52 0 L62 20 L77 6 L82 27 Z" fill="url(#avflame)" stroke="#ffe3a6" stroke-width="2"/>':'')+'</svg>'}
+if(window.CAULDRON_RANK_ATLAS){document.documentElement.style.setProperty("--rank-art","url(\u0027"+window.CAULDRON_RANK_ATLAS+"\u0027)");}
+function avatar(rank){const n=Math.max(0,Math.min(3,Number(rank)||0));return '<span role="img" class="avatar avatarArt rank'+n+'" aria-label="'+esc(rank<0?"Начальный образ: "+TITLES[0]:TITLES[n])+'"></span>'}
 function rankLabel(){const a=avg(),n=league(a);return n<0?"Рейтинг ещё не открыт":TITLES[n]}
 function updateTop(){if(state.mode==="exam"&&state.view==="play")topStatus.textContent=(state.examIndex+1)+" / 5";else if(state.mode==="exam"&&state.view==="feedback")topStatus.textContent=(state.examIndex+1)+" / 5";else if(state.mode==="rule"||state.mode==="errors")topStatus.textContent="5 слов";else topStatus.textContent=mem.history.length?avg().toFixed(2)+" / 5":"ЕГЭ 11"}
 function heading(title,sub){return '<div class="selectorHead panel"><h2>'+esc(title)+'</h2><p>'+esc(sub)+'</p></div>'}

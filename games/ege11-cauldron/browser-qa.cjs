@@ -53,6 +53,41 @@ async function engineCheck(engine,name,base){
     await page.goto(base+app,{waitUntil:"load"});
     const n=await page.evaluate(()=>window.__CAULDRON_QA.counts());
     assert.equal(n.tasks,276);
+    // Verify the generated four-portrait atlas decodes in Chromium and mobile Safari WebKit.
+    const art=await page.evaluate(async()=>{
+      const url=window.CAULDRON_RANK_ATLAS;
+      if(!url)return null;
+      const picture=new Image();picture.src=url;await picture.decode();
+      const avatar=document.querySelector(".homeTop .avatarArt");
+      return {width:picture.naturalWidth,height:picture.naturalHeight,css:getComputedStyle(avatar).backgroundImage,cls:avatar.className};
+    });
+    assert(art&&art.width===288&&art.height===288,name+" portrait atlas decoding "+JSON.stringify(art));
+    assert(art.css.includes("data:image/webp;base64,"),name+" portrait sprite rendered");
+    assert(art.cls.includes("rank0"),"new player starts with initial sinner portrait");
+    if(width===375){
+      // A second launch must choose the stored AVERAGE score, not the most recent result.
+      const cases=[
+        {scores:[1],rank:0,title:"Жалкий грешник"},
+        {scores:[3],rank:1,title:"Подающий надежды чертёнок"},
+        {scores:[4],rank:2,title:"Демоническая сущность"},
+        {scores:[5],rank:3,title:"Сам Сатана"},
+        {scores:[5,1],rank:1,title:"Подающий надежды чертёнок"}
+      ];
+      for(const item of cases){
+        await page.evaluate(scores=>localStorage.setItem("russian11:ege11:hell:v1:741159",JSON.stringify({
+          history:scores.map((score,i)=>({at:"2026-11-14T09:00:00Z",score,attemptId:"test-"+i,sent:true})),
+          misses:{},mastered:{}
+        })),item.scores);
+        await page.reload({waitUntil:"load"});
+        const a=page.locator(".homeTop .avatarArt");
+        assert.equal(await a.count(),1,"portrait shown on reopened app");
+        assert((await a.getAttribute("class")).includes("rank"+item.rank),"rank corresponds to stored average "+item.scores);
+        assert.equal(await page.locator(".homeTop .rankTitle").innerText(),item.title);
+      }
+      await page.evaluate(()=>localStorage.removeItem("russian11:ege11:hell:v1:741159"));
+      await page.reload({waitUntil:"load"});
+    }
+
     assert.equal(Object.values(n.rulePools).filter(c=>c>=5).length,23,"all 23 rules drillable");
     await page.locator('[data-action="guide"]').click();
     assert.equal(await page.locator('section.ruleBox').count(),23,"all handbook topics are visible");
