@@ -2,7 +2,7 @@
 const {chromium,webkit} = require("playwright");
 const assert=require("node:assert/strict");
 const fs=require("node:fs"),http=require("node:http"),path=require("node:path");
-const ROOT=path.resolve(__dirname,"../../..");
+const ROOT=path.resolve(__dirname,"../..");
 const MIME={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8"};
 const app="/games/ege11-cauldron/";
 const widths=[[320,568],[375,667],[390,844],[430,932],[1280,720],[1366,768]];
