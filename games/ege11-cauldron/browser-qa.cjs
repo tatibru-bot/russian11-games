@@ -127,6 +127,9 @@ async function engineCheck(engine,name,base){
       assert.equal(sent.gameId,"ege11-cauldron");
       assert.equal(sent.correct,5);assert.equal(sent.total,5);assert.equal(Object.values(sent.tested).reduce((x,y)=>x+y,0),50);
       await page.locator('[data-action="home"]').click();
+      assert.equal(await page.locator('[data-action="retry-last"]').count(),1,"resume save button available");
+      await page.reload({waitUntil:"load"});
+      assert.equal(await page.locator('[data-action="retry-last"]').count(),1,"save recovery persists");
       await page.locator('[data-action="start-exam"]').click();
       const slots=await page.evaluate(()=>window.__CAULDRON_QA.currentSlots());
       for(let i=0;i<slots.length;i++){
