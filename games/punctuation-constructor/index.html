@@ -126,14 +126,24 @@ function stripExtras(indices){const hidden=new Set([...st.marks.extras.flatMap(i
 function tokenString(indices){return indices.map(i=>q(st.task.words[i])).join(" ")}
 function schema(){
  const a=st.task,sections=[];
+ const marked=a.conjs.filter(c=>st.marks.conjs.includes("c"+c.at));
+ const between=marked.filter(c=>c.role==="parts").map(c=>a.words[c.at]);
+ const clausesJoin=between.length?" <span class=\"junction\"> "+between.map(q).join(" + ")+" </span> ":" <span class=\"junction\"> ↔ </span> ";
  if(st.marks.bases.length){
-  const mains=a.mains.map(m=>'<span class="bracket">[ '+tokenString(stripExtras(m.words.filter(i=>!st.marks.subs.some(id=>a.subs.find(s=>s.id===id)?.words.includes(i)))))+' ]</span>').join(' <span class="junction">— союзная связь —</span> ');
+  const mains=a.mains.map(m=>'<span class="bracket">[ '+tokenString(stripExtras(m.words.filter(i=>!st.marks.subs.some(id=>a.subs.find(s=>s.id===id)?.words.includes(i)))))+' ]</span>').join(clausesJoin);
   sections.push('<div class="lane"><b>1-я дорожка</b> '+mains+'</div>');
  }else sections.push('<div class="emptyLane">Схема появится над предложением после выделения первой основы.</div>');
  for(const id of st.marks.subs){const s=a.subs.find(x=>x.id===id),head=a.words[s.head],extra=stripExtras(s.words);
   const parent=a.subs.find(x=>x.id!==id&&x.words.includes(s.head)),level=parent?"↳ ↳":"↳";
   sections.push('<div class="lane lower"><span class="branch">'+level+'</span><span class="bracket subbr">( '+tokenString(extra)+' )</span><span class="branch">'+q(s.question)+' → «'+q(head)+'»</span></div>');
  }
+ const homogeneous=marked.filter(c=>c.role==="between-subs");
+ if(homogeneous.length){
+  const parts=a.subs.filter(x=>st.marks.subs.includes(x.id)),sameQuestion=parts.length>=2&&new Set(parts.map(x=>x.question)).size===1;
+  sections.push('<div class="lane lower"><b>Однородные придаточные</b><span class="junction">'+homogeneous.map(c=>q(a.words[c.at])).join(" + ")+'</span><span class="branch">союз вне круглых скобок'+(sameQuestion?'; общий вопрос «'+q(parts[0].question)+'»':"")+'</span></div>');
+ }
+ const within=marked.filter(c=>c.role==="members");
+ if(within.length)sections.push('<div class="lane"><b>Однородные члены</b><span class="junction">'+within.map(c=>q(a.words[c.at])).join(" · ")+'</span><span class="branch">сочинительный союз внутри части</span></div>');
  if(st.marks.turns.length){
   const lines=st.marks.turns.map(id=>{const t=a.turns.find(x=>x.id===id);return '<span>│ '+tokenString(t.words)+' │ → ×'+q(a.words[t.head])+'</span>'}).join(" · ");
   sections.push('<div class="lane turnlane"><b>Обороты</b> '+lines+'</div>');
