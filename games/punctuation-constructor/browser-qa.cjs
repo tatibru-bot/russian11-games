@@ -33,6 +33,61 @@ async function testFirstSub(page){
  const linked=await page.evaluate(()=>window.__PUNCT_QA.getState().marks.subs);
  assert(linked.includes(s.id),"first subordinate attached to exact head and question");
 }
+async function completeGuided(page,num,index){
+ await page.evaluate(({n,k})=>window.__PUNCT_QA.launch(n,k),{n:num,k:index});
+ const task=await page.evaluate(()=>window.__PUNCT_QA.getTask());
+ for(const b of task.bases){
+  for(const i of b.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="bases"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ for(const s of task.subs){
+  for(const i of s.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="subs"]').click();
+  await page.locator('.word[data-i="'+s.head+'"]').click();
+  await page.selectOption("#question",s.question);
+  await page.locator('[data-act="link"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ for(const c of task.conjs){
+  await page.locator('.word[data-i="'+c.at+'"]').click();
+  await page.selectOption("#kind",c.type);
+  await page.selectOption("#role",c.role);
+  await page.locator('[data-act="mark"][data-kind="conjs"]').click();
+ }
+ for(const j of task.junctions){if(j.glued)await page.locator('[data-act="glue"][data-i="'+j.after+'"]').click()}
+ await page.locator('[data-act="nextstage"]').click();
+ for(const t of task.turns){
+  for(const i of t.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.selectOption("#kind",t.type);
+  await page.locator('[data-act="mark"][data-kind="turns"]').click();
+  await page.locator('.word[data-i="'+t.head+'"]').click();
+  await page.locator('[data-act="link"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ for(const e of task.extras){
+  for(const i of e.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.selectOption("#kind",e.type);
+  await page.locator('[data-act="mark"][data-kind="extras"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ for(const h of task.hom){
+  for(const i of h.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="hom"]').click();
+ }
+ for(const g of task.general){
+  for(const i of g.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="general"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ for(const p of task.punct){
+  await page.locator('[data-act="gap"][data-i="'+p.after+'"]').click();
+  await page.locator('[data-act="set-sign"][data-sign="'+p.sign+'"]').click();
+ }
+ await page.locator('[data-act="nextstage"]').click();
+ assert.match(await page.locator(".finish h2").innerText(),/Конструктор собран/);
+}
+
 async function exhaustiveFeedback(page){
  const items=await page.evaluate(()=>window.PUNCT_DATA);
  assert.equal(items.length,12,"12 manually annotated puzzles");
@@ -70,6 +125,10 @@ async function engineCheck(name,browser,w,h){
   await page.selectOption("#kind",firstConj.type);await page.selectOption("#role",firstConj.role);
   await page.locator('[data-act="mark"][data-kind="conjs"]').click();
   assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.conjs.length),1);
+  await completeGuided(page,"17",0);
+  await completeGuided(page,"20",1);
+  await completeGuided(page,"HARD",0);
+  await completeGuided(page,"HARD",1);
   await exhaustiveFeedback(page);
  }
  assert.deepEqual(errors,[],name+" "+w+"x"+h+" runtime errors");
