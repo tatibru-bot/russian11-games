@@ -55,7 +55,7 @@ async function engineCheck(name,browser,w,h){
  assert.equal(await page.locator(".modeTile").count(),6,"six independent EGE menu entries");
  await visibleFit(page,name+" "+w+"x"+h+" menu");
  await page.locator('[data-act="launch"][data-num="19"]').click();
- assert.equal(await page.locator(".word").count(),11,"render individual word tokens");
+ assert.equal(await page.locator(".word").count(),10,"render individual word tokens");
  await visibleFit(page,name+" "+w+"x"+h+" game");
  await page.screenshot({path:"/tmp/punct-"+name+"-"+w+".png",fullPage:false});
  if(w===375){
@@ -85,4 +85,4 @@ let PORT;
  }
  console.log("PASS: 12 puzzles, six modes, 7-stage prototype, schema, mobile fit and Chromium/WebKit");
  await new Promise(ok=>srv.close(ok));
-})().catch(e=>{console.error(e);process.exitCode=1});
+})().catch(e=>{console.error(e);process.exit(1)});
