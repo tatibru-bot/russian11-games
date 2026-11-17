@@ -286,7 +286,7 @@ function schemeTree(){
  const common=a.common.filter(x=>st.marks.common.includes(x.id));
  const root='<div class="schemeTreeRoot">'+(common.length?'<span class="schemeNode common">ОВЧ</span><span class="schemeTreeEdge">↘</span>':"")+
   a.mains.map((m,k)=>'<span class="schemeNode">[ — ═ ]</span>'+(k<a.mains.length-1?'<span class="schemeTreeEdge">'+q(a.conjs.find(x=>x.role==="parts")?.at!=null?a.words[a.conjs.find(x=>x.role==="parts").at]:"↔")+'</span>':"")).join("")+'</div>';
- const depth=s=>{const parent=a.subs.find(x=>x.id!==s.id&&x.words.includes(s.head));return parent?1:0};
+ const depth=(sub,seen=new Set())=>{if(seen.has(sub.id))return 0;seen.add(sub.id);const parent=a.subs.find(x=>x.id!==sub.id&&x.words.includes(sub.head));return parent?1+depth(parent,seen):0};
  const leaf=subs.map(x=>'<div class="schemeTreeBranch" style="margin-left:'+(depth(x)*17)+'px"><span class="schemeTreeEdge">↳ '+q(x.question)+'</span><span class="schemeNode sub">( — ═ )</span><small>← '+q(a.words[x.head])+'</small></div>').join("");
  return '<div class="schemeTree"><div class="schemeTreeTitle">Дерево зависимостей</div>'+root+leaf+'</div>';
 }
@@ -334,7 +334,7 @@ function schema(){
  const relations=a.subs.filter(x=>subIds.has(x.id));
  const homo=relations.length>=2&&relations.every(x=>x.head===relations[0].head&&x.question===relations[0].question);
  const nested=relations.some(x=>relations.some(y=>x!==y&&y.words.includes(x.head)));
- const pattern=relations.length<2?"":homo?"Однородное подчинение":nested?"Последовательное или комбинированное подчинение":"Параллельное или комбинированное подчинение";
+ const pattern=relations.length<2?"":homo?"Однородное подчинение":relations.length===2?(nested?"Последовательное подчинение":"Параллельное подчинение"):nested?"Комбинированное подчинение":"Параллельное или однородное подчинение";
  return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
   (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
   schemeTree()+
