@@ -215,13 +215,33 @@ function descMark(i){
 function stripExtras(indices){const hidden=new Set([...st.marks.extras.flatMap(id=>st.task.extras.find(x=>x.id===id)?.words||[])]);return indices.filter(i=>!hidden.has(i))}
 function tokenString(indices){return indices.map(i=>q(st.task.words[i])).join(" ")}
 
+
+function parentOf(sub){return st.task.subs.find(x=>x.id!==sub.id&&x.words.includes(sub.head))||null}
+function subDepth(sub,seen=new Set()){
+ if(seen.has(sub.id))throw Error("Зацикленная зависимость придаточных");
+ seen.add(sub.id);const parent=parentOf(sub);
+ return parent?subDepth(parent,seen)+1:1;
+}
+function fullSubWords(sub){
+ const seen=new Set(),all=new Set(sub.words);
+ function visit(s){if(seen.has(s.id))throw Error("Зацикленная зависимость");seen.add(s.id);
+  for(const child of st.task.subs.filter(x=>parentOf(x)?.id===s.id)){
+   child.words.forEach(i=>all.add(i));visit(child);
+  }
+ }
+ visit(sub);return [...all].sort((a,b)=>a-b);
+}
 function laneOf(i){
- const a=st.task;
- if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return 2;
- if(st.marks.subs.some(id=>a.subs.find(x=>x.id===id)?.words.includes(i)))return 1;
- if(a.conjs.some(c=>c.at===i&&c.role==="between-subs")&&st.marks.subs.length)return 1;
+ const a=st.task,marked=a.subs.filter(x=>st.marks.subs.includes(x.id));
+ const maxDepth=Math.max(0,...marked.map(subDepth));
+ if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return Math.max(1,maxDepth)+1;
+ const inside=marked.filter(x=>fullSubWords(x).includes(i));
+ if(inside.length)return Math.max(...inside.map(subDepth));
+ const between=a.conjs.find(c=>c.at===i&&c.role==="between-subs");
+ if(between&&marked.length>1)return Math.min(...marked.map(subDepth));
  return 0;
 }
+
 function isInMark(i,kind){return st.marks[kind].some(id=>st.task[kind].find(x=>x.id===id)?.words.includes(i))}
 function wordPiece(i){
  const a=st.task,w=a.words[i],punct=st.step===6;
@@ -236,47 +256,53 @@ function wordPiece(i){
  const gap=punct?'<button class="punctGap '+(st.gap===i?"target":"")+(st.marks.punct[i]?" filled":"")+'" data-act="gap" data-i="'+i+'" aria-label="Знак после '+q(w)+'">'+q(st.marks.punct[i]||"·")+'</button>':"";
  return '<span class="brick '+(first?"turnBegin ":"")+(last?"turnEnd":"")+'" data-i="'+i+'">'+(anchor?'<span class="above" aria-label="определяемое слово">×</span>':"")+'<button class="word '+classes+'" data-act="token" data-i="'+i+'" aria-pressed="'+!!picked+'"><span class="wtext">'+q(w)+'</span></button>'+gap+'</span>';
 }
+
 function bracketGroups(level,visible){
- const a=st.task,v=new Set(visible),common=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
- const groups=level===0?(st.marks.bases.length?a.mains:[]):level===1?a.subs.filter(x=>st.marks.subs.includes(x.id)):[];
+ const a=st.task,used=new Set(visible),common=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
+ const groups=level===0?(st.marks.bases.length?a.mains:[]):a.subs.filter(x=>st.marks.subs.includes(x.id)&&subDepth(x)===level);
  return groups.map(g=>{
-  const positions=g.words.filter(i=>v.has(i)&&!(level===0&&common.has(i)));
-  if(!positions.length)return null;
-  return {id:g.id,min:Math.min(...positions),max:Math.max(...positions),sub:level===1};
+  const positions=g.words.filter(i=>used.has(i)&&!(level===0&&common.has(i)));
+  return positions.length?{id:g.id,min:Math.min(...positions),max:Math.max(...positions),sub:level>0}:null;
  }).filter(Boolean);
 }
-function laneHTML(level){
- const a=st.task,visible=a.words.map((_,i)=>i).filter(i=>laneOf(i)===level);
- const name=["1 · Главные части","2 · Придаточные","3 · Не члены предложения"][level];
- const groups=bracketGroups(level,visible);
+function activeLevels(){
+ const depths=st.task.subs.filter(x=>st.marks.subs.includes(x.id)).map(subDepth);
+ const levels=[0,...new Set(depths)].sort((a,b)=>a-b);
+ if(st.marks.extras.length)levels.push(Math.max(1,...depths)+1);
+ return levels;
+}
+function laneHTML(level,extraLevel){
+ const a=st.task,visible=a.words.map((_,i)=>i).filter(i=>laneOf(i)===level),extra=level===extraLevel;
+ const groups=extra?[]:bracketGroups(level,visible);
+ const name=extra?"↓ Не члены предложения":level===0?"Главные части":"↓ Придаточные · уровень "+level;
  let pieces="";
  for(const i of visible){
-  const opens=groups.filter(g=>g.min===i).sort((x,y)=>y.max-x.max);
-  for(const g of opens)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?"(":"[")+'</span>';
+  for(const g of groups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))
+   pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?"(":"[")+'</span>';
   pieces+=wordPiece(i);
-  const closes=groups.filter(g=>g.max===i).sort((x,y)=>y.min-x.min);
-  for(const g of closes)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?")":"]")+'</span>';
+  for(const g of groups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))
+   pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?")":"]")+'</span>';
  }
- return '<div class="track '+(level===1?"secondary":level===2?"tertiary":"")+'" data-lane="'+level+'"><div class="trackLabel">'+name+'</div>'+(pieces||'<span class="emptyTrack">'+(level===1?"Пока не спущено ни одного придаточного":level===2?"Пока нет выделенных вводных или обращений":"")+" </span>")+'</div>';
+ return '<div class="track '+(extra?"tertiary":level?"secondary":"")+'" data-lane="'+level+'"><div class="trackLabel">'+name+'</div>'+pieces+'</div>';
 }
 function blueprint(){
- return '<div class="blueprint" id="blueprint"><div class="blueprintContent" id="blueprintSurface">'+[0,1,2].map(laneHTML).join("")+'<svg class="arrowOverlay" aria-hidden="true"><defs><marker id="brickArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#ffdc7c" stroke-width="1.4"/></marker></defs><g id="arrowPaths"></g></svg></div></div>';
+ const levels=activeLevels(),extraLevel=st.marks.extras.length?levels[levels.length-1]:-1;
+ return '<div class="blueprint" id="blueprint"><div class="blueprintContent" id="blueprintSurface">'+levels.map(level=>laneHTML(level,extraLevel)).join("")+'<svg class="arrowOverlay" aria-hidden="true"><defs><marker id="brickArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#ffdc7c" stroke-width="1.4"/></marker></defs><g id="arrowPaths"></g></svg></div></div>';
 }
 function drawArrows(){
  const surface=document.getElementById("blueprintSurface"),svg=surface?.querySelector(".arrowOverlay"),paths=document.getElementById("arrowPaths");
  if(!surface||!svg||!paths||!st.task)return;
  const b=surface.getBoundingClientRect(),items=[];
- const point=i=>{const el=surface.querySelector('.brick[data-i="'+i+'"] .word');if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left+r.width/2-b.left,y:r.top-b.top+surface.parentElement.scrollTop}};
+ const point=i=>{const el=surface.querySelector('.brick[data-i="'+i+'"] .word');if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left+r.width/2-b.left,y:r.top-b.top}};
  for(const id of st.marks.subs){const sub=st.task.subs.find(x=>x.id===id);items.push({from:sub.head,to:sub.words[0],label:sub.question,stroke:"#cab7ff"})}
- for(const id of st.marks.turns){const t=st.task.turns.find(x=>x.id===id);items.push({from:t.head,to:t.words[0],label:t.type==="ger"?"добавочное действие":"×",stroke:"#ffcf80"})}
+ for(const id of st.marks.turns){const t=st.task.turns.find(x=>x.id===id);items.push({from:t.head,to:t.words[0],label:t.type==="ger"?"действие":"×",stroke:"#ffcf80"})}
  const w=Math.max(surface.scrollWidth,surface.clientWidth),h=Math.max(surface.scrollHeight,surface.clientHeight);
  svg.setAttribute("width",w);svg.setAttribute("height",h);
  paths.innerHTML=items.map(x=>{
   const p=point(x.from),t=point(x.to);if(!p||!t)return "";
-  const y1=p.y-2,y2=t.y-2,control=Math.min(y1,y2)-Math.max(16,Math.min(40,Math.abs(p.x-t.x)/4));
+  const y1=p.y-2,y2=t.y-2,control=Math.min(y1,y2)-Math.max(15,Math.min(35,Math.abs(p.x-t.x)/4));
   const middle=(p.x+t.x)/2;
-  const label=String(x.label||"").replace(/^\s+|\s+$/g,"");
-  return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="1.9" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(label)+'</text>';
+  return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="2" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(x.label)+'</text>';
  }).join("");
 }
 
@@ -411,13 +437,14 @@ function mark(kind){
   if(userKind!==target.type||role!==target.role){fail("Проверь функцию: союз соединяет части, однородные члены или однородные придаточные? Союзное слово — член придаточного.");return}
   st.marks.conjs.push("c"+at);clearChoice();note("Связующее слово распознано.","ok");render();return;
  }
- const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(x.words,st.picked));
+ const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(kind==="subs"?fullSubWords(x):x.words,st.picked));
  if(!item){fail("Границы конструкции выбраны неточно. Её нужно выделить целиком (допускаются разорванные части).");return}
  if(kind==="subs"||kind==="turns"){
-  if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Сначала уточни, чем он выражен.");return}
-  st.pending={kind,id:item.id,words:item.words};st.picked=[];st.anchor=null;st.question="";note("Конструкция спущена. Нажми в исходном предложении слово, от которого она зависит.");render();return;
- }
- if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
+   if(kind==="subs"&&parentOf(item)&&!st.marks.subs.includes(parentOf(item).id)){fail("Сначала спусти внешнее придаточное целиком, затем из него — вложенное.");return}
+   if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Уточни его тип.");return}
+   st.pending={kind,id:item.id,words:kind==="subs"?fullSubWords(item):item.words};st.picked=[];st.anchor=null;st.question="";note("Выбери опорное слово и, если нужно, вопрос.");render();return;
+  }
+  if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
  st.marks[kind].push(item.id);clearChoice();note("Конструкция отмечена.","ok");render();
 }
 function link(){
