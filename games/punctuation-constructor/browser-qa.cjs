@@ -14,8 +14,13 @@ async function visibleFit(page,tag){
 async function testStage1(page){
  const task=await page.evaluate(()=>window.__PUNCT_QA.getTask()),groups=task.bases;
  for(const b of groups){
+  if((await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases)).includes(b.id))continue;
   for(const i of b.words)await page.locator('.word[data-i="'+i+'"]').click();
   await page.locator('[data-act="mark"][data-kind="bases"]').click();
+ }
+ for(const v of task.common){
+  for(const i of v.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="common"]').click();
  }
  const n=await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases.length);
  assert.equal(n,groups.length,"all grammatical bases marked");
@@ -37,8 +42,13 @@ async function completeGuided(page,num,index){
  await page.evaluate(({n,k})=>window.__PUNCT_QA.launch(n,k),{n:num,k:index});
  const task=await page.evaluate(()=>window.__PUNCT_QA.getTask());
  for(const b of task.bases){
+  if((await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases)).includes(b.id))continue;
   for(const i of b.words)await page.locator('.word[data-i="'+i+'"]').click();
   await page.locator('[data-act="mark"][data-kind="bases"]').click();
+ }
+ for(const v of task.common){
+  for(const i of v.words)await page.locator('.word[data-i="'+i+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="common"]').click();
  }
  await page.locator('[data-act="nextstage"]').click();
  for(const s of task.subs){
@@ -90,7 +100,7 @@ async function completeGuided(page,num,index){
 
 async function exhaustiveFeedback(page){
  const items=await page.evaluate(()=>window.PUNCT_DATA);
- assert.equal(items.length,12,"12 manually annotated puzzles");
+ assert.equal(items.length,13,"13 manually annotated puzzles");
  assert.equal(new Set(items.map(x=>x.id)).size,items.length);
  for(const item of items){
   assert(item.words.length>3,"no trivial puzzle");
@@ -111,16 +121,20 @@ async function engineCheck(name,browser,w,h){
  await visibleFit(page,name+" "+w+"x"+h+" menu");
  await page.locator('[data-act="launch"][data-num="19"]').click();
  assert.equal(await page.locator(".word").count(),10,"render individual word tokens");
+  assert.equal(await page.locator(".cleanSentence").count(),1,"original sentence shown without annotations");
+  assert.equal(await page.locator(".track").count(),3,"three construction tracks retained at all steps");
  await visibleFit(page,name+" "+w+"x"+h+" game");
  await page.screenshot({path:"/tmp/punct-"+name+"-"+w+".png",fullPage:false});
  if(w===375){
   await testStage1(page);
-  await testFirstSub(page);
+  assert((await page.locator(".schemeGraphic").count())>0,"symbolic scheme after bases");
+   await testFirstSub(page);
   await page.locator('[data-act="menu"]').click();
   await page.locator('[data-act="launch"][data-num="16"]').click();
   await testStage1(page);
   await page.locator('[data-act="nextstage"]').click(); // 16 has zero subordinated clauses
-  const firstConj=await page.evaluate(()=>window.__PUNCT_QA.getTask().conjs[0]);
+  assert.equal(await page.locator(".word.common").count(),2,"common modifier stays outside brackets");
+   const firstConj=await page.evaluate(()=>window.__PUNCT_QA.getTask().conjs[0]);
   await page.locator('.word[data-i="'+firstConj.at+'"]').click();
   await page.selectOption("#kind",firstConj.type);await page.selectOption("#role",firstConj.role);
   await page.locator('[data-act="mark"][data-kind="conjs"]').click();
@@ -142,6 +156,6 @@ let PORT;
   for(const [w,h] of sizes)await engineCheck(name,b,w,h);
   await b.close();
  }
- console.log("PASS: 12 puzzles, six modes, 7-stage prototype, schema, mobile fit and Chromium/WebKit");
+ console.log("PASS: 13 puzzles, six modes, 7-stage prototype, inline markup, schema, mobile fit and Chromium/WebKit");
  await new Promise(ok=>srv.close(ok));
 })().catch(e=>{console.error(e);process.exit(1)});
