@@ -520,7 +520,7 @@ function renderPunctuation(){
  const title=phase==="place"?"Поставь знаки самостоятельно":phase==="retry"?"Перепроверь отмеченные швы":phase==="auditEnd"?"Проверка швов завершена":"Проверка швов";
  const intro=phase==="place"?"Предложение собрано обратно. Расставь знаки без подсказок, затем проверь границы конструкций.":phase==="retry"?"Здесь остались спорные границы. Сравни постановку знака с построенной схемой.":phase==="auditEnd"?"Нажми «Проверить результат», чтобы узнать, верно ли собрана пунктуация.":"Смотри на выделенную границу. Нужна запятая, другой знак или знака нет?";
  status.textContent="этап 7 / 7";
- main.innerHTML='<div class="game punctuationStage"><div class="titleline"><div class="meta"><b>№ '+q(a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
+ main.innerHTML='<div class="game punctuationStage '+(a.words.length>22?"compactLong":"")+'"><div class="titleline"><div class="meta"><b>№ '+q(a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
  '<div class="stepTitle panel"><span class="stepNumber">7/7</span><div><strong>Проверка сборки · '+title+'</strong><p>'+intro+'</p></div></div>'+
  '<section class="restoredPanel panel"><div class="panelHeader">Собранное предложение</div>'+restoredSentence()+'</section>'+
  '<section class="diagramPanel panel"><div class="panelHeader">Его синтаксическая схема</div>'+schema()+'</section>'+
@@ -558,7 +558,7 @@ function toolbar(){
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
  if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind">'+[["coord","Сочинительный"],["sub","Подчинительный"],["relative","Союзное слово"],["correlate","Указательное «то»"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><label class="field">Связь: <select id="role">'+[["parts","Части ССП (две основы)"],["members","Однородные члены"],["between-subs","Однородные придаточные"],["inside","Внутри придаточного"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceRole===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
   if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["part","Причастный"],["ger","Деепричастный"],["appos","Приложение"],["detail","Уточнение"],["compare","Сравнительный"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
-  if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["intro","Вводное"],["address","Обращение"],["insert","Вставка"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+  if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["intro","Вводное"],["address","Обращение"],["insert","Вставка"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="extras">Отметить на месте</button><span class="stretch"></span>'+(done?next:"")+'</div>';
   return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
 }
 function junctionButtons(){
@@ -591,19 +591,19 @@ function render(){
  const instructions=[
   "Выдели все грамматические основы сразу. Если есть общий второстепенный член, отметь его отдельно.",
   "Спусти всё придаточное целиком. Если внутри есть ещё одно, сначала перенеси внешнее, затем из него — внутреннее. Укажи вопрос и опорное слово.",
-  "Найди союз или союзное слово. Выбери тип и связь, затем нажми «Разметить союз».",
+  "Определи союзы и их роль. Затем самостоятельно проверь, есть ли стык двух союзов.",
   "Выдели оборот: причастный свяжи с определяемым словом (×), деепричастный — со сказуемым. Выделение сохраняется.",
-  "Перенеси на нижнюю дорожку вводные слова, обращения и вставки.",
+  "Найди обращения, вводные слова и вставки. Оставь их на месте: выдели цветом и подпиши.",
   "Найди однородные члены и обобщающие слова. Они останутся выделенными.",
-  "Расставь знаки препинания в разобранном предложении."
+  "Собери предложение обратно, самостоятельно расставь знаки, затем проверь значимые стыки."
  ];
  const hasNoItems=step>0&&step<6&&p[1]===0;
  const needsSchema=st.marks.bases.length>0;
- main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Сложный уровень":"№ "+a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
+ main.innerHTML='<div class="game '+(a.words.length>22?"compactLong":"")+'"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Сложный уровень":"№ "+a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
   '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(hasNoItems?' <span class="stepSkip">Здесь такого элемента нет — переходи дальше.</span>':"")+'</p></div></div>'+
   '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">Предложение</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
-  '<div class="buildGrid '+(!needsSchema?"noSchema":"")+'"><section class="buildPanel panel"><div class="panelHeader">Разбор по дорожкам</div>'+blueprint()+'</section>'+
-  (needsSchema?'<section class="diagramPanel panel"><div class="panelHeader">Схема</div><div class="diagram">'+schema()+'</div></section>':"")+'</div></div>'+
+  (needsSchema?'<section class="diagramPanel panel"><div class="panelHeader">Схема</div>'+schema()+'</section>':"")+
+  '<section class="buildPanel panel"><div class="panelHeader">Разбор по дорожкам</div>'+blueprint()+'</section></div>'+
   '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||"")+'</div></div></div>';
  requestAnimationFrame(drawArrows);
 }
@@ -701,11 +701,13 @@ function nextStage(){
  st.choiceKind=({2:"coord",3:"part",4:"intro"})[st.step]||"coord";st.choiceRole="parts";if(st.step===6){st.phase="place";st.gap=null;st.seams=[];st.auditIndex=0;}note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
 }
 function finish(){
- const a=st.task,punctText=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
- const dots=a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.sign)+' — '+q(p.why)+'</div>').join("")||'<div class="reviewRow">Запятых нет: '+q(a.insight)+'</div>';
- main.innerHTML='<div class="finish"><div class="head panel"><h2>🏁 Конструктор собран!</h2><p><b>'+q(a.num==="HARD"?"Хард":("№ "+a.num))+' · '+q(a.short)+'</b></p><p>'+q(punctText)+'</p><p>'+q(a.insight)+'</p></div><div class="scroll panel"><strong>Почему стоят именно эти знаки</strong>'+dots+'</div><div class="actionLine"><button class="primary" data-act="nexttask">Следующее предложение →</button><button class="ghost" data-act="menu">В меню</button></div></div>';
+ const a=st.task;
+ main.innerHTML='<div class="game finishedStage"><div class="head panel"><h2>🏁 Конструктор собран!</h2><h3>Все знаки препинания расставлены правильно!</h3></div>'+
+ '<section class="restoredPanel panel"><div class="panelHeader">Готовое предложение с разметкой</div>'+restoredSentence(true)+'</section>'+
+ '<section class="diagramPanel panel"><div class="panelHeader">Полная графическая схема</div>'+schema()+'</section>'+
+ '<section class="buildPanel panel"><div class="panelHeader">Как построена конструкция</div>'+blueprint()+'</section>'+
+ '<div class="actionLine"><button class="primary" data-act="nexttask">Следующее предложение →</button><button class="ghost" data-act="menu">В меню</button></div></div>';
 }
-
 function showAnswer(){
  const a=st.task,oldMarks=st.marks,oldStep=st.step;
  st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};
