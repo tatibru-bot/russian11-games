@@ -600,7 +600,7 @@ function toolbar(){
  }
  if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основы</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
- if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind">'+[["coord","Сочинительный"],["sub","Подчинительный"],["relative","Союзное слово"],["correlate","Указательное «то»"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><label class="field">Связь: <select id="role">'+[["parts","Между главными"],["members","Между однородными"],["between-subs","Между придаточными"],["inside","Внутри придаточного"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceRole===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
+ if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind">'+[["coord","Сочинительный"],["sub","Подчинительный"],["relative","Союзное слово"],["correlate","Указательное «то»"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><label class="field">Связь: <select id="role">'+[["parts","Части ССП (две основы)"],["members","Однородные члены"],["between-subs","Однородные придаточные"],["inside","Внутри придаточного"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceRole===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
   if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["part","Причастный"],["ger","Деепричастный"],["appos","Приложение"],["detail","Уточнение"],["compare","Сравнительный"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
   if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["intro","Вводное"],["address","Обращение"],["insert","Вставка"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
   return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
@@ -656,7 +656,16 @@ function mark(kind){
   const at=st.picked[0],target=a.conjs.find(x=>x.at===at&&!st.marks.conjs.includes("c"+at));
   if(!target){fail("Это слово не является союзом/союзным словом в данном предложении или уже разобрано.");return}
   const userKind=st.choiceKind,role=st.choiceRole;
-  if(userKind!==target.type||role!==target.role){fail("Проверь функцию: союз соединяет части, однородные члены или однородные придаточные? Союзное слово — член придаточного.");return}
+  if(userKind!==target.type||role!==target.role){
+   if(userKind===target.type&&target.role==="parts"&&role==="members"){
+    fail("Здесь две грамматические основы, значит И соединяет части сложносочинённого предложения, а не однородные члены."+(a.common.length?" Общий второстепенный член отменяет запятую перед И, но не меняет тип связи.":""));return;
+   }
+   if(userKind===target.type&&target.role==="members"&&role==="parts"){
+    fail("Здесь союз соединяет однородные члены внутри одной части, а не два простых предложения. Проверь число грамматических основ.");return;
+   }
+   if(userKind!==target.type){fail("Тип связующего слова выбран неверно: различай сочинительный союз, подчинительный союз и союзное слово.");return}
+   fail("Неверна роль союза. Посмотри, что именно он соединяет: части ССП, однородные члены или придаточные.");return;
+  }
   st.marks.conjs.push("c"+at);clearChoice();note("Связующее слово распознано.","ok");render();return;
  }
  const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(kind==="subs"?fullSubWords(x):x.words,st.picked));
