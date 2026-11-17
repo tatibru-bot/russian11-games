@@ -160,6 +160,112 @@ body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),li
 .schemeTreeBranch{display:flex;align-items:center;gap:6px;position:relative;padding:3px 0 4px 9px;margin-left:5px;border-left:2px solid #a9a1df;flex-wrap:wrap}
 .schemeTreeBranch::before{content:"";width:10px;height:2px;background:#a9a1df;position:absolute;left:0;top:50%}
 .schemeTreeBranch small{font-size:11px;color:#cbd8f4}
+
+/* ЛЕГОПУНКТ 0.3: без вложенных областей прокрутки; весь экран принадлежит рабочему полю. */
+html,body{height:auto;min-height:100%;overflow:visible;overscroll-behavior:auto}
+body{overflow-y:auto}
+.app{height:auto;min-height:100dvh;max-width:none;gap:7px;padding:8px 12px;overflow:visible}
+main{flex:1 0 auto;min-height:0;overflow:visible}
+.game{height:auto;min-height:0;overflow:visible;display:flex;flex-direction:column;gap:8px}
+.top{min-height:40px}
+#status{display:none}
+.brand strong{font-size:23px}
+.brand small{font-size:13px}
+.titleline{min-height:36px}
+.titleline .meta b{font-size:20px;color:#ffe29a}
+.titleline .meta{font-size:14px}
+.titleline button{font-size:15px;min-height:35px}
+.stepTitle{min-height:0;padding:10px 14px;gap:13px}
+.stepNumber{font-size:23px;min-width:68px;padding:8px}
+.stepTitle strong{font-size:clamp(20px,2.1vw,25px)}
+.stepTitle p{font-size:clamp(15px,1.5vw,18px);line-height:1.4;color:#e6edf6}
+.stepSkip{font-size:inherit}
+.workarea{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:visible}
+.wordsPanel{padding:10px 14px;min-height:0;overflow:visible}
+.panelHeader{font-size:15px;line-height:1.35;letter-spacing:.04em;margin-bottom:4px}
+.cleanSentence{font-size:clamp(18px,1.9vw,23px);font-weight:650;max-height:none;overflow:visible;line-height:1.5}
+.buildGrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(250px,1fr);align-items:start;gap:8px;min-height:0;overflow:visible}
+.buildGrid.noSchema{grid-template-columns:minmax(0,1fr)}
+.buildPanel,.diagramPanel{display:flex;flex-direction:column;gap:6px;min-height:0;padding:10px 12px;overflow:visible}
+.blueprint,.diagramPanel .diagram,.blueprintContent{flex:0 0 auto;min-height:0;height:auto;overflow:visible;scrollbar-width:none}
+.blueprintContent{padding:4px 0 6px}
+.track{align-items:center;gap:7px 5px;min-height:0;margin:0 0 10px;padding:8px 10px 10px;overflow:visible}
+.trackLabel{font-size:15px;line-height:1.2;margin-bottom:1px;letter-spacing:.025em}
+.brick{min-height:42px;padding-top:9px}
+.brick .word{min-height:39px;font-size:clamp(17px,1.52vw,21px);padding:7px 10px;line-height:1.25;box-shadow:inset 0 5px #ffffff25,0 3px #091728}
+.brick .above{top:-14px;font-size:22px}
+.brick.turnBegin:before,.brick.turnEnd:after{font-size:27px}
+.syntaxBracket{font-size:clamp(23px,2.3vw,30px);line-height:1.25}
+.schemeCompact{display:flex;flex-direction:column;gap:12px;min-width:0;padding:6px 0}
+.schemeRow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:40px}
+.schemeNode{font-size:clamp(19px,2vw,25px);padding:6px 12px}
+.schemeNode.sub{font-size:clamp(18px,1.65vw,23px)}
+.schemeQuestion{font-size:16px;font-weight:750;color:#dacbff;white-space:nowrap}
+.schemeCommon{font-size:17px;margin-right:8px}
+.schemeJoin{font-size:21px}
+.schemeBranch{border-left:3px solid #b7a7ee;padding-left:10px;margin-top:4px}
+.schemeMarks{font-size:16px;color:#ffd58f;margin-top:5px;line-height:1.5}
+.schemeEmpty{font-size:17px;color:#d4deed}
+.controls{flex:0 0 auto;min-height:0;padding:10px 12px;gap:7px}
+.actionLine{gap:8px}
+.actionLine button{min-height:46px;font-size:17px;padding:8px 14px}
+.actionLine .field{font-size:16px;line-height:1.4}
+.actionLine select{font-size:17px;min-height:43px;padding:6px 10px}
+.hint{font-size:16px;min-height:0;line-height:1.35;padding:0 2px}
+.hint:empty{display:none}
+.selectionHint,.footer,.graphLinks,.schemeNote,.schemeTree{display:none}
+.punctBar{gap:8px;flex-wrap:wrap}
+.punctBar button{min-width:45px;min-height:45px;font-size:20px}
+.punctGap{min-width:25px;min-height:29px;font-size:18px}
+.blueprint .punctGap{min-width:21px}
+.menu{height:auto;overflow:visible;gap:12px}
+.modeGrid{flex:0 0 auto;grid-template-rows:repeat(2,minmax(130px,1fr))}
+.modeTile strong{font-size:24px}
+.modeTile small,.modeTile b{font-size:15px}
+.intro h1{font-size:30px}
+.intro p{font-size:17px}
+.bottomNote{font-size:13px}
+.finish{height:auto;overflow:visible}
+.finish .scroll{overflow:visible;flex:0 0 auto}
+.finish p{font-size:17px}
+.modalBack{position:absolute;min-height:100%;height:auto;inset:0;align-items:flex-start;overflow:visible}
+.modal{max-height:none;overflow:visible;margin:14px auto;padding:18px}
+.answerGrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(230px,1fr);gap:10px}
+.answerGrid .previewBuild,.answerGrid .diagram{max-height:none;overflow:visible}
+.answerGrid .previewBuild{min-width:0}
+@media(max-width:760px){
+ .app{padding:6px 7px;gap:5px}
+ .brand strong{font-size:18px}.brand small{font-size:11px}
+ .titleline .meta b{font-size:17px}
+ .stepTitle{padding:8px;gap:8px}
+ .stepNumber{font-size:20px;min-width:58px;padding:6px}
+ .stepTitle strong{font-size:19px}.stepTitle p{font-size:15px}
+ .wordsPanel{padding:8px 10px}
+ .panelHeader{font-size:13px}
+ .cleanSentence{font-size:19px}
+ .buildGrid,.answerGrid{display:flex;flex-direction:column;gap:8px}
+ .buildPanel,.diagramPanel{width:100%;padding:8px 9px}
+ .track{padding:6px 7px 9px;gap:5px 3px}
+ .trackLabel{font-size:13px}
+ .brick{min-height:38px}.brick .word{font-size:17px;min-height:36px;padding:6px 8px}
+ .syntaxBracket{font-size:23px}
+ .schemeNode{font-size:19px;padding:4px 9px}
+ .schemeNode.sub{font-size:18px}
+ .actionLine button{min-height:42px;font-size:16px;padding:6px 9px}
+ .actionLine select{font-size:16px;min-height:40px;padding:5px 6px}
+ .actionLine .field,.hint{font-size:15px}
+ .controls{padding:7px}
+ .modeGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(115px,1fr))}
+ .modeTile strong{font-size:20px}.modeTile small,.modeTile b{font-size:13px}
+ .intro h1{font-size:24px}.intro p{font-size:15px}
+}
+@media(max-width:390px){
+ .brand strong{font-size:16px}.stepTitle strong{font-size:17px}
+ .stepTitle p{font-size:14px}.cleanSentence{font-size:18px}
+ .brick .word{font-size:16px;padding:5px 6px}
+ .actionLine select{min-width:0;max-width:190px}
+}
+
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
