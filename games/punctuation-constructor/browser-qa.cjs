@@ -131,6 +131,20 @@ async function runViewport(browser,name,width,height,port){
   assert.equal(await page.locator(".hint.error").innerText(),"Неверно выделены основы");
   assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases.length),0);
   await page.locator('[data-act="clear"]').click();
+  await stepBases(page,a);
+  await stepSubs(page,a);
+  const testConj=a.conjs[0];
+  await page.selectOption("#kind","coord");
+  await page.selectOption("#role","members");
+  await page.locator('.word[data-i="'+testConj.at+'"]').click();
+  await page.locator('[data-act="mark"][data-kind="conjs"]').click();
+  assert.match(await page.locator(".hint.error").innerText(),/две грамматические основы/,"clear feedback: ССП vs. homogeneous members");
+  assert.equal(await page.inputValue("#role"),"members","chosen wrong role is preserved for correction");
+  await page.selectOption("#role","parts");
+  await page.locator('[data-act="mark"][data-kind="conjs"]').click();
+  assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.conjs.length),1,"right ССП role accepted");
+  await page.locator('[data-act="nextstage"]').click();
+  assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().step),3,"can advance after correct role");
   for(const num of ["16","17","18","19","20","HARD"]){
    const total=await page.evaluate(n=>window.PUNCT_DATA.filter(a=>a.num===n).length,num);
    for(let index=0;index<total;index++){
