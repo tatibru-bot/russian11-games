@@ -306,66 +306,32 @@ function drawArrows(){
  }).join("");
 }
 
-function schemeTree(){
- const a=st.task,subs=a.subs.filter(x=>st.marks.subs.includes(x.id));
- if(!st.marks.bases.length)return "";
- const common=a.common.filter(x=>st.marks.common.includes(x.id));
- const root='<div class="schemeTreeRoot">'+(common.length?'<span class="schemeNode common">ОВЧ</span><span class="schemeTreeEdge">↘</span>':"")+
-  a.mains.map((m,k)=>'<span class="schemeNode">[ — ═ ]</span>'+(k<a.mains.length-1?'<span class="schemeTreeEdge">'+q(a.conjs.find(x=>x.role==="parts")?.at!=null?a.words[a.conjs.find(x=>x.role==="parts").at]:"↔")+'</span>':"")).join("")+'</div>';
- const depth=(sub,seen=new Set())=>{if(seen.has(sub.id))return 0;seen.add(sub.id);const parent=a.subs.find(x=>x.id!==sub.id&&x.words.includes(sub.head));return parent?1+depth(parent,seen):0};
- const leaf=subs.map(x=>'<div class="schemeTreeBranch" style="margin-left:'+(depth(x)*17)+'px"><span class="schemeTreeEdge">↳ '+q(x.question)+'</span><span class="schemeNode sub">( — ═ )</span><small>← '+q(a.words[x.head])+'</small></div>').join("");
- return '<div class="schemeTree"><div class="schemeTreeTitle">Дерево зависимостей</div>'+root+leaf+'</div>';
-}
+
 function schema(){
- const a=st.task,baseIds=new Set(st.marks.bases),subIds=new Set(st.marks.subs);
- const commonIds=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
- const extraIds=new Set(a.extras.filter(x=>st.marks.extras.includes(x.id)).flatMap(x=>x.words));
- const turnIds=new Set(a.turns.filter(x=>st.marks.turns.includes(x.id)).flatMap(x=>x.words));
- const allGroups=[
-  ...(baseIds.size?a.mains.map(g=>({type:"main",words:g.words.filter(i=>!commonIds.has(i)&&!extraIds.has(i))})):[]),
-  ...a.subs.filter(g=>subIds.has(g.id)).map(g=>({type:"sub",words:g.words.filter(i=>!extraIds.has(i))}))
- ].filter(g=>g.words.length).map(g=>({...g,min:Math.min(...g.words),max:Math.max(...g.words)}));
- const subjects=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.subjects));
- const predicates=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.predicates));
- const seenTurns=new Set();
- const homIds=new Set(a.hom.filter(x=>st.marks.hom.includes(x.id)).flatMap(x=>x.words));
- const generalIds=new Set(a.general.filter(x=>st.marks.general.includes(x.id)).flatMap(x=>x.words));
- let parts="";
- for(let i=0;i<a.words.length;i++){
-  for(const g of allGroups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?"(":"[")+'</span>';
-  let symbol="";
-  if(commonIds.has(i)){
-   if(a.common.some(g=>st.marks.common.includes(g.id)&&g.words[0]===i))symbol='<span class="schemeCommon">ОВЧ</span>'
-  }else if(subjects.has(i)&&predicates.has(i))symbol='<span class="schemeMark">— ═</span>';
-  else if(subjects.has(i))symbol='<span class="schemeMark">—</span>';
-  else if(predicates.has(i))symbol='<span class="schemeMark">═</span>';
-  else if(extraIds.has(i))symbol='<span class="schemeExtra">⊕</span>';
-  else if(turnIds.has(i)){
-   const t=a.turns.find(x=>st.marks.turns.includes(x.id)&&x.words.includes(i));
-   if(t&&!seenTurns.has(t.id)){symbol='<span class="schemeTurn">│об.│</span>';seenTurns.add(t.id)}
-  }else{
-   const c=a.conjs.find(x=>x.at===i&&st.marks.conjs.includes("c"+i));
-   if(c)symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
-   else if(a.subs.some(x=>subIds.has(x.id)&&x.words[0]===i))symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
-   else if(a.hom.some(x=>st.marks.hom.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark hom">○</span>';
-   else if(a.general.some(x=>st.marks.general.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark general">◎</span>';
-  }
-  // A grammatical base may simultaneously be an homogeneous member or generalizing word.
-  if((subjects.has(i)||predicates.has(i))&&generalIds.has(i))symbol='<span class="schemeMark general">'+symbol+'</span>';
-  else if((subjects.has(i)||predicates.has(i))&&homIds.has(i))symbol='<span class="schemeMark hom">'+symbol+'</span>';
-  parts+=symbol;
-  for(const g of allGroups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?")":"]")+'</span>';
- }
- const links=a.subs.filter(x=>subIds.has(x.id)).map(x=>'<div class="graphLink">↳ ('+q(x.question)+') от <b>'+q(a.words[x.head])+'</b></div>').join("");
- const relations=a.subs.filter(x=>subIds.has(x.id));
- const homo=relations.length>=2&&relations.every(x=>x.head===relations[0].head&&x.question===relations[0].question);
- const nested=relations.some(x=>relations.some(y=>x!==y&&y.words.includes(x.head)));
- const pattern=relations.length<2?"":homo?"Однородное подчинение":relations.length===2?(nested?"Последовательное подчинение":"Параллельное подчинение"):nested?"Комбинированное подчинение":"Параллельное или однородное подчинение";
- return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
-  (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
-  schemeTree()+
-  '<div class="schemeNote">[ ] — главная часть; ( ) — придаточная; — подлежащее; ═ сказуемое; ⊕ не член предложения; ○ однородный член.</div>';
+ const a=st.task,markedBases=a.bases.filter(x=>st.marks.bases.includes(x.id));
+ if(!markedBases.length)return '<div class="schemeEmpty">Сначала найди грамматические основы — здесь появится схема.</div>';
+ const common=a.common.some(x=>st.marks.common.includes(x.id));
+ const mainLines=a.mains.map(m=>{
+  const bases=markedBases.filter(b=>b.words.some(i=>m.words.includes(i)));
+  const parts=bases.map(b=>b.subjects.length?"— ═":"═").join(" ");
+  return '<span class="schemeNode">[ '+(parts||"— ═")+' ]</span>';
+ });
+ const mainConj=a.conjs.find(c=>c.role==="parts");
+ const join=mainConj&&st.marks.conjs.includes("c"+mainConj.at)?q(a.words[mainConj.at]):"";
+ const main='<div class="schemeRow schemeMain">'+(common?'<span class="schemeCommon">ОВЧ</span>':"")+mainLines.join(join?'<span class="schemeJoin">'+join+'</span>':" ")+'</div>';
+ const markedSubs=a.subs.filter(x=>st.marks.subs.includes(x.id)).sort((a,b)=>subDepth(a)-subDepth(b));
+ const branches=markedSubs.map(x=>{
+  const base=markedBases.find(b=>b.words.some(i=>x.words.includes(i)));
+  const hasSubject=!!base?.subjects?.length;
+  const conjunction=a.conjs.find(c=>x.words.includes(c.at)&&c.role==="inside"&&st.marks.conjs.includes("c"+c.at));
+  const role=conjunction?q(a.words[conjunction.at])+" ":"";
+  return '<div class="schemeRow schemeBranch" style="margin-left:'+(subDepth(x)-1)*22+'px"><span class="schemeQuestion">↳ '+q(x.question)+'</span><span class="schemeNode sub">( '+role+(hasSubject?"— ═":"═")+' )</span></div>';
+ }).join("");
+ const turnCount=st.marks.turns.length,homCount=st.marks.hom.length,generalCount=st.marks.general.length;
+ const note=(turnCount||homCount||generalCount)?'<div class="schemeMarks">'+(turnCount?"× ─ │оборот│ ":"")+(homCount?" ◯ однородные ":"")+(generalCount?" ◎ обобщающее":"")+'</div>':"";
+ return '<div class="schemeCompact">'+main+branches+note+'</div>';
 }
+
 function toolbar(){
  const a=st.task,step=st.step,done=stageReady();
  const next='<button class="primary" data-act="nextstage">'+(step===6?"Проверить пунктуацию":"Следующий этап →")+'</button>';
@@ -387,32 +353,32 @@ function junctionButtons(){
  const a=list("junctions");if(!a.length)return "";
  return '<div class="actionLine">'+a.map(x=>'<button data-act="glue" data-i="'+x.after+'" class="'+(st.glues.includes(x.after)?"gold":"ghost")+'">⛓ Стык «'+q(st.task.words[x.after])+' + '+q(st.task.words[x.right])+'»: '+(st.glues.includes(x.after)?"склеено":"не склеено")+'</button>').join("")+'</div>';
 }
+
 function render(){
  if(st.view==="menu"){menu();return}
  if(st.view==="finish"){finish();return}
  const a=st.task,step=st.step,p=progress();
  status.textContent="этап "+(step+1)+" / 7";
  const instructions=[
-  "Выдели грамматическую основу; если их ровно две, вторая подчеркнётся автоматически. Есть ли общий второстепенный член (ОВЧ)? Если есть — выдели его: он остаётся за квадратными скобками.",
-  "Выдели придаточное ЦЕЛИКОМ, сохраняя все слова и порядок. Оно опустится на вторую дорожку. Задай вопрос и свяжи его с опорным словом.",
-  "Найди союз и определи его роль. Сочинительный союз между придаточными остаётся между круглыми скобками, а не внутри них.",
-  "Выдели оборот на месте: он НЕ переносится. Поставь × над определяемым словом и соедини его с оборотом стрелкой.",
-  "Найди вводное, обращение или вставку: это не члены предложения, поэтому они опускаются на третью дорожку.",
-  "Отметь однородные члены кружками; обобщающее слово — двойным кружком. Всё ранее отмеченное остаётся видимым.",
-  "Расставь знаки в уже собранной конструкции. Исходное предложение сверху всегда можно прочитать без пометок."
-];
- main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Хард-уровень":"ЕГЭ № "+a.num)+' · '+q(a.short)+'</b>Пример '+(st.index+1)+' из '+taskCount(a.num)+' · элементов '+p[0]+'/'+p[1]+'</div><div><button class="ghost" data-act="help">? Теория</button> <button class="ghost" data-act="menu">✕ Меню</button></div></div>'+
-  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(step>0&&step<6?' <span class="stepSkip">Если такого элемента нет, переходи дальше.</span>':"")+'</p></div></div>'+
-  '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">ИСХОДНОЕ ПРЕДЛОЖЕНИЕ — ЧИТАЙ БЕЗ ПОМЕТОК</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
-  '<div class="buildGrid"><section class="buildPanel panel"><div class="panelHeader">РАЗБОР — ПЕРЕМЕЩАЙ КИРПИЧИКИ И СОХРАНЯЙ СВЯЗИ</div>'+blueprint()+'<div class="selectionHint">'+(st.picked.length?'Выбрано кирпичиков: '+st.picked.length:'Касайся слов ниже, чтобы выделить конструкцию.')+'</div></section>'+
-  '<section class="diagramPanel panel"><div class="panelHeader">ГРАФИЧЕСКАЯ СХЕМА РЯДОМ С РАЗБОРОМ</div><div class="diagram">'+schema()+'</div></section></div></div>'+
-  '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||((!p[1]&&step!==6)?"Такого элемента нет — переходи к следующему этапу.":""))+'</div></div>'+
-  '<div class="footer"><span>ЛЕГОПУНКТ · прототип, без записи в бот</span><button class="ghost" data-act="show-answer">Готовый разбор</button></div></div>'+(st.helpOpen?renderModal():"");
-  requestAnimationFrame(drawArrows);
+  "Выдели все грамматические основы сразу. Если есть общий второстепенный член, отметь его отдельно.",
+  "Спусти всё придаточное целиком. Если внутри есть ещё одно, сначала перенеси внешнее, затем из него — внутреннее. Укажи вопрос и опорное слово.",
+  "Найди союз или союзное слово. Выбери тип и связь, затем нажми «Разметить союз».",
+  "Выдели оборот, выбери его вид и слово, к которому он относится. Оборот остаётся на месте.",
+  "Перенеси на нижнюю дорожку вводные слова, обращения и вставки.",
+  "Найди однородные члены и обобщающие слова. Они останутся выделенными.",
+  "Расставь знаки препинания в разобранном предложении."
+ ];
+ const hasNoItems=step>0&&step<6&&p[1]===0;
+ const needsSchema=st.marks.bases.length>0;
+ main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Сложный уровень":"№ "+a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
+  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(hasNoItems?' <span class="stepSkip">Здесь такого элемента нет — переходи дальше.</span>':"")+'</p></div></div>'+
+  '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">Предложение</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
+  '<div class="buildGrid '+(!needsSchema?"noSchema":"")+'"><section class="buildPanel panel"><div class="panelHeader">Разбор по дорожкам</div>'+blueprint()+'</section>'+
+  (needsSchema?'<section class="diagramPanel panel"><div class="panelHeader">Схема</div><div class="diagram">'+schema()+'</div></section>':"")+'</div></div>'+
+  '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||"")+'</div></div></div>';
+ requestAnimationFrame(drawArrows);
 }
-function renderModal(){
- return '<div class="modalBack"><section class="modal panel"><h3>📖 Почему именно такой порядок?</h3><p>'+q(help.theory[st.step])+'</p><p>Приём: сначала определи устройство предложения, затем сравни границы, и только после этого решай, где нужен знак. Разбор пока не подсказывает, какие слова выделять.</p><button class="primary" data-act="help">Продолжить</button></section></div>'
-}
+
 function fail(msg){st.fail++;note(msg,"error");render()}
 function chooseToken(i){
  if(st.pending){st.anchor=i;note("Выбрано опорное слово «"+st.task.words[i]+"». Теперь укажи вопрос, если это придаточное.","");render();return}
@@ -479,18 +445,17 @@ function finish(){
  const dots=a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.sign)+' — '+q(p.why)+'</div>').join("")||'<div class="reviewRow">Запятых нет: '+q(a.insight)+'</div>';
  main.innerHTML='<div class="finish"><div class="head panel"><h2>🏁 Конструктор собран!</h2><p><b>'+q(a.num==="HARD"?"Хард":("№ "+a.num))+' · '+q(a.short)+'</b></p><p>'+q(punctText)+'</p><p>'+q(a.insight)+'</p></div><div class="scroll panel"><strong>Почему стоят именно эти знаки</strong>'+dots+'</div><div class="actionLine"><button class="primary" data-act="nexttask">Следующее предложение →</button><button class="ghost" data-act="menu">В меню</button></div></div>';
 }
+
 function showAnswer(){
  const a=st.task,oldMarks=st.marks,oldStep=st.step;
  st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};
  st.step=6;
- const visual='<div class="previewBuild">'+[0,1,2].map(laneHTML).join("").replace(/data-act="(token|gap)"/g,'data-act="noop"')+'</div>';
- const graphic=schema();
- st.marks=oldMarks;st.step=oldStep;
+ const levels=activeLevels(),extra=st.marks.extras.length?levels[levels.length-1]:-1;
+ const visual='<div class="previewBuild">'+levels.map(level=>laneHTML(level,extra)).join("").replace(/data-act="(token|gap)"/g,'data-act="noop"')+'</div>';
+ const graphic=schema();st.marks=oldMarks;st.step=oldStep;
  const full=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
- const text='<div class="reviewRow">'+q(a.insight)+'</div>'+a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.why)+'</div>').join("");
- const id="answerModal";document.getElementById(id)?.remove();
- const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
- modal.innerHTML='<section class="modal panel" style="width:min(1000px,100%);max-height:93dvh"><h3>🧱 Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,1fr);gap:8px">'+visual+'<div class="diagram">'+graphic+'</div></div>'+text+'<button class="primary" data-act="close-answer">Вернуться к заданию</button></section>';
+ const id="answerModal";document.getElementById(id)?.remove();const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
+ modal.innerHTML='<section class="modal panel"><h3>Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid">'+visual+'<div class="diagram">'+graphic+'</div></div><p>'+q(a.insight)+'</p><button class="primary" data-act="close-answer">Закрыть</button></section>';
  document.body.append(modal);
 }
 document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value;else if(e.target.id==="kind")st.choiceKind=e.target.value;else if(e.target.id==="role")st.choiceRole=e.target.value});
@@ -500,7 +465,6 @@ document.addEventListener("click",e=>{
  if(act==="close-answer"){document.getElementById("answerModal")?.remove();return}
  if(act==="menu"){menu();return}
  if(act==="launch"){launch(b.dataset.num);return}
- if(act==="help"){st.helpOpen=!st.helpOpen;render();return}
  if(act==="show-answer"){showAnswer();return}
  if(act==="token"){chooseToken(Number(b.dataset.i));return}
  if(act==="mark"){mark(b.dataset.kind);return}
