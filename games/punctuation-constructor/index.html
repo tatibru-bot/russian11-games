@@ -288,7 +288,7 @@ const SAME=(a,b)=>a.length===b.length&&a.slice().sort((x,y)=>x-y).every((x,i)=>x
 const has=(arr,id)=>arr.includes(id);
 const STORE="punct:constructor:mvp:completed:v1";
 let completed={};try{completed=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch(e){}
-let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};
+let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts",junctionDecision:null,junctionFound:[],phase:"place",seams:[],auditIndex:0};
 function resetMarks(){return {bases:[],common:[],subs:[],conjs:[],turns:[],extras:[],hom:[],general:[],punct:{}}}
 function list(kind){return st.task[kind]||[]}
 function selectedMatch(kind){return list(kind).find(x=>!has(st.marks[kind],x.id)&&SAME(x.words,st.picked))}
@@ -301,7 +301,7 @@ function progress(){const a=st.task;return [
  [st.marks.hom.length+st.marks.general.length,a.hom.length+a.general.length],
  [Object.entries(st.marks.punct).filter(([k,v])=>v).length,a.punct.length]
  ][st.step]}
-function stageReady(){const p=progress();if(!p||p[0]!==p[1]||st.pending)return false;if(st.step===2){return list("junctions").every(j=>st.glues.includes(j.after)===j.glued)}return true}
+function stageReady(){const p=progress();if(!p||p[0]!==p[1]||st.pending)return false;if(st.step===2){return st.junctionDecision===(st.task.junctions.length?"yes":"no")&&st.task.junctions.every(j=>st.junctionFound.includes(j.after))}return true}
 function note(s,type=""){st.hint=s;st.hintType=type}
 function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};render()}
 function launchNext(){const a=tasks.filter(x=>x.num===st.num);launch(st.num,(st.index+1)%a.length)}
@@ -373,6 +373,8 @@ function wordPiece(i){
  const first=turns.some(t=>t.words[0]===i),last=turns.some(t=>t.words[t.words.length-1]===i);
  const anchor=turns.some(t=>(t.type==="part"||t.type==="appos")&&t.head===i&&(st.marks.turns.includes(t.id)||st.anchor===t.head));
  const label=extra&&extra.words[0]===i?({intro:"ввод.",address:"обращ.",insert:"встав."}[extra.type]||"не член"):"";
+ const junction=a.junctions.find(j=>st.junctionFound.includes(j.after)&&(j.after===i||j.right===i));
+ if(junction)classes+=" junctionPair";
  return '<span class="brick '+(first?"turnBegin ":"")+(last?"turnEnd ":"")+'" data-i="'+i+'">'+(anchor?'<span class="above cross" aria-label="определяемое слово">×</span>':"")+(label?'<span class="above extraLabel">'+label+'</span>':"")+'<button class="word '+classes+'" data-act="token" data-i="'+i+'" aria-pressed="'+!!picked+'"><span class="wtext">'+q(w)+'</span></button></span>';
 }
 function bracketGroups(level,visible){
@@ -464,8 +466,24 @@ function toolbar(){
   return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
 }
 function junctionButtons(){
- const a=list("junctions");if(!a.length)return "";
- return '<div class="actionLine">'+a.map(x=>'<button data-act="glue" data-i="'+x.after+'" class="'+(st.glues.includes(x.after)?"gold":"ghost")+'">⛓ Стык «'+q(st.task.words[x.after])+' + '+q(st.task.words[x.right])+'»: '+(st.glues.includes(x.after)?"склеено":"не склеено")+'</button>').join("")+'</div>';
+ if(st.marks.conjs.length<st.task.conjs.length)return "";
+ const found=st.junctionDecision;
+ return '<div class="junctionPanel"><span class="field"><b>Есть ли стык двух союзов?</b></span>'+
+  '<button class="'+(found==="yes"?"gold":"ghost")+'" data-act="junction-yes">Да</button>'+
+  '<button class="'+(found==="no"?"gold":"ghost")+'" data-act="junction-no">Нет</button>'+
+  (found==="yes"?'<span class="field">Выдели два соседних союза и отметь их связь.</span><button class="primary" data-act="junction-confirm">Соединить ↔</button>':"")+'</div>';
+}
+function junctionDecision(value){
+ if(value==="no"){
+  if(st.task.junctions.length){fail("Проверь соседние союзы: не встретились ли они на одной границе?");return}
+  st.junctionDecision="no";st.junctionFound=[];st.picked=[];note("Проверка стыков завершена.","ok");render();return;
+ }
+ st.junctionDecision="yes";st.picked=[];note("Выдели два соседних союза и нажми «Соединить». Пока знак препинания не решай.");render();
+}
+function confirmJunction(){
+ const target=st.task.junctions.find(j=>!st.junctionFound.includes(j.after)&&SAME(st.picked,[j.after,j.right]));
+ if(!target){fail("Не удалось подтвердить стык. Проверь, какие два союза стоят рядом.");return}
+ st.junctionFound.push(target.after);st.picked=[];note("Стык найден и отмечен. Вопрос о запятой решишь при проверке сборки.","ok");render();
 }
 
 function render(){
@@ -538,7 +556,7 @@ function mark(kind){
    if(kind==="subs"&&parentOf(item)&&!st.marks.subs.includes(parentOf(item).id)){fail("Сначала спусти внешнее придаточное целиком, затем из него — вложенное.");return}
    if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Уточни его тип.");return}
    st.pending={kind,id:item.id,words:kind==="subs"?fullSubWords(item):item.words};st.picked=[];st.anchor=null;st.question="";
-   const instruction=kind==="subs"?"Выбери опорное слово и вопрос.":item.type==="ger"?"Деепричастный оборот выделен. Укажи сказуемое, от которого зависит действие.":"Причастный оборот выделен. Укажи определяемое слово (×).";
+   const instruction=kind==="subs"?"Выбери опорное слово и вопрос.":item.type==="ger"?"Деепричастный оборот выделен. Укажи сказуемое.":"Причастный оборот выделен. Укажи определяемое слово (×).";
    note(instruction);render();return;
   }
   if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
@@ -607,6 +625,9 @@ document.addEventListener("click",e=>{
  if(act==="cancel"){clearChoice();note("");render();return}
  if(act==="clear"){st.picked=[];note("");render();return}
  if(act==="glue"){glue(Number(b.dataset.i));return}
+ if(act==="junction-yes"){junctionDecision("yes");return}
+ if(act==="junction-no"){junctionDecision("no");return}
+ if(act==="junction-confirm"){confirmJunction();return}
  if(act==="gap"){punctuation(Number(b.dataset.i));return}
  if(act==="set-sign"){setSign(b.dataset.sign);return}
  if(act==="nextstage"){nextStage();return}
@@ -615,6 +636,6 @@ document.addEventListener("click",e=>{
 if(!tasks.length){main.innerHTML='<div class="panel">База заданий не загрузилась.</div>';return}
 menu();
 window.__PUNCT_QA={tasks:tasks.length,launch, getTask:()=>st.task, getState:()=>st,render,mark,link,glue,nextStage,select(indices){st.picked=indices;render()},markAllForTest(){
-  const a=st.task;st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};st.glues=a.junctions.filter(x=>x.glued).map(x=>x.after);st.step=6;render();}};
+  const a=st.task;st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};st.junctionDecision=a.junctions.length?"yes":"no";st.junctionFound=a.junctions.map(x=>x.after);st.phase="place";st.step=6;render();}};
 })();
 </script></body></html>
