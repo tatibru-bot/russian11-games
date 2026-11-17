@@ -72,6 +72,7 @@ async function stepUnions(page,a){
   assert.equal(await page.inputValue("#role"),c.role,"role persists after token rerender");
   await page.locator('[data-act="mark"][data-kind="conjs"]').click();
   assert(await page.evaluate(at=>window.__PUNCT_QA.getState().marks.conjs.includes("c"+at),c.at),"union accepted");
+  assert(await page.locator('.word[data-i="'+c.at+'"]').evaluate(el=>el.classList.contains("conj")),"union remains color-marked");
  }
  for(const j of a.junctions)if(j.glued)await page.locator('[data-act="glue"][data-i="'+j.after+'"]').click();
  await page.locator('[data-act="nextstage"]').click();
@@ -81,9 +82,13 @@ async function stepTurns(page,a){
   await page.selectOption("#kind",t.type);
   await clickWords(page,t.words);
   await page.locator('[data-act="mark"][data-kind="turns"]').click();
+  for(const i of t.words)assert(await page.locator('.word[data-i="'+i+'"]').evaluate(el=>el.classList.contains("pendingTurn")),"turn stays highlighted while linking");
+  if(t.type==="part")assert.match(await page.locator(".controls").innerText(),/Определяемое слово/,"participial target terminology");
   await page.locator('.word[data-i="'+t.head+'"]').click();
+  for(const i of t.words)assert(await page.locator('.word[data-i="'+i+'"]').evaluate(el=>el.classList.contains("pendingTurn")),"turn stays highlighted when head selected");
   await page.locator('[data-act="link"]').click();
   assert(await page.evaluate(id=>window.__PUNCT_QA.getState().marks.turns.includes(id),t.id),"turn accepted");
+  for(const i of t.words)assert(await page.locator('.word[data-i="'+i+'"]').evaluate(el=>el.classList.contains("turn")),"turn stays marked after linking");
  }
  await page.locator('[data-act="nextstage"]').click();
 }
