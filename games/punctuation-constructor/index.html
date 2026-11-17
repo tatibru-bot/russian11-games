@@ -149,6 +149,17 @@ body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),li
 @media(max-height:640px){.cleanSentence{max-height:40px}.stepTitle strong{font-size:15px}.stepTitle p{font-size:10px}.buildGrid{grid-template-rows:minmax(90px,1.8fr) minmax(62px,1fr)}.footer{min-height:21px}}
 
 .answerGrid .previewBuild{overflow:auto;max-height:45dvh}.answerGrid .diagram{max-height:45dvh;overflow:auto}.answerGrid .brick{padding-top:5px}.answerGrid .brick .word{cursor:default}.answerGrid .track{margin:4px 0}@media(max-width:600px){.answerGrid{grid-template-columns:minmax(0,1fr)!important}.answerGrid .previewBuild{max-height:35dvh}.answerGrid .diagram{max-height:25dvh}}
+
+.schemeTree{margin-top:8px;padding:7px 5px;border-radius:8px;background:#10263e;border:1px solid #57738f;overflow:auto}
+.schemeTreeTitle{font-size:10px;color:#c0d7e7;letter-spacing:.07em;text-transform:uppercase;font-weight:850;margin-bottom:6px}
+.schemeTreeRoot{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.schemeNode{display:inline-block;border:2px solid #72dbea;border-radius:4px;padding:2px 7px;color:#ddfaff;font-size:14px;font-weight:900;background:#23445a;white-space:nowrap}
+.schemeNode.sub{border-radius:45px;border-color:#bda8fa;color:#e7deff;background:#302a51}
+.schemeNode.common{border-radius:4px;border-color:#91e9b5;color:#b9ffce;font-size:11px}
+.schemeTreeEdge{color:#ffdb7b;font-size:12px;font-weight:800}
+.schemeTreeBranch{display:flex;align-items:center;gap:6px;position:relative;padding:3px 0 4px 9px;margin-left:5px;border-left:2px solid #a9a1df;flex-wrap:wrap}
+.schemeTreeBranch::before{content:"";width:10px;height:2px;background:#a9a1df;position:absolute;left:0;top:50%}
+.schemeTreeBranch small{font-size:11px;color:#cbd8f4}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -268,6 +279,17 @@ function drawArrows(){
   return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="1.9" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(label)+'</text>';
  }).join("");
 }
+
+function schemeTree(){
+ const a=st.task,subs=a.subs.filter(x=>st.marks.subs.includes(x.id));
+ if(!st.marks.bases.length)return "";
+ const common=a.common.filter(x=>st.marks.common.includes(x.id));
+ const root='<div class="schemeTreeRoot">'+(common.length?'<span class="schemeNode common">ОВЧ</span><span class="schemeTreeEdge">↘</span>':"")+
+  a.mains.map((m,k)=>'<span class="schemeNode">[ — ═ ]</span>'+(k<a.mains.length-1?'<span class="schemeTreeEdge">'+q(a.conjs.find(x=>x.role==="parts")?.at!=null?a.words[a.conjs.find(x=>x.role==="parts").at]:"↔")+'</span>':"")).join("")+'</div>';
+ const depth=s=>{const parent=a.subs.find(x=>x.id!==s.id&&x.words.includes(s.head));return parent?1:0};
+ const leaf=subs.map(x=>'<div class="schemeTreeBranch" style="margin-left:'+(depth(x)*17)+'px"><span class="schemeTreeEdge">↳ '+q(x.question)+'</span><span class="schemeNode sub">( — ═ )</span><small>← '+q(a.words[x.head])+'</small></div>').join("");
+ return '<div class="schemeTree"><div class="schemeTreeTitle">Дерево зависимостей</div>'+root+leaf+'</div>';
+}
 function schema(){
  const a=st.task,baseIds=new Set(st.marks.bases),subIds=new Set(st.marks.subs);
  const commonIds=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
@@ -311,7 +333,7 @@ function schema(){
  const pattern=relations.length<2?"":homo?"Однородное подчинение":nested?"Последовательное или комбинированное подчинение":"Параллельное или комбинированное подчинение";
  return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
   (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
-  (links||commonIds.size?'<div class="graphLinks">'+(commonIds.size?'<div class="graphLink" style="border-color:#8ee0b0">ОВЧ ↗ относится к обеим главным частям</div>':"")+links+'</div>':"")+
+  schemeTree()+
   '<div class="schemeNote">[ ] — главная часть; ( ) — придаточная; — подлежащее; ═ сказуемое; ⊕ не член предложения; ○ однородный член.</div>';
 }
 function toolbar(){
@@ -431,7 +453,7 @@ function showAnswer(){
  const a=st.task,oldMarks=st.marks,oldStep=st.step;
  st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};
  st.step=6;
- const visual='<div class="previewBuild">'+[0,1,2].map(laneHTML).join("")+'</div>';
+ const visual='<div class="previewBuild">'+[0,1,2].map(laneHTML).join("").replace(/data-act="(token|gap)"/g,'data-act="noop"')+'</div>';
  const graphic=schema();
  st.marks=oldMarks;st.step=oldStep;
  const full=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
