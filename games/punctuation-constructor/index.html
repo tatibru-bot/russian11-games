@@ -339,12 +339,12 @@ function fullSubWords(sub){
 }
 function laneOf(i){
  const a=st.task,marked=a.subs.filter(x=>st.marks.subs.includes(x.id));
- const maxDepth=Math.max(0,...marked.map(subDepth));
+ const maxDepth=Math.max(0,...marked.map(x=>subDepth(x)));
  if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return Math.max(1,maxDepth)+1;
  const inside=marked.filter(x=>fullSubWords(x).includes(i));
- if(inside.length)return Math.max(...inside.map(subDepth));
+ if(inside.length)return Math.max(...inside.map(x=>subDepth(x)));
  const between=a.conjs.find(c=>c.at===i&&c.role==="between-subs");
- if(between&&marked.length>1)return Math.min(...marked.map(subDepth));
+ if(between&&marked.length>1)return Math.min(...marked.map(x=>subDepth(x)));
  return 0;
 }
 
@@ -372,7 +372,7 @@ function bracketGroups(level,visible){
  }).filter(Boolean);
 }
 function activeLevels(){
- const depths=st.task.subs.filter(x=>st.marks.subs.includes(x.id)).map(subDepth);
+ const depths=st.task.subs.filter(x=>st.marks.subs.includes(x.id)).map(x=>subDepth(x));
  const levels=[0,...new Set(depths)].sort((a,b)=>a-b);
  if(st.marks.extras.length)levels.push(Math.max(1,...depths)+1);
  return levels;
