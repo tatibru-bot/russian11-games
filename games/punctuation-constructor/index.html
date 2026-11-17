@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#101d30"><meta name="color-scheme" content="dark">
-<title>Конструктор предложения · Лаборатория пунктуации</title>
+<meta name="theme-color" content="#132b48"><meta name="color-scheme" content="dark">
+<title>ЛЕГОПУНКТ · Пунктуация по кирпичикам</title>
 <script src="./data.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:#0b1728;color:#eef4fa;--bg:#0b1728;--panel:#15283c;--line:#355269;--muted:#b4c8d7;--cyan:#83e7e9;--gold:#ffdb85;--rose:#ff9fc0;--purple:#bba5fb;--green:#95e8b4;--orange:#ffb27a;color-scheme:dark}
@@ -70,9 +70,86 @@ main{flex:1;min-height:0;overflow:hidden}.panel{background:#162b40e8;border:1px 
 @media(max-width:370px){.brand strong{font-size:12px}.brand small{font-size:9px}.modeTile strong{font-size:15px}.status{font-size:10px}.stepTitle p{font-size:10px}.actionLine button{min-height:30px;padding:3px 6px}.actionLine select{min-height:29px;font-size:11px}}
 @media(max-height:640px){header.top{min-height:31px}.brand .glyph{font-size:19px}.intro{padding:7px 11px}.stepTitle{padding:4px 8px}.controls{gap:3px}.workarea{grid-template-rows:minmax(58px,40%) minmax(85px,60%)}.word{min-height:24px}.tokenWrap{min-height:25px}.lane{padding:3px 6px}.bottomNote{padding:2px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ЛЕГОПУНКТ: оригинальная цветовая система учебного конструктора; без использования логотипов LEGO. */
+:root{--bg:#10243d;--panel:#203956;--line:#52718b;--cyan:#6fdef4;--gold:#ffdd73;--rose:#ff9eaa;--purple:#bba4ff;--green:#8de9ae;--orange:#ffb879}
+body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),linear-gradient(150deg,#11243c,#152f50 75%,#0e2440)}
+.panel{border-color:#62819c;box-shadow:inset 0 1px #ffffff25,0 2px 0 #0a172a}
+.brand .glyph{background:#f84e56;border-radius:7px;box-shadow:inset 0 5px #ff8c8c,0 3px 0 #aa3544;min-width:35px;text-align:center;padding:2px}
+.brand strong{letter-spacing:.04em;color:#ffdf79;font-weight:950}
+.stepTitle{border-left:6px solid #ffd54c;padding:9px 12px;min-height:63px}
+.stepNumber{background:#e95459;color:#fff;border:2px solid #ff9d86;box-shadow:inset 0 4px #ff847c;font-size:19px;min-width:59px;text-align:center}
+.stepTitle strong{font-size:clamp(17px,2.6vw,23px);line-height:1.1;color:#fff4b2}
+.stepTitle p{font-size:clamp(11px,1.35vw,13px);color:#e3ebf4;margin-top:4px}
+.stepSkip{display:inline-block;color:#ffde89;font-weight:750}
+.menu .intro{border-left:7px solid #ffcf48}
+.modeTile{border:2px solid #4d779c;box-shadow:inset 0 7px #ffffff1e,0 4px #081725}
+.modeTile:nth-child(1){border-color:#ffac5f;background:linear-gradient(145deg,#9f4c2d,#482e48)}
+.modeTile:nth-child(2){border-color:#f68d97;background:linear-gradient(145deg,#913f57,#432c51)}
+.modeTile:nth-child(3){border-color:#74c4ff;background:linear-gradient(145deg,#245b99,#263853)}
+.modeTile:nth-child(4){border-color:#8edbad;background:linear-gradient(145deg,#236b61,#223953)}
+.modeTile:nth-child(5){border-color:#c5a8ff;background:linear-gradient(145deg,#654a91,#333554)}
+.modeTile strong{color:#ffedbd}
+.workarea{flex:1;min-height:0;display:grid;grid-template-rows:minmax(50px,max-content) minmax(0,1fr);gap:6px}
+.wordsPanel{gap:3px;padding:7px 10px;display:block;min-height:0}
+.cleanSentence{font-size:clamp(13px,1.7vw,17px);line-height:1.5;color:#fff;max-height:66px;overflow:auto;font-weight:600;white-space:normal}
+.buildGrid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(185px,1fr);gap:6px;min-height:0}
+.buildPanel,.diagramPanel{display:flex;flex-direction:column;gap:4px;min-height:0;padding:7px 9px}
+.blueprint{position:relative;overflow:auto;min-height:0;flex:1;scrollbar-width:thin}
+.blueprintContent{position:relative;min-height:100%;padding:2px 2px 9px}
+.track{position:relative;display:flex;align-items:flex-start;flex-wrap:wrap;gap:5px 4px;margin:3px 0 7px;padding:7px 6px 8px 6px;min-height:52px;border-radius:9px;border:1px solid #577e9c;background:#142c45}
+.track.secondary{background:#242448;border-color:#8b81dc}
+.track.tertiary{background:#3c2946;border-color:#d797b4}
+.trackLabel{flex:0 0 100%;font-size:10px;color:#bfdfe8;text-transform:uppercase;letter-spacing:.06em;font-weight:850}
+.track.secondary .trackLabel{color:#c7bcff}.track.tertiary .trackLabel{color:#ffd3e5}
+.emptyTrack{font-size:11px;color:#8cabc4;font-style:italic}
+.brick{display:inline-flex;align-items:center;position:relative;gap:0;min-height:38px;padding-top:8px;z-index:2}
+.brick .word{border-radius:5px;min-height:30px;font-size:clamp(12px,1.5vw,15px);padding:5px 7px;box-shadow:inset 0 4px #ffffff25,0 3px #091728;font-weight:750;white-space:nowrap}
+.brick .word.subject .wtext{text-decoration-line:underline;text-decoration-style:solid;text-decoration-color:#ffe48a;text-decoration-thickness:2px;text-underline-offset:4px}
+.brick .word.predicate .wtext{text-decoration-line:underline;text-decoration-style:double;text-decoration-color:#ffca80;text-decoration-thickness:2px;text-underline-offset:4px}
+.brick .word.common{background:#216446;border-color:#90dfa3;color:#fcffed}
+.brick .word.turn{background:#66502b;border-color:#f7c879}
+.brick .word.extra{background:#603454;border-color:#f6b3df}
+.brick .word.hom{border-radius:24px;outline:1px solid #a8e7b3}
+.brick .word.general{outline:3px double #ffe9a0}
+.brick .word.selected{background:#ffeeab;color:#151f31;outline:2px solid #fff3b5}
+.brick .above{position:absolute;top:-10px;left:50%;transform:translateX(-50%);height:16px;color:#ffdd6c;font-size:17px;font-weight:1000;pointer-events:none}
+.brick.turnBegin:before{content:"│";position:absolute;left:-5px;bottom:1px;color:#f9d595;font-size:24px;font-weight:bold}
+.brick.turnEnd:after{content:"│";position:absolute;right:-5px;bottom:1px;color:#f9d595;font-size:24px;font-weight:bold}
+.syntaxBracket{font-weight:900;font-size:clamp(19px,2vw,25px);line-height:1.5;color:#88dbfd;align-self:center}
+.syntaxBracket.sub{color:#c2afff}.syntaxBracket.common{color:#9fe6ab}
+.blueprint .punctGap{min-width:17px;padding:1px 2px;margin-left:1px}
+.arrowOverlay{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:4}
+.diagramPanel .diagram{display:flex;flex-direction:column;gap:5px}
+.schemeNote{font-size:10px;line-height:1.4;color:#bcd0e3}
+.schemeGraphic{font-size:clamp(16px,1.8vw,22px);line-height:1.9;word-break:normal;color:#fff;white-space:normal}
+.schemePart{display:inline;color:#89e7fb;font-weight:950;white-space:nowrap}
+.schemePart.sub{color:#d2b7ff}
+.schemeMark{padding:1px 3px;color:#ffebad}
+.schemeMark.hom{border:2px solid #c9e7a5;border-radius:100%;color:#e8ffca}
+.schemeMark.general{border:4px double #f0d495;border-radius:100%}
+.schemeJoin{color:#ffda6e;font-weight:850;padding:0 2px}
+.schemeCommon{color:#a4edbf;border-bottom:2px solid #a4edbf;font-weight:800;font-size:12px}
+.schemeExtra{font-size:12px;color:#f2bcde}
+.schemeTurn{font-size:12px;color:#ffd090}
+.graphLinks{display:flex;flex-direction:column;gap:5px;border-top:1px dashed #64768a;padding-top:6px;margin-top:7px}
+.graphLinks .graphLink{font-size:12px;color:#e7e0fd;padding:5px;border-left:3px solid #b3a4f6;background:#2d2b4a;border-radius:4px}
+.selectionHint{font-size:10px;color:#e5debb;min-height:12px}
+@media(max-width:720px){
+ .app{padding:5px 6px}.buildGrid{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(110px,1.8fr) minmax(78px,1fr)}
+ .workarea{grid-template-rows:minmax(46px,max-content) minmax(0,1fr)}
+ .wordsPanel,.buildPanel,.diagramPanel{padding:5px 7px}.stepTitle{padding:5px 7px;min-height:57px}
+ .stepTitle strong{font-size:16px}.stepTitle p{font-size:10px}.stepNumber{font-size:16px;min-width:48px}
+ .cleanSentence{font-size:13px;max-height:50px}.brick .word{font-size:12px;min-height:26px;padding:4px 5px}
+ .track{padding:4px 5px 6px;min-height:42px;margin:2px 0 4px}.trackLabel{font-size:9px}
+ .controls{padding:4px 6px}.selectionHint{font-size:9px}
+ .diagramPanel .diagram{min-height:50px}
+}
+@media(max-height:640px){.cleanSentence{max-height:40px}.stepTitle strong{font-size:15px}.stepTitle p{font-size:10px}.buildGrid{grid-template-rows:minmax(90px,1.8fr) minmax(62px,1fr)}.footer{min-height:21px}}
+
 </style></head>
 <body><div class="app">
-<header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧩</span><div><strong>Конструктор предложения</strong><small>Лаборатория пунктуации · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
+<header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
 <main id="main"></main>
 </div><script>
 (function(){
