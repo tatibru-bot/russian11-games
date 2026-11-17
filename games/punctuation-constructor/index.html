@@ -303,7 +303,7 @@ function progress(){const a=st.task;return [
  ][st.step]}
 function stageReady(){const p=progress();if(!p||p[0]!==p[1]||st.pending)return false;if(st.step===2){return st.junctionDecision===(st.task.junctions.length?"yes":"no")&&st.task.junctions.every(j=>st.junctionFound.includes(j.after))}return true}
 function note(s,type=""){st.hint=s;st.hintType=type}
-function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};render()}
+function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts",junctionDecision:null,junctionFound:[],phase:"place",seams:[],auditIndex:0};render()}
 function launchNext(){const a=tasks.filter(x=>x.num===st.num);launch(st.num,(st.index+1)%a.length)}
 function taskCount(num){return tasks.filter(x=>x.num===num).length}
 function menu(){
