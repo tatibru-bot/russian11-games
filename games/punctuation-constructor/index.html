@@ -401,6 +401,7 @@ body{overflow-x:hidden!important}
 }
 
 .restToken[data-act="gap"]{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:36px;line-height:inherit}.restToken[data-act="gap"]:focus-visible{outline:2px solid #ffe091}.punctuationStage .restToken.extra{background:#5e39575e}.punctuationStage .restToken.subord{color:#e4d8ff}
+.schemePunct{font-size:.95em;color:#ffe09c;font-weight:950;margin-left:-2px;margin-right:2px}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -572,6 +573,9 @@ function schema(){
   }
   if(turnEnd)built+='<span class="schemeTurnBound">│</span>';
   for(const g of groups.filter(g=>g.max===i).sort((x,y)=>y.min-x.min))built+='<span class="schemeBrace '+g.type+'">'+(g.type==="main"?"]":")")+'</span>';
+  // Знаки в схеме возникают только по решению ученика при обратной сборке.
+  if((st.step===6||st.view==="finish")&&st.marks.punct[i])
+   built+='<span class="schemePunct">'+q(st.marks.punct[i])+'</span>';
  }
  return '<div class="schemeEquation" aria-label="Схема предложения">'+built+'</div>';
 }
