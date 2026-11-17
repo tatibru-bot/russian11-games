@@ -136,6 +136,7 @@ body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),li
 .graphLinks .graphLink{font-size:12px;color:#e7e0fd;padding:5px;border-left:3px solid #b3a4f6;background:#2d2b4a;border-radius:4px}
 .selectionHint{font-size:10px;color:#e5debb;min-height:12px}
 @media(max-width:720px){
+ .modeGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
  .app{padding:5px 6px}.buildGrid{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(110px,1.8fr) minmax(78px,1fr)}
  .workarea{grid-template-rows:minmax(46px,max-content) minmax(0,1fr)}
  .wordsPanel,.buildPanel,.diagramPanel{padding:5px 7px}.stepTitle{padding:5px 7px;min-height:57px}
@@ -147,6 +148,7 @@ body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),li
 }
 @media(max-height:640px){.cleanSentence{max-height:40px}.stepTitle strong{font-size:15px}.stepTitle p{font-size:10px}.buildGrid{grid-template-rows:minmax(90px,1.8fr) minmax(62px,1fr)}.footer{min-height:21px}}
 
+.answerGrid .previewBuild{overflow:auto;max-height:45dvh}.answerGrid .diagram{max-height:45dvh;overflow:auto}.answerGrid .brick{padding-top:5px}.answerGrid .brick .word{cursor:default}.answerGrid .track{margin:4px 0}@media(max-width:600px){.answerGrid{grid-template-columns:minmax(0,1fr)!important}.answerGrid .previewBuild{max-height:35dvh}.answerGrid .diagram{max-height:25dvh}}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -277,13 +279,13 @@ function schema(){
  ].filter(g=>g.words.length).map(g=>({...g,min:Math.min(...g.words),max:Math.max(...g.words)}));
  const subjects=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.subjects));
  const predicates=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.predicates));
- const seenCommon=new Set(),seenTurns=new Set(),shownBase=new Set();
+ const seenTurns=new Set();
  let parts="";
  for(let i=0;i<a.words.length;i++){
   for(const g of allGroups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?"(":"[")+'</span>';
   let symbol="";
   if(commonIds.has(i)){
-   if(!seenCommon.has(i)){symbol='<span class="schemeCommon">ОВЧ</span>';seenCommon.add(i)}
+   if(a.common.some(g=>st.marks.common.includes(g.id)&&g.words[0]===i))symbol='<span class="schemeCommon">ОВЧ</span>'
   }else if(subjects.has(i)&&predicates.has(i))symbol='<span class="schemeMark">— ═</span>';
   else if(subjects.has(i))symbol='<span class="schemeMark">—</span>';
   else if(predicates.has(i))symbol='<span class="schemeMark">═</span>';
@@ -309,7 +311,7 @@ function schema(){
  const pattern=relations.length<2?"":homo?"Однородное подчинение":nested?"Последовательное или комбинированное подчинение":"Параллельное или комбинированное подчинение";
  return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
   (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
-  (links?'<div class="graphLinks">'+links+'</div>':"")+
+  (links||commonIds.size?'<div class="graphLinks">'+(commonIds.size?'<div class="graphLink" style="border-color:#8ee0b0">ОВЧ ↗ относится к обеим главным частям</div>':"")+links+'</div>':"")+
   '<div class="schemeNote">[ ] — главная часть; ( ) — придаточная; — подлежащее; ═ сказуемое; ⊕ не член предложения; ○ однородный член.</div>';
 }
 function toolbar(){
@@ -348,7 +350,7 @@ function render(){
   "Расставь знаки в уже собранной конструкции. Исходное предложение сверху всегда можно прочитать без пометок."
 ];
  main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Хард-уровень":"ЕГЭ № "+a.num)+' · '+q(a.short)+'</b>Пример '+(st.index+1)+' из '+taskCount(a.num)+' · элементов '+p[0]+'/'+p[1]+'</div><div><button class="ghost" data-act="help">? Теория</button> <button class="ghost" data-act="menu">✕ Меню</button></div></div>'+
-  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+' <span class="stepSkip">Если такого элемента нет, этап можно пропустить.</span></p></div></div>'+
+  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(step>0&&step<6?' <span class="stepSkip">Если такого элемента нет, переходи дальше.</span>':"")+'</p></div></div>'+
   '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">ИСХОДНОЕ ПРЕДЛОЖЕНИЕ — ЧИТАЙ БЕЗ ПОМЕТОК</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
   '<div class="buildGrid"><section class="buildPanel panel"><div class="panelHeader">РАЗБОР — ПЕРЕМЕЩАЙ КИРПИЧИКИ И СОХРАНЯЙ СВЯЗИ</div>'+blueprint()+'<div class="selectionHint">'+(st.picked.length?'Выбрано кирпичиков: '+st.picked.length:'Касайся слов ниже, чтобы выделить конструкцию.')+'</div></section>'+
   '<section class="diagramPanel panel"><div class="panelHeader">ГРАФИЧЕСКАЯ СХЕМА РЯДОМ С РАЗБОРОМ</div><div class="diagram">'+schema()+'</div></section></div></div>'+
@@ -426,18 +428,18 @@ function finish(){
  main.innerHTML='<div class="finish"><div class="head panel"><h2>🏁 Конструктор собран!</h2><p><b>'+q(a.num==="HARD"?"Хард":("№ "+a.num))+' · '+q(a.short)+'</b></p><p>'+q(punctText)+'</p><p>'+q(a.insight)+'</p></div><div class="scroll panel"><strong>Почему стоят именно эти знаки</strong>'+dots+'</div><div class="actionLine"><button class="primary" data-act="nexttask">Следующее предложение →</button><button class="ghost" data-act="menu">В меню</button></div></div>';
 }
 function showAnswer(){
- const a=st.task;const lines=[
- "<b>Грамматические основы:</b> "+a.bases.map(b=>tokenString(b.words)).join(" · "),
- "<b>Придаточные:</b> "+(a.subs.map(s=>"("+tokenString(s.words)+") → "+a.words[s.head]+" ("+s.question+")").join(" · ")||"нет"),
- "<b>Связующие слова:</b> "+(a.conjs.map(c=>a.words[c.at]+": "+help.types[c.type]+" / "+c.role).join(" · ")||"нет"),
- "<b>Обороты:</b> "+(a.turns.map(t=>tokenString(t.words)+" → "+a.words[t.head]).join(" · ")||"нет"),
- "<b>Вводные, обращения:</b> "+(a.extras.map(x=>tokenString(x.words)+" — "+help.types[x.type]).join(" · ")||"нет"),
- "<b>Однородные:</b> "+(a.hom.map(x=>tokenString(x.words)).join(" · ")||"нет"),
- "<b>Знаки:</b> "+(a.punct.map(x=>"после «"+a.words[x.after]+"» "+x.sign).join("; ")||"нет")
- ];
- st.helpOpen=false;
- const id="answerModal";document.getElementById(id)?.remove();const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
- modal.innerHTML='<section class="modal panel"><h3>🔍 Полная модель разбора</h3>'+lines.map(x=>'<p>'+x+'</p>').join("")+'<p>'+q(a.insight)+'</p><button class="primary" data-act="close-answer">Вернуться к заданию</button></section>';document.body.append(modal);
+ const a=st.task,oldMarks=st.marks,oldStep=st.step;
+ st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};
+ st.step=6;
+ const visual='<div class="previewBuild">'+[0,1,2].map(laneHTML).join("")+'</div>';
+ const graphic=schema();
+ st.marks=oldMarks;st.step=oldStep;
+ const full=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
+ const text='<div class="reviewRow">'+q(a.insight)+'</div>'+a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.why)+'</div>').join("");
+ const id="answerModal";document.getElementById(id)?.remove();
+ const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
+ modal.innerHTML='<section class="modal panel" style="width:min(1000px,100%);max-height:93dvh"><h3>🧱 Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,1fr);gap:8px">'+visual+'<div class="diagram">'+graphic+'</div></div>'+text+'<button class="primary" data-act="close-answer">Вернуться к заданию</button></section>';
+ document.body.append(modal);
 }
 document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value});
 document.addEventListener("click",e=>{
