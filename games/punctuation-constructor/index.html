@@ -447,6 +447,102 @@ function schema(){
  }
  return '<div class="schemeEquation" aria-label="Схема предложения">'+built+'</div>';
 }
+
+function seamPositions(){
+ const a=st.task,n=a.words.length,set=new Set();
+ const add=i=>{if(i>=0&&i<n-1)set.add(i)};
+ function groupEdges(indices){
+  const v=[...new Set(indices)].sort((x,y)=>x-y);
+  if(!v.length)return;
+  let start=v[0],end=start;
+  const close=()=>{add(start-1);add(end)};
+  for(const i of v.slice(1)){
+   if(i>end+1){close();start=i}
+   end=i;
+  }
+  close();
+ }
+ for(const group of [...a.mains,...a.subs,...a.turns,...a.extras,...a.common,...a.hom,...a.general])
+  groupEdges(group.words);
+ for(const c of a.conjs){add(c.at-1);add(c.at)}
+ for(const j of a.junctions)add(j.after);
+ // Защитная проверка базы: все реальные границы должны встретиться среди кандидатов,
+ // но сами кандидаты содержат и множество мест, где знака нет.
+ for(const p of a.punct)add(p.after);
+ return [...set].sort((x,y)=>x-y);
+}
+function restoreWord(i){
+ const a=st.task,w=a.words[i],classes=[];
+ const subj=a.bases.some(b=>st.marks.bases.includes(b.id)&&b.subjects.includes(i));
+ const pred=a.bases.some(b=>st.marks.bases.includes(b.id)&&b.predicates.includes(i));
+ if(subj)classes.push("subject");
+ if(pred)classes.push("predicate");
+ if(foundTag(i,"conjs"))classes.push("conj");
+ if(foundTag(i,"extras"))classes.push("extra");
+ if(foundTag(i,"hom"))classes.push("hom");
+ if(foundTag(i,"general"))classes.push("general");
+ if(isInMark(i,"common"))classes.push("common");
+ const turn=a.turns.find(t=>st.marks.turns.includes(t.id)&&t.words.includes(i));
+ if(turn)classes.push(turn.type==="ger"?"gerLine":"partLine");
+ const part=a.subs.filter(sub=>st.marks.subs.includes(sub.id)&&fullSubWords(sub).includes(i));
+ if(part.length)classes.push("subord");
+ const extra=a.extras.find(e=>st.marks.extras.includes(e.id)&&e.words[0]===i);
+ const tag=extra?({intro:"ввод.",address:"обращ.",insert:"встав."}[extra.type]||""):"";
+ const cross=a.turns.some(t=>st.marks.turns.includes(t.id)&&t.type!=="ger"&&t.head===i);
+ return '<span class="restToken '+classes.join(" ")+'" data-i="'+i+'">'+(tag?'<span class="restLabel">'+tag+'</span>':"")+(cross?'<span class="restCross">×</span>':"")+'<span class="restWord">'+q(w)+'</span></span>';
+}
+function restoredSentence(isFinal=false){
+ const a=st.task,active=st.phase==="audit"||st.phase==="retry"?st.seams[st.auditIndex]:st.gap;
+ let result='<div class="restoredLine '+(isFinal?"finished":"")+'" role="group" aria-label="Собранное предложение">';
+ for(let i=0;i<a.words.length;i++){
+  result+='<span class="punctUnit">'+restoreWord(i);
+  if(i<a.words.length-1){
+   const sign=st.marks.punct[i]||"";
+   if(isFinal)result+='<span class="restFinalSign">'+q(sign)+'</span>';
+   else result+='<button class="seamGap '+(active===i?"active ":"")+(sign?"marked":"")+'" data-act="gap" data-i="'+i+'" '+(st.phase!=="place"?"disabled":"")+' title="Знак после «'+q(a.words[i])+'»" aria-label="Знак после '+q(a.words[i])+'">'+q(sign||"·")+'</button>';
+  }else result+='<span class="restFinalSign">.</span>';
+  result+='</span>';
+ }
+ return result+'</div>';
+}
+function seamOptions(){
+ return '<div class="punctBar">'+[[",","Запятая"],["—","Тире"],[":","Двоеточие"],[";","Точка с запятой"],["","Без знака"]].map(([v,name])=>'<button title="'+name+'" data-act="set-sign" data-sign="'+v+'">'+(v||"∅")+'</button>').join("")+'</div>';
+}
+function punctuationControls(){
+ const a=st.task,phase=st.phase;
+ if(phase==="place")return '<div class="actionLine"><span class="field">Выбери место между словами и знак.</span>'+seamOptions()+'<span class="stretch"></span><button class="primary" data-act="start-audit">Проверить швы →</button></div>';
+ if(phase==="auditEnd")return '<div class="actionLine"><b>Все предложенные швы проверены.</b><span class="stretch"></span><button class="primary" data-act="finish-audit">Проверить результат ✓</button></div>';
+ const i=st.seams[st.auditIndex],next=a.words[i+1]||"конец",word=a.words[i]||"";
+ return '<div class="actionLine auditControls"><span class="field">Шов '+(st.auditIndex+1)+' / '+st.seams.length+': <b>«'+q(word)+'» │ «'+q(next)+'»</b></span>'+seamOptions()+'<span class="stretch"></span><button class="ghost" data-act="back-audit" '+(st.auditIndex?"":"disabled")+'>← Назад</button></div>';
+}
+function renderPunctuation(){
+ const a=st.task,phase=st.phase;
+ const title=phase==="place"?"Поставь знаки самостоятельно":phase==="retry"?"Перепроверь отмеченные швы":phase==="auditEnd"?"Проверка швов завершена":"Проверка швов";
+ const intro=phase==="place"?"Предложение собрано обратно. Расставь знаки без подсказок, затем проверь границы конструкций.":phase==="retry"?"Здесь остались спорные границы. Сравни постановку знака с построенной схемой.":phase==="auditEnd"?"Нажми «Проверить результат», чтобы узнать, верно ли собрана пунктуация.":"Смотри на выделенную границу. Нужна запятая, другой знак или знака нет?";
+ status.textContent="этап 7 / 7";
+ main.innerHTML='<div class="game punctuationStage"><div class="titleline"><div class="meta"><b>№ '+q(a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
+ '<div class="stepTitle panel"><span class="stepNumber">7/7</span><div><strong>Проверка сборки · '+title+'</strong><p>'+intro+'</p></div></div>'+
+ '<section class="restoredPanel panel"><div class="panelHeader">Собранное предложение</div>'+restoredSentence()+'</section>'+
+ '<section class="diagramPanel panel"><div class="panelHeader">Его синтаксическая схема</div>'+schema()+'</section>'+
+ '<details class="analysisDetails"><summary>Показать разобранные дорожки</summary>'+blueprint()+'</details>'+
+ '<div class="controls panel pinnedControls">'+punctuationControls()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||"")+'</div></div></div>';
+}
+function startAudit(){
+ st.seams=seamPositions();st.auditIndex=0;st.phase=st.seams.length?"audit":"auditEnd";
+ st.gap=st.seams[0]??null;note("Проверь каждый предложенный стык. Среди них есть места БЕЗ запятой.","");render();
+}
+function finishAudit(){
+ const correct=Object.fromEntries(st.task.punct.map(p=>[p.after,p.sign]));
+ const chosen=st.marks.punct;
+ const wrong=[...new Set([...Object.keys(correct),...Object.keys(chosen)])].filter(k=>(correct[k]||"")!==(chosen[k]||"")).map(Number).sort((a,b)=>a-b);
+ if(wrong.length){
+  st.seams=wrong;st.auditIndex=0;st.gap=wrong[0];st.phase="retry";
+  note("Есть "+wrong.length+" границ(ы), где знак нужно пересмотреть. Правильные ответы не показаны.","error");render();return;
+ }
+ completed[st.task.id]=true;try{localStorage.setItem(STORE,JSON.stringify(completed))}catch(e){}
+ st.phase="complete";st.view="finish";render();
+}
+
 function toolbar(){
  const a=st.task,step=st.step,done=stageReady();
  const next='<button class="primary" data-act="nextstage">'+(step===6?"Проверить пунктуацию":"Следующий этап →")+'</button>';
@@ -489,6 +585,7 @@ function confirmJunction(){
 function render(){
  if(st.view==="menu"){menu();return}
  if(st.view==="finish"){finish();return}
+ if(st.step===6){renderPunctuation();return}
  const a=st.task,step=st.step,p=progress();
  status.textContent="этап "+(step+1)+" / 7";
  const instructions=[
@@ -578,20 +675,30 @@ function link(){
  st.marks[st.pending.kind].push(group.id);clearChoice();note("Связь построена: теперь это часть синтаксической схемы.","ok");render();
 }
 function glue(i){st.glues=st.glues.includes(i)?st.glues.filter(n=>n!==i):[...st.glues,i];note("Склейка — это отсутствие запятой на стыке двух союзов. Проверь, есть ли продолжение ТО.","");render()}
-function punctuation(i){st.gap=i;note("Граница после «"+st.task.words[i]+"». Выбери знак или ∅.","");render()}
-function setSign(sign){if(st.gap==null){fail("Сначала нажми промежуток после нужного слова.");return}if(sign)st.marks.punct[st.gap]=sign;else delete st.marks.punct[st.gap];note("Знак выбран. Можно перейти к следующей границе.");render()}
+function punctuation(i){
+ if(st.step!==6||st.phase!=="place")return;
+ st.gap=i;note("Граница после «"+st.task.words[i]+"». Выбери знак (или ∅).","");render();
+}
+function setSign(sign){
+ if(st.step!==6)return;
+ if(st.phase==="audit"||st.phase==="retry")st.gap=st.seams[st.auditIndex];
+ if(st.gap==null){fail("Сначала выбери границу между словами.");return}
+ if(sign)st.marks.punct[st.gap]=sign;else delete st.marks.punct[st.gap];
+ if(st.phase==="audit"||st.phase==="retry"){
+  st.auditIndex++;
+  if(st.auditIndex>=st.seams.length){st.phase="auditEnd";st.gap=null}else st.gap=st.seams[st.auditIndex];
+  note("");render();return;
+ }
+ note("Знак отмечен. Можно выбрать следующий промежуток.","ok");render();
+}
+function backAudit(){
+ if(st.auditIndex>0){st.auditIndex--;st.gap=st.seams[st.auditIndex];note("");render()}
+}
 function nextStage(){
  if(st.step!==6&&!stageReady()){fail("Этап ещё не завершён. Проверь неразмеченные элементы и стык союзов.");return}
- if(st.step===6){
-  const target=Object.fromEntries(st.task.punct.map(p=>[String(p.after),p.sign]));
-  const actual=st.marks.punct;
-  const wrong=[...new Set([...Object.keys(target),...Object.keys(actual)])].filter(key=>(target[key]||"")!==(actual[key]||""));
-  if(wrong.length){const some=wrong.slice(0,3).map(i=>{const obj=st.task.punct.find(p=>p.after===+i);return 'после «'+st.task.words[i]+'»: '+(obj?.why||"знак здесь не нужен")}).join(" · ");fail("Не совпали "+wrong.length+" границ(ы). Подумай: "+some);return}
-  completed[st.task.id]=true;try{localStorage.setItem(STORE,JSON.stringify(completed))}catch(e){}
-  st.view="finish";render();return;
- }
+ if(st.step===6){startAudit();return}
  st.step++;st.picked=[];st.pending=null;st.anchor=null;st.question="";
- st.choiceKind=({2:"coord",3:"part",4:"intro"})[st.step]||"coord";st.choiceRole="parts";note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
+ st.choiceKind=({2:"coord",3:"part",4:"intro"})[st.step]||"coord";st.choiceRole="parts";if(st.step===6){st.phase="place";st.gap=null;st.seams=[];st.auditIndex=0;}note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
 }
 function finish(){
  const a=st.task,punctText=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
@@ -630,6 +737,9 @@ document.addEventListener("click",e=>{
  if(act==="junction-confirm"){confirmJunction();return}
  if(act==="gap"){punctuation(Number(b.dataset.i));return}
  if(act==="set-sign"){setSign(b.dataset.sign);return}
+ if(act==="start-audit"){startAudit();return}
+ if(act==="finish-audit"){finishAudit();return}
+ if(act==="back-audit"){backAudit();return}
  if(act==="nextstage"){nextStage();return}
  if(act==="nexttask"){launchNext();return}
 });
