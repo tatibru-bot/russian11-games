@@ -302,6 +302,8 @@ function schema(){
  const subjects=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.subjects));
  const predicates=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.predicates));
  const seenTurns=new Set();
+ const homIds=new Set(a.hom.filter(x=>st.marks.hom.includes(x.id)).flatMap(x=>x.words));
+ const generalIds=new Set(a.general.filter(x=>st.marks.general.includes(x.id)).flatMap(x=>x.words));
  let parts="";
  for(let i=0;i<a.words.length;i++){
   for(const g of allGroups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?"(":"[")+'</span>';
@@ -322,7 +324,9 @@ function schema(){
    else if(a.hom.some(x=>st.marks.hom.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark hom">○</span>';
    else if(a.general.some(x=>st.marks.general.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark general">◎</span>';
   }
-  // Common or connecting words remain outside brackets whenever they are not part of any clause.
+  // A grammatical base may simultaneously be an homogeneous member or generalizing word.
+  if((subjects.has(i)||predicates.has(i))&&generalIds.has(i))symbol='<span class="schemeMark general">'+symbol+'</span>';
+  else if((subjects.has(i)||predicates.has(i))&&homIds.has(i))symbol='<span class="schemeMark hom">'+symbol+'</span>';
   parts+=symbol;
   for(const g of allGroups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?")":"]")+'</span>';
  }
