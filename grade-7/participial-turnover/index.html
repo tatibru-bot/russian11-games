@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f6fb">
+<title>Причастный оборот — тренажёр для 7 класса</title>
+<style>
+:root{color-scheme:light;--ink:#17253d;--muted:#67758a;--blue:#2660bd;--blue-pale:#e8f1ff;--line:#dfe6f0;--orange:#a45d10;--orange-pale:#fff6e8;--green:#25724d}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(160deg,#f7faff,#f3f5fa 54%,#f9f9fb);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+main{max-width:1080px;margin:0 auto;padding:25px 26px 52px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:#577296;font-weight:800}
+h1{margin:5px 0 0;font-size:clamp(26px,3.7vw,39px);line-height:1.15;letter-spacing:-.035em}
+.progress-label{font-size:16px;font-weight:800;white-space:nowrap;color:#304a71;text-align:right}
+.progress-track{height:9px;background:#dfe8f4;border-radius:100px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;background:#4779ce;border-radius:100px;transition:width .2s}
+.card{margin-top:22px;border:1px solid #e2e8f0;border-radius:23px;background:#fff;box-shadow:0 14px 42px #1525410c;overflow:hidden}
+.card-content{padding:30px clamp(18px,4.5vw,45px) 30px}
+.stage-row{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.stage-label{font-size:15px;font-weight:800;color:#4a648a}
+.stage-dots{display:flex;gap:6px}
+.stage-dot{width:24px;height:7px;border-radius:9px;background:#dde5f0}
+.stage-dot.active{background:var(--blue)}.stage-dot.done{background:#a2c0eb}
+.prompt{margin:21px 0 6px;font-size:clamp(23px,3.1vw,31px);line-height:1.27;font-weight:800;letter-spacing:-.025em}
+.subprompt{font-size:clamp(16px,2.1vw,19px);color:#51647e;line-height:1.5;margin-top:10px}
+.sentence-shell{position:relative;margin-top:26px;border-radius:17px;background:#f8fafe;border:1px solid #e5ebf4;overflow:visible}
+.sentence-text{position:relative;padding:28px 23px 30px;min-height:124px;font-size:clamp(27px,3.55vw,37px);line-height:1.77;font-weight:550;letter-spacing:-.02em}
+.sentence-shell.with-arrow .sentence-text{padding-top:81px}
+.unit{display:inline-block;white-space:nowrap;margin-right:.11em;position:relative}
+.word{position:relative;display:inline-block;padding:0 .045em;border:0;border-radius:7px;background:none;color:inherit;font:inherit;line-height:inherit;cursor:default;transition:background .1s;vertical-align:baseline}
+.word.clickable{cursor:pointer}.word.clickable:hover{background:#eaf1ff}.word:focus-visible{outline:3px solid #4779ce;outline-offset:4px}
+.word.part{ text-decoration-line:underline; text-decoration-style:wavy; text-decoration-color:#bd6b0c; text-decoration-thickness:2px; text-underline-offset:7px}
+.word.selected{background:#deebff}.word.part.selected{background:#d1e4ff}
+.word.head{background:#e8f5ef}.word.head:before{content:"×";position:absolute;left:50%;top:-.77em;transform:translateX(-50%);font-size:.68em;line-height:1;font-weight:900;color:var(--green)}
+.punctuation{display:inline}
+.gap{display:inline-flex;align-items:center;justify-content:center;vertical-align:baseline;position:relative;margin:0 .045em 0 0;padding:0;width:20px;height:39px;background:transparent;border:0;border-radius:7px;font-size:27px;line-height:1;color:#a7b6ca;font-weight:500;cursor:pointer;touch-action:manipulation}
+.gap:hover,.gap:focus-visible{background:#e3edfc;color:#1e56ae;outline:none}.gap.active{font-size:35px;color:#1d58b6;font-weight:850}
+.gap.comma-active{color:#1557b8;font-size:37px;font-weight:900}
+.gap:after{content:"";position:absolute;inset:-3px -3px;z-index:0}
+.gap.edge{color:#a1acbc}
+.arrow-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2}
+.relation{margin:14px 0 0;display:none;font-size:clamp(17px,2.5vw,22px);font-weight:750;color:#24527f;align-items:center;gap:10px;flex-wrap:wrap}
+.relation.visible{display:flex}.rel-head{color:var(--green)}.rel-arrow{color:#2c60ae}
+.notice{min-height:56px;margin-top:23px;font-size:clamp(16px,2.2vw,19px);line-height:1.48;color:#596a81;display:flex;align-items:center}
+.notice.warning{color:var(--orange);background:var(--orange-pale);border:1px solid #f8e3c8;padding:12px 16px;border-radius:12px}
+.notice.good{color:var(--green)}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:15px}
+.btn{font:inherit;font-size:18px;min-height:51px;border-radius:12px;padding:11px 23px;border:1px solid var(--line);font-weight:750;cursor:pointer;touch-action:manipulation}
+.btn.primary{background:#235db7;color:white;border-color:#235db7}.btn.primary:hover{background:#184f9f}
+.btn.secondary{background:white;color:#46607f}.btn.secondary:hover{background:#eef3fa}
+.btn:focus-visible{outline:3px solid #94b5e8;outline-offset:3px}
+.small-help{font-size:15px;color:#6b7890}
+.completed-heading{font-size:clamp(27px,4vw,42px);font-weight:900;color:#28724b;margin:4px 0 17px}
+.final-sentence{font-size:clamp(25px,3.45vw,35px);line-height:1.65;font-weight:650;background:#f5f9ff;border:1px solid #dfe8f5;padding:23px;border-radius:16px}
+.final-details{margin:23px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.detail{background:#f7f9fc;border:1px solid #e8edf3;border-radius:12px;padding:13px 15px}
+.detail-title{font-size:13px;color:#66788f;font-weight:800;margin-bottom:5px}.detail-value{font-size:17px;font-weight:700;line-height:1.35}
+.note{font-size:16px;line-height:1.5;color:#62728a;margin-top:16px}
+.end-summary{font-size:21px;line-height:1.55;margin:5px 0 25px}
+.footer{margin-top:19px;font-size:14px;color:#6f7b8b;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+@media(max-width:620px){main{padding:16px 12px 36px}.card{margin-top:14px;border-radius:17px}.card-content{padding:22px 15px}.sentence-text{padding:19px 10px 21px;font-size:clamp(27px,7.2vw,33px);line-height:1.65}.sentence-shell.with-arrow .sentence-text{padding-top:75px}.word{padding:0}.unit{margin-right:.12em}.gap{width:17px;height:35px}.progress-label{text-align:left}.btn{font-size:17px;padding:10px 17px}.notice{min-height:45px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Компактная адаптивная компоновка: весь ход одного задания на одном экране */
+html,body{width:100%;min-height:100%;}
+main{height:100vh;height:100dvh;min-height:0;padding:10px clamp(10px,2vw,22px) 9px;display:flex;flex-direction:column;max-width:1180px}
+.header{flex:0 0 auto;min-height:35px;gap:8px;flex-wrap:nowrap}
+.eyebrow{font-size:10px;letter-spacing:.09em}
+h1{margin:1px 0 0;font-size:clamp(21px,2.35vw,29px);line-height:1.15}
+.progress-label{font-size:13px}
+.progress-track{flex:0 0 auto;margin-top:7px;height:5px}
+.card{flex:1 1 auto;min-height:0;margin-top:9px;border-radius:15px;box-shadow:0 4px 18px #15254108}
+.card-content{height:100%;min-height:0;padding:13px clamp(12px,2.4vw,26px) 11px;display:flex;flex-direction:column}
+.stage-row{flex:0 0 auto;gap:8px}
+.stage-label{font-size:12px}
+.stage-dots{gap:4px}.stage-dot{height:5px;width:19px}
+.prompt{flex:0 0 auto;margin:9px 0 0;font-size:clamp(19px,2.3vw,25px);line-height:1.19;letter-spacing:-.02em}
+.subprompt{flex:0 0 auto;margin-top:4px;font-size:clamp(14px,1.6vw,16px);line-height:1.32}
+.sentence-shell{flex:0 1 auto;margin-top:12px;border-radius:12px}
+.sentence-text{padding:12px 14px 14px;min-height:0;font-size:clamp(25px,3vw,31px);line-height:1.36;letter-spacing:-.015em}
+.sentence-shell.with-arrow .sentence-text{padding-top:54px}
+.word{line-height:inherit;padding:0 .02em;border-radius:3px}
+.word.head:before{top:-.7em}
+.unit{margin-right:.08em}
+.gap{width:12px;height:1.44em;min-height:34px;line-height:1;font-size:.72em;margin:0 -1px 0 0;vertical-align:middle;z-index:1}
+.gap:after{inset:-4px -5px}.gap.active{font-size:1.1em}.gap.comma-active{font-size:1.15em}
+.relation{flex:0 0 auto;margin:6px 0 0;font-size:15px;line-height:1.15;gap:6px}
+.notice{flex:0 0 auto;min-height:24px;margin-top:8px;font-size:clamp(13px,1.5vw,16px);line-height:1.27}
+.notice.warning{padding:6px 9px;border-radius:8px}
+.notice.good{min-height:21px;color:#17603f;background:#eff9f2;border:1px solid #c7e7d2;padding:8px 11px;border-radius:9px;font-weight:750}
+.card-content.is-success .subprompt{display:none}
+.card-content.is-success .sentence-shell{margin-top:12px}
+.card-content.is-success .stage-label{color:#1f704d}
+.btn.next-step{background:#235db7;color:white;border-color:#235db7;font-weight:850}
+.word.head{cursor:default}
+.actions{flex:0 0 auto;gap:7px;margin-top:8px;flex-wrap:nowrap}
+.btn{font-size:16px;min-height:42px;border-radius:9px;padding:7px 17px;white-space:nowrap}
+.small-help{font-size:13px;line-height:1.25}
+.footer{flex:0 0 auto;margin-top:5px;font-size:11px;line-height:1.1}
+.final-sentence{font-size:clamp(23px,2.7vw,29px);line-height:1.38;padding:12px 15px;margin-top:12px}
+.result-compact{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:9px;font-size:clamp(14px,1.5vw,16px);line-height:1.3}
+.result-compact .full{grid-column:1/-1}.result-compact b{color:#405779}
+.completed-heading{font-size:clamp(22px,3vw,28px);line-height:1.2;margin:8px 0 9px}
+.note{font-size:13px;line-height:1.27;margin-top:8px}
+.end-summary{font-size:clamp(16px,2vw,20px);margin:7px 0 14px}
+/* При появлении сообщения об ошибке дублирующую инструкцию можно скрыть. */
+.card-content.has-warning .subprompt{display:none}
+@media(max-width:650px){
+ main{padding:6px 7px 6px}
+ .header{min-height:28px}
+ .eyebrow{display:none}
+ h1{font-size:20px;max-width:235px;line-height:1.09}
+ .progress-label{font-size:11px;max-width:88px;white-space:normal;line-height:1.15}
+ .progress-track{margin-top:4px;height:4px}
+ .card{margin-top:5px;border-radius:12px}
+ .card-content{padding:8px 10px 9px}
+ .stage-label{font-size:11px}.stage-dot{width:15px;height:4px}
+ .prompt{margin-top:7px;font-size:20px;line-height:1.16}
+ .subprompt{font-size:13px;line-height:1.22;margin-top:4px}
+ .sentence-shell{margin-top:9px}
+ .sentence-text{padding:9px 7px 10px;font-size:clamp(23px,6.25vw,27px);line-height:1.32}
+ .sentence-shell.with-arrow .sentence-text{padding-top:40px}
+ .unit{margin-right:.06em}
+ .gap{width:9px;min-height:28px;margin-right:-1px}
+ .gap:after{inset:-4px -7px}
+ .relation{font-size:13px;margin-top:5px}
+ .notice{margin-top:7px;min-height:19px;font-size:13px;line-height:1.2}
+ .notice.warning{padding:5px 7px}
+ .actions{margin-top:6px}
+ .btn{min-height:39px;padding:6px 13px;font-size:15px}
+ .small-help{display:none}
+ .footer{display:none}
+ .final-sentence{margin-top:11px;padding:9px 10px;font-size:clamp(22px,5.9vw,26px);line-height:1.33}
+ .result-compact{grid-template-columns:1fr;gap:5px;font-size:13px;margin-top:9px}
+ .completed-heading{margin:6px 0;font-size:23px}
+ .note{font-size:12px;line-height:1.2;margin-top:7px}
+}
+@media(max-height:740px){
+ .footer{display:none}
+ .card-content{padding-top:8px;padding-bottom:8px}
+ .prompt{margin-top:6px}.sentence-shell{margin-top:7px}
+ .notice{margin-top:6px}.actions{margin-top:6px}
+ .sentence-text{line-height:1.29}
+}
+@media(max-width:650px) and (max-height:700px){
+ h1{font-size:18px}
+ .prompt{font-size:18px}
+ .subprompt{font-size:12px}
+ .sentence-shell.with-arrow .sentence-text{padding-top:35px}
+ .sentence-text{line-height:1.25}
+ .notice{font-size:12px}
+}
+/* Дополнительные ступени адаптации при особо длинных предложениях */
+html.fit-compact .eyebrow,html.fit-compact .footer{display:none}
+html.fit-compact .card-content{padding-top:7px;padding-bottom:6px}
+html.fit-compact .prompt{font-size:18px;margin-top:4px}
+html.fit-compact .subprompt{font-size:12px;margin-top:2px;line-height:1.18}
+html.fit-compact .sentence-shell{margin-top:5px}
+html.fit-compact .sentence-text{padding-bottom:6px;line-height:1.19}
+html.fit-compact .sentence-shell.with-arrow .sentence-text{padding-top:33px}
+html.fit-compact .notice{font-size:12px;line-height:1.16;margin-top:5px}
+html.fit-compact .actions{margin-top:5px}
+html.fit-compact .btn{min-height:36px;padding:5px 11px}
+html.fit-compact .final-sentence{padding:7px 9px;margin-top:6px;line-height:1.22}
+html.fit-compact .result-compact{margin-top:6px;gap:3px;font-size:12px}
+html.fit-compact .note{font-size:11px;margin-top:5px}
+html.fit-tight .header{min-height:24px}
+html.fit-tight h1{font-size:17px}
+html.fit-tight .progress-track{margin-top:3px}
+html.fit-tight .card{margin-top:4px}
+html.fit-tight .prompt{font-size:16px;line-height:1.13}
+html.fit-tight .sentence-text{padding-top:6px;padding-bottom:5px;line-height:1.15}
+html.fit-tight .sentence-shell.with-arrow .sentence-text{padding-top:28px}
+html.fit-tight .notice{font-size:11px;line-height:1.13}
+html.fit-tight .notice.warning{padding:3px 5px}
+html.fit-tight .final-sentence{line-height:1.16}
+html.fit-tight .note{font-size:10px}
+html.fit-ultra .subprompt{display:none}
+html.fit-ultra .sentence-shell.with-arrow .sentence-text{padding-top:23px}
+html.fit-ultra .notice{line-height:1.09}
+html.fit-ultra .actions{margin-top:3px}
+html.fit-ultra .btn{min-height:33px}
+</style>
+</head>
+<body>
+<main>
+  <div class="header">
+    <div><div class="eyebrow">Русский язык · 7 класс</div><h1>Конструктор причастного оборота</h1></div>
+    <div class="progress-label" id="progressLabel">Предложение 1 из 24</div>
+  </div>
+  <div class="progress-track" aria-label="Пройденные предложения"><div class="progress-fill" id="progressFill"></div></div>
+  <article class="card" aria-live="off"><div class="card-content" id="content"></div></article>
+  <div class="footer"><span>24 предложения · 6 шагов в каждом</span><span>Выбирай слова нажатием, затем проверяй ответ.</span></div>
+</main>
+<script>
+'use strict';
+const SOURCE = [
+ {text:'Яблоки сбиваемые ветром скатывались в самый двор.',part:'сбиваемые',head:['Яблоки'],phrase:'сбиваемые ветром',q:'какие?'},
+ {text:'Рассказы и странные истории услышанные Васей помогали ему в жизни.',part:'услышанные',head:['Рассказы','истории'],phrase:'услышанные Васей',q:'какие?',note:'Здесь определение можно отнести к однородным словам «рассказы» и «истории». Оба выбора принимаются.'},
+ {text:'Внезапно обрушившийся на землю ливень застал ребят врасплох.',part:'обрушившийся',head:['ливень'],phrase:'Внезапно обрушившийся на землю',q:'какой?'},
+ {text:'Черная туча надвигающаяся с запада заставила путников искать укрытия.',part:'надвигающаяся',head:['туча'],phrase:'надвигающаяся с запада',q:'какая?'},
+ {text:'Утомленные дорогой они мечтали об отдыхе.',part:'Утомленные',head:['они'],phrase:'Утомленные дорогой',q:'какие?',pronoun:true},
+ {text:'Насквозь промокшие путешественники спрятались от дождя под кроной векового дуба.',part:'промокшие',head:['путешественники'],phrase:'Насквозь промокшие',q:'какие?'},
+ {text:'Среди великих полководцев прославивших Россию учебники называют Суворова.',part:'прославивших',head:['полководцев'],phrase:'прославивших Россию',q:'каких?'},
+ {text:'Капитан выставил у окопов передвижные крепости состоящие из деревянных щитов.',part:'состоящие',head:['крепости'],phrase:'состоящие из деревянных щитов',q:'какие?'},
+ {text:'Солнце освещало вершины лип пожелтевших под свежим дыханием осени.',part:'пожелтевших',head:['лип'],phrase:'пожелтевших под свежим дыханием осени',q:'каких?'},
+ {text:'Передо мною тянулось ночною бурей взволнованное море.',part:'взволнованное',head:['море'],phrase:'ночною бурей взволнованное',q:'какое?'},
+ {text:'Глубоко оскорбленная она вышла из комнаты и расплакалась.',part:'оскорбленная',head:['она'],phrase:'Глубоко оскорбленная',q:'какая?',pronoun:true},
+ {text:'Контрольная работа назначенная на 20 марта переносится на 23 марта.',part:'назначенная',head:['работа'],phrase:'назначенная на 20 марта',q:'какая?'},
+ {text:'Книга открытая учеником лежала на столе.',part:'открытая',head:['Книга'],phrase:'открытая учеником',q:'какая?'},
+ {text:'Я увидел белую фигуру мелькающую среди деревьев.',part:'мелькающую',head:['фигуру'],phrase:'мелькающую среди деревьев',q:'какую?'},
+ {text:'Слово «кодак» ставшее названием популярного фотоаппарата не означает ничего.',part:'ставшее',head:['Слово'],phrase:'ставшее названием популярного фотоаппарата',q:'какое?'},
+ {text:'Люди надеющиеся на его благодарность очень разочаровались в справедливости.',part:'надеющиеся',head:['Люди'],phrase:'надеющиеся на его благодарность',q:'какие?'},
+ {text:'Преступник разыскиваемый полицией прятался в заброшенном доме.',part:'разыскиваемый',head:['Преступник'],phrase:'разыскиваемый полицией',q:'какой?'},
+ {text:'Владимир отказался от предложенного ему завтрака.',part:'предложенного',head:['завтрака'],phrase:'предложенного ему',q:'какого?'},
+ {text:'Изредка раздается шум струи выпускаемый китом и опять ни одного звука.',part:'выпускаемый',head:['шум'],phrase:'выпускаемый китом',q:'какой?',note:'Причастие «выпускаемый» согласуется со словом «шум», а не со словом «струи».'},
+ {text:'Маленькие игривые волны рождаемые дыханием ветра бились о борт.',part:'рождаемые',head:['волны'],phrase:'рождаемые дыханием ветра',q:'какие?'},
+ {text:'Оберегаемые мамой они никогда и ничего не боялись в жизни.',part:'Оберегаемые',head:['они'],phrase:'Оберегаемые мамой',q:'какие?',pronoun:true},
+ {text:'Ребяческий крик повторяемый эхом с утра и до ночи гремит по лесам.',part:'повторяемый',head:['крик'],phrase:'повторяемый эхом',variants:['повторяемый эхом с утра и до ночи'],q:'какой?',note:'Оборот здесь допускает два прочтения: «с утра и до ночи» можно отнести к сказуемому «гремит» или к причастию «повторяемый». Оба разбора засчитываются.'},
+ {text:'У порога лежал Швабрин простреленный дряхлою рукою отца.',part:'простреленный',head:['Швабрин'],phrase:'простреленный дряхлою рукою отца',q:'какой?'},
+ {text:'Невдалеке от берега стояли четыре корабля украшенные резным деревом.',part:'украшенные',head:['корабля'],phrase:'украшенные резным деревом',q:'какие?'}
+];
+function clean(s){return s.replace(/[.,!?;:]+$/,'').trim().toLocaleLowerCase('ru')}
+function findSequence(words, phrase){const parts=phrase.split(/\s+/).map(clean);for(let i=0;i<=words.length-parts.length;i++){if(parts.every((x,k)=>clean(words[i+k])===x))return [i,i+parts.length-1];}throw Error('Не найдена последовательность: '+phrase);}
+const DATA=SOURCE.map((r,i)=>{
+ const stripped=r.text.trim().replace(/\.$/,'');const words=stripped.split(/\s+/);
+ const part=words.findIndex(w=>clean(w)===clean(r.part));if(part<0)throw Error('Не найдено причастие: '+r.part);
+ const heads=r.head.map(h=>words.findIndex(w=>clean(w)===clean(h)));if(heads.some(h=>h<0))throw Error('Не найдено определяемое слово: '+r.text);
+ const ranges=[r.phrase,...(r.variants||[])].map(x=>findSequence(words,x));
+ if(!ranges.every(([s,e])=>s<=part&&part<=e))throw Error('Причастие вне оборота: '+r.text);
+ return {...r,id:i,words,partIndex:part,headIndexes:heads,ranges};
+});
+// При каждом открытии перемешиваем все 24 задания без повторов.
+// Запоминаем только номер первого задания: при следующем запуске
+// стараемся не показывать то же самое первое предложение подряд.
+const LAST_FIRST_KEY='prichastnyy_7klass_last_first_v1';
+function shuffledOrder(otherFirst=null){
+ const order=DATA.map((_,i)=>i);
+ for(let i=order.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [order[i],order[j]]=[order[j],order[i]];
+ }
+ if(otherFirst===null){
+  try{const stored=localStorage.getItem(LAST_FIRST_KEY);if(stored!==null)otherFirst=Number(stored);}catch(e){}
+ }
+ if(order.length>1&&order[0]===otherFirst){
+  const swapAt=1+Math.floor(Math.random()*(order.length-1));
+  [order[0],order[swapAt]]=[order[swapAt],order[0]];
+ }
+ try{localStorage.setItem(LAST_FIRST_KEY,String(order[0]));}catch(e){}
+ return order;
+}
+let order=shuffledOrder();
+let ix=0, step=1, selectedHead=null, chosenRange=null, selectedDeps=new Set(), selectedGaps=new Set(), selectedCommas=new Set(), attempt=0, notice='', noticeType='', readyForNext=false, done=false;
+const content=document.getElementById('content');
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function resetRound(i){ix=i;step=1;selectedHead=null;chosenRange=null;selectedDeps=new Set();selectedGaps=new Set();selectedCommas=new Set();attempt=0;notice='';noticeType='';readyForNext=false;render();}
+function current(){return DATA[order[ix]]}
+function rangeDeps([s,e],part){let out=new Set();for(let i=s;i<=e;i++)if(i!==part)out.add(i);return out;}
+function sameSet(a,b){return a.size===b.size&&[...a].every(x=>b.has(x))}
+function expectedCommas(){const e=current(),[s,end]=chosenRange;
+ const afterHead=e.headIndexes.every(h=>h<s); // оборот после определяемого слова
+ const expected=[];
+ if(afterHead){if(s>0)expected.push(s);if(end+1<e.words.length)expected.push(end+1)}
+ else if(e.pronoun&&end+1<e.words.length)expected.push(end+1);
+ return new Set(expected);
+}
+function answerSentence(){const e=current(),commas=expectedCommas();return e.words.map((w,i)=>w+(commas.has(i+1)?',':'')).join(' ')+'.'}
+function gapMarkup(i){const e=current();const isLast=i===e.words.length;
+ if(step===4){const active=selectedGaps.has(i);return `<button class="gap ${active?'active':''} ${i===0||isLast?'edge':''}" type="button" data-gap="${i}" aria-label="Поставить или убрать границу ${i===0?'в начале предложения':i===e.words.length?'в конце предложения':'перед словом '+escapeHtml(e.words[i])}" aria-pressed="${active}">${active?'|':'¦'}</button>`;}
+ if(step===5&&chosenRange&&(i===chosenRange[0]||i===chosenRange[1]+1)){
+ const active=selectedCommas.has(i);return `<button class="gap ${active?'comma-active':''}" type="button" data-comma="${i}" aria-label="${active?'Убрать':'Поставить'} запятую на границе оборота" aria-pressed="${active}">${active?',':'+'}</button>`;
+ }
+ return '';
+}
+function sentenceHtml(){const e=current();let html='';for(let i=0;i<e.words.length;i++){
+ const hasPart=((step>=2||(step===1&&readyForNext))&&i===e.partIndex);
+ const isSel=step>=3&&chosenRange ? (i>=chosenRange[0]&&i<=chosenRange[1]) : (step===3&&(i===e.partIndex||selectedDeps.has(i)));
+ const isHead=(step>=3||(step===2&&readyForNext))&&selectedHead===i;
+ const clickable=!readyForNext&&(step===1||step===2||(step===3&&i!==selectedHead));
+ let cls='word'+(hasPart?' part':'')+(isSel?' selected':'')+(isHead?' head':'')+(clickable?' clickable':'');
+ html+=`<span class="unit">${gapMarkup(i)}<button class="${cls}" type="button" data-word="${i}" ${clickable?'':'disabled'} ${step===3&&i===selectedHead?'title="Определяемое слово: не входит в причастный оборот"':''} aria-pressed="${step===3&&isSel?'true':'false'}">${escapeHtml(e.words[i])}</button>${i===e.words.length-1?gapMarkup(e.words.length)+'<span class="punctuation">.</span>':''}</span> `;
+ }
+ return html;
+}
+const prompts={
+ 1:['Выдели причастие','Нажми на одно слово в предложении.'],
+ 2:['Отлично! Найди определяемое слово','Нажми на слово, от которого к причастию можно задать вопрос «какой?».'],
+ 3:['Самое важное позади! Остались мелочи.','Выдели зависимые от причастия слова. Причастие уже отмечено, а определяемое слово с крестиком не входит в оборот.'],
+ 4:['Теперь поставь границы оборота | |','Нажми на два промежутка: перед первым и после последнего слова оборота.'],
+ 5:['Поставь запятые, если они нужны','Нажми на границу оборота, чтобы поставить или убрать запятую. Если запятые не нужны, сразу нажми «Проверить».'],
+ 6:['Ответ','Ты справился!']
+};
+function stageDots(){let s='';for(let n=1;n<=6;n++)s+=`<span class="stage-dot ${n===step?'active':n<step?'done':''}" title="Этап ${n}"></span>`;return s;}
+function render(){const e=current();document.getElementById('progressLabel').textContent=done?'Все 24 предложения пройдены':`Предложение ${ix+1} из ${DATA.length}`;document.getElementById('progressFill').style.width=((done?DATA.length:ix)/DATA.length*100)+'%';
+ if(done){content.classList.remove('has-warning');content.innerHTML=`<div class="completed-heading">Все 24 предложения разобраны!</div><div class="end-summary">Ты прошёл весь тренажёр: нашёл причастия, определяемые слова, границы оборотов и расставил запятые. Отличная работа!</div><div class="actions"><button type="button" class="btn primary" id="restart">Пройти ещё раз</button></div>`;document.getElementById('restart').addEventListener('click',()=>{order=shuffledOrder(order[0]);done=false;resetRound(0)});return;}
+ if(step===6){content.classList.remove('has-warning');const [s,last]=chosenRange;const phrase=e.words.slice(s,last+1).join(' ');const head=e.words[selectedHead];let commas=expectedCommas().size;
+ content.innerHTML=`<div class="stage-row"><span class="stage-label">Шаг 6 из 6 · Ответ</span><span class="stage-dots">${stageDots()}</span></div><div class="prompt">Ты справился!</div><div class="final-sentence">${escapeHtml(answerSentence())}</div><div class="result-compact"><div><b>Определяемое слово:</b> × ${escapeHtml(head)}</div><div><b>Вопрос:</b> ${escapeHtml(e.q)} → ${escapeHtml(e.words[e.partIndex])}</div><div class="full"><b>Причастный оборот:</b> ${escapeHtml(phrase)}</div><div class="full"><b>Запятые:</b> ${commas===0?'не нужны':commas===1?'одна':'две'}</div></div>${e.note?`<div class="note">${escapeHtml(e.note)}</div>`:''}<div class="actions"><button type="button" class="btn primary" id="next">${ix===DATA.length-1?'Завершить тренировку':'Следующее предложение →'}</button></div>`;
+ document.getElementById('next').addEventListener('click',()=>{if(ix===DATA.length-1){done=true;render()}else resetRound(ix+1)});return;
+ }
+ const [heading,sub]=prompts[step];
+ const buttons=readyForNext?`<button type="button" id="advance" class="btn primary next-step">Дальше →</button>`:(step>=3?`<button type="button" id="check" class="btn primary">Проверить</button>`:'');
+ const arrow=step>=3||(step===2&&readyForNext);
+ content.classList.toggle('has-warning', noticeType==='warning');
+ content.classList.toggle('is-success',readyForNext);
+ content.innerHTML=`<div class="stage-row"><span class="stage-label">Шаг ${step} из 6${readyForNext?' · выполнен ✓':''}</span><span class="stage-dots">${stageDots()}</span></div><div class="prompt">${escapeHtml(heading)}</div><div class="subprompt">${escapeHtml(sub)}</div><div class="sentence-shell ${arrow?'with-arrow':''}"><div class="sentence-text" id="sentenceText">${sentenceHtml()}${arrow?'<svg class="arrow-overlay" id="arrowOverlay" aria-hidden="true"></svg>':''}</div></div><div class="relation" id="relation"></div><div class="notice ${noticeType}" role="status" id="notice">${escapeHtml(notice)}</div><div class="actions"><span class="small-help">${readyForNext?'Этап выполнен.':step<=2?'Нажми на слово в предложении.':step===3?'Выбранные слова подсвечиваются голубым.':'Выбери границы прямо в предложении.'}</span>${buttons}</div>`;
+ content.querySelectorAll('[data-word]').forEach(el=>{if(step<=3)el.addEventListener('click',()=>onWord(Number(el.dataset.word)))});
+ content.querySelectorAll('[data-gap]').forEach(el=>el.addEventListener('click',()=>onGap(Number(el.dataset.gap))));
+ content.querySelectorAll('[data-comma]').forEach(el=>el.addEventListener('click',()=>onComma(Number(el.dataset.comma))));
+ if(readyForNext)document.getElementById('advance').addEventListener('click',advance);
+ else if(step>=3)document.getElementById('check').addEventListener('click',check);
+ if(arrow)requestAnimationFrame(drawArrow);
+}
+function advance(){
+ if(!readyForNext||step>=6)return;
+ step++;readyForNext=false;attempt=0;notice='';noticeType='';render();
+}
+function showSuccess(msg){notice='✓ '+msg+' Нажми «Дальше».';noticeType='good';readyForNext=true;render();}
+function showWarning(msg){notice=msg;noticeType='warning';render();}
+function onWord(i){if(readyForNext)return;const e=current();if(step===1){if(i===e.partIndex){showSuccess('Причастие найдено и подчёркнуто волнистой линией.');}else showWarning('Причастие образовано от глагола, но отвечает на вопрос «какой?», «какая?», «какое?», «какие?» и другие формы этого вопроса. Попробуй ещё раз.');return;}
+ if(step===2){if(e.headIndexes.includes(i)){selectedHead=i;showSuccess(`Определяемое слово — «${e.words[i]}». Вопрос: ${e.q}`);}else showWarning('Найди существительное или местоимение, признак которого обозначает причастие. От него можно задать вопрос к причастию.');return;}
+ if(step===3){if(i===e.partIndex)return; if(i===selectedHead){showWarning('Слово с крестиком — определяемое. Оно не входит в причастный оборот.');return;} if(selectedDeps.has(i))selectedDeps.delete(i);else selectedDeps.add(i);notice='';noticeType='';render();}
+}
+function onGap(i){if(step!==4||readyForNext)return;if(selectedGaps.has(i))selectedGaps.delete(i);else if(selectedGaps.size>=2){showWarning('Для оборота нужны ровно две границы. Убери одну из выбранных, чтобы поставить другую.');return;}else selectedGaps.add(i);notice='';noticeType='';render();}
+function onComma(i){if(step!==5||readyForNext)return;selectedCommas.has(i)?selectedCommas.delete(i):selectedCommas.add(i);notice='';noticeType='';render();}
+function check(){if(readyForNext)return;const e=current();if(step===3){
+ // Определяемое слово находится вне оборота и не должно попадать в проверку.
+ // В отличие от прежнего поведения, оно недоступно для повторного выбора.
+ selectedDeps.delete(selectedHead);
+ const targets=e.ranges.map(r=>rangeDeps(r,e.partIndex));const match=targets.findIndex(t=>sameSet(t,selectedDeps));if(match>=0){chosenRange=e.ranges[match];showSuccess('Все слова причастного оборота найдены.');return;}
+ attempt++;if(attempt===1){showWarning('От причастия задай вопросы к другим словам: какие слова от него зависят? Выделяй весь оборот, а не только причастие.');return;}
+ const distances=targets.map(t=>({t,dist:[...t].filter(x=>!selectedDeps.has(x)).length+[...selectedDeps].filter(x=>!t.has(x)).length})).sort((a,b)=>a.dist-b.dist);let t=distances[0].t;
+ const missing=[...t].filter(x=>!selectedDeps.has(x)).length;const extra=[...selectedDeps].filter(x=>!t.has(x)).length;
+ showWarning(`Проверь ещё раз: не хватает слов — ${missing}; лишних выделено — ${extra}. От каждого зависимого слова можно задать вопрос от причастия или его зависимого слова.`);return;
+ }
+ if(step===4){const [s,end]=chosenRange;const expected=new Set([s,end+1]);if(sameSet(selectedGaps,expected)){showSuccess('Границы оборота стоят правильно.');}else{attempt++;showWarning('Границы ставят перед первым словом оборота и после его последнего слова. Посмотри на все выделенные слова.');}return;}
+ if(step===5){if(sameSet(selectedCommas,expectedCommas())){showSuccess('Запятые расставлены правильно.');}else{attempt++;showWarning(attempt===1?'Если причастный оборот стоит после определяемого слова, его выделяют запятыми. Если перед ним — обычно нет. Исключение: определяемое слово — личное местоимение («он», «она», «они»).':`Проверь порядок: причастный оборот после определяемого слова обособляется. Если перед существительным — нет; перед личным местоимением — да. В этом предложении нужно поставить запятых: ${expectedCommas().size}.`);}}
+}
+function drawArrow(){if((step<3&&!(step===2&&readyForNext))||done)return;const e=current(),host=document.getElementById('sentenceText'),svg=document.getElementById('arrowOverlay'),rel=document.getElementById('relation');if(!host||!svg||!rel)return;
+ const a=host.querySelector(`[data-word="${selectedHead}"]`),b=host.querySelector(`[data-word="${e.partIndex}"]`);if(!a||!b)return;
+ const h=host.getBoundingClientRect(),ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();
+ const x1=ra.left+ra.width/2-h.left,y1=ra.top-h.top-8,x2=rb.left+rb.width/2-h.left,y2=rb.top-h.top-8;
+ if(Math.abs(y1-y2)>24){svg.style.display='none';rel.classList.add('visible');rel.innerHTML=`<span class="rel-head">× ${escapeHtml(e.words[selectedHead])}</span><span class="rel-arrow">── ${escapeHtml(e.q)} →</span><span>${escapeHtml(e.words[e.partIndex])}</span>`;return;}
+ svg.style.display='block';rel.classList.remove('visible');const ctl=Math.max(17,Math.min(y1,y2)-43);let midX=(x1+x2)/2,midY=(y1+y2+2*ctl)/4-5;
+ const path=`M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${midX.toFixed(1)} ${ctl.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+ svg.setAttribute('viewBox',`0 0 ${host.clientWidth} ${host.clientHeight}`);
+ svg.innerHTML=`<defs><marker id="arrow-tip" markerWidth="8" markerHeight="8" refX="7.3" refY="3.4" orient="auto"><path d="M0 0 L7 3.4 L0 6.8" fill="none" stroke="#3472bc" stroke-width="1.5"/></marker></defs><path d="${path}" fill="none" stroke="#3472bc" stroke-width="2.7" marker-end="url(#arrow-tip)"/><text x="${midX}" y="${Math.max(15,midY)}" text-anchor="middle" font-size="19" font-weight="800" fill="#245da4" stroke="#f8fafe" stroke-width="7" paint-order="stroke">${escapeHtml(e.q)}</text>`;
+}
+window.addEventListener('resize',()=>{if((step>=3||(step===2&&readyForNext))&&!done)requestAnimationFrame(drawArrow)});
+// Вспомогательные данные для педагогической/автоматизированной проверки, не используются для подсказок ученику.
+window.__TRAINER_DATA__=DATA;window.__TRAINER_STATE__=()=>({ix,step,readyForNext,selectedHead,chosenRange,selectedDeps:[...selectedDeps],order:[...order],currentId:current().id,done});
+// Проверка видимой высоты и ширины при каждом переходе между шагами.
+function fitsViewport(){
+ const root=document.documentElement,card=document.querySelector('.card').getBoundingClientRect();
+ const end=content.querySelector('.actions')?.getBoundingClientRect();
+ const sentence=content.querySelector('.sentence-shell,.final-sentence')?.getBoundingClientRect();
+ return root.scrollHeight<=window.innerHeight+1 && root.scrollWidth<=window.innerWidth+1 && card.bottom<=window.innerHeight+1 && (!end||end.bottom<=card.bottom-6) && (!sentence||sentence.bottom<=card.bottom-6);
+}
+function fitScreen(){
+ const root=document.documentElement;
+ root.classList.remove('fit-compact','fit-tight','fit-ultra');
+ const target=content.querySelector('.sentence-text,.final-sentence');
+ if(target)target.style.fontSize='';
+ const refreshRelation=()=>{if(!done&&(step>=3||(step===2&&readyForNext)))drawArrow();};
+ // На узком экране стрелка между строками показывается под предложением;
+ // она тоже должна учитываться в общей высоте.
+ refreshRelation();
+ for(const level of ['fit-compact','fit-tight','fit-ultra']){
+  if(fitsViewport())break;
+  root.classList.add(level);
+  refreshRelation();
+ }
+ if(target && !fitsViewport()){
+  let fs=parseFloat(getComputedStyle(target).fontSize);
+  const minFs=window.innerWidth<350?15:window.innerWidth<650?17:20;
+  while(!fitsViewport()&&fs>minFs){fs-=1;target.style.fontSize=fs+'px';refreshRelation();}
+ }
+ refreshRelation();
+}
+const renderWithoutFit=render;
+render=function(){renderWithoutFit();requestAnimationFrame(fitScreen);};
+window.addEventListener('resize',()=>requestAnimationFrame(fitScreen));
+render();
+</script>
+</body>
+</html>
