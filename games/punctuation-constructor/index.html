@@ -400,6 +400,7 @@ body{overflow-x:hidden!important}
  .schemeEquation{font-size:18px}
 }
 
+.restToken[data-act="gap"]{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:36px;line-height:inherit}.restToken[data-act="gap"]:focus-visible{outline:2px solid #ffe091}.punctuationStage .restToken.extra{background:#5e39575e}.punctuationStage .restToken.subord{color:#e4d8ff}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -593,9 +594,10 @@ function seamPositions(){
   groupEdges(group.words);
  for(const c of a.conjs){add(c.at-1);add(c.at)}
  for(const j of a.junctions)add(j.after);
- // Защитная проверка базы: все реальные границы должны встретиться среди кандидатов,
- // но сами кандидаты содержат и множество мест, где знака нет.
- for(const p of a.punct)add(p.after);
+ // Однородные проверяются по каждому сочленению ряда, а не только по его краям.
+ for(const h of a.hom)for(const i of h.words)add(i);
+ // Кандидаты вычисляются из структуры, а НЕ из таблицы правильных знаков.
+ if(a.punct.some(p=>!set.has(p.after)))throw Error("База: пропущена синтаксическая граница "+a.id);
  return [...set].sort((x,y)=>x-y);
 }
 function restoreWord(i){
@@ -616,7 +618,9 @@ function restoreWord(i){
  const extra=a.extras.find(e=>st.marks.extras.includes(e.id)&&e.words[0]===i);
  const tag=extra?({intro:"ввод.",address:"обращ.",insert:"встав."}[extra.type]||""):"";
  const cross=a.turns.some(t=>st.marks.turns.includes(t.id)&&t.type!=="ger"&&t.head===i);
- return '<span class="restToken '+classes.join(" ")+'" data-i="'+i+'">'+(tag?'<span class="restLabel">'+tag+'</span>':"")+(cross?'<span class="restCross">×</span>':"")+'<span class="restWord">'+q(w)+'</span></span>';
+ const clickable=st.step===6&&st.phase==="place";
+ const tagName=clickable?"button":"span";
+ return '<'+tagName+' class="restToken '+classes.join(" ")+'" data-i="'+i+'" '+(clickable?'type="button" data-act="gap" title="Поставить знак после этого слова"':'')+'>'+(tag?'<span class="restLabel">'+tag+'</span>':"")+(cross?'<span class="restCross">×</span>':"")+'<span class="restWord">'+q(w)+'</span></'+tagName+'>';
 }
 function restoredSentence(isFinal=false){
  const a=st.task,active=st.phase==="audit"||st.phase==="retry"?st.seams[st.auditIndex]:st.gap;
