@@ -62,7 +62,7 @@ const source=[
  conjs:[["как#1","sub","inside"],["и","coord","between-subs"],["как#2","sub","inside"]],
  punct:[["помнил",",","Главное отделено от двух однородных изъяснительных придаточных."]],
  insight:"Два придаточных зависят от «помнил», отвечают на один вопрос «что?» и соединены одиночным И. Перед И запятая не нужна."},
-{ id:"20-junction-open",num:"20",short:"Стык союзов без ТО",text:"Я знал что если погода улучшится мы выйдем к озеру но друзья сомневались",
+{ id:"20-junction-open",num:"20",short:"Сочетание союзов · А",text:"Я знал что если погода улучшится мы выйдем к озеру но друзья сомневались",
  bases:[["Я","знал"],["погода","улучшится"],["мы","выйдем"],["друзья","сомневались"]],
  mains:[{id:"m1",words:["Я знал"]},{id:"m2",words:["друзья сомневались"]}],
  subs:[{id:"s1",words:["что","мы выйдем к озеру"],question:"что?",head:"знал"},{id:"s2",words:["если погода улучшится"],question:"при каком условии?",head:"выйдем"}],
@@ -70,7 +70,7 @@ const source=[
  junctions:[["что","если",false]],
  punct:[["знал",",","Граница главного и придаточного."],["что",",","На стыке «что, если» есть запятая: нет второй части ТО."],["улучшится",",","Конец вложенного придаточного условия."],["озеру",",","НО соединяет главные части."]],
  insight:"Придаточное «если погода улучшится» можно изъять без перестройки оставшейся конструкции; на стыке ЧТО, ЕСЛИ запятая."},
-{ id:"20-junction-glued",num:"20",short:"Стык союзов с ТО",text:"Я знал что если погода улучшится то мы выйдем к озеру но друзья сомневались",
+{ id:"20-junction-glued",num:"20",short:"Сочетание союзов · Б",text:"Я знал что если погода улучшится то мы выйдем к озеру но друзья сомневались",
  bases:[["Я","знал"],["погода","улучшится"],["мы","выйдем"],["друзья","сомневались"]],
  mains:[{id:"m1",words:["Я знал"]},{id:"m2",words:["друзья сомневались"]}],
  subs:[{id:"s1",words:["что","то мы выйдем к озеру"],question:"что?",head:"знал"},{id:"s2",words:["если погода улучшится"],question:"при каком условии?",head:"выйдем"}],
@@ -122,6 +122,15 @@ const items=source.map(raw=>{
  const extras=(raw.extras||[]).map((x,i)=>({id:"e"+i,words:indices(words,x[0]),type:x[1]}));
  const hom=(raw.hom||[]).map((x,i)=>({id:"h"+i,words:indices(words,x)}));
  const general=(raw.general||[]).map((x,i)=>({id:"g"+i,words:indices(words,x)}));
+ // У обобщающего слова и всего однородного ряда одна синтаксическая функция.
+ for(const g of general)for(const b of bases){
+  if(g.words.some(i=>b.subjects.includes(i))){
+   for(const h of hom)for(const i of h.words)if(!b.subjects.includes(i))b.subjects.push(i);
+  }
+  if(g.words.some(i=>b.predicates.includes(i))){
+   for(const h of hom)for(const i of h.words)if(!b.predicates.includes(i))b.predicates.push(i);
+  }
+ }
  const junctions=(raw.junctions||[]).map(x=>({after:indices(words,[x[0]])[0],right:indices(words,[x[1]])[0],glued:x[2]}));
  const punct=(raw.punct||[]).map(x=>({after:indices(words,[x[0]])[0],sign:x[1],why:x[2]}));
  const duplicates=(items,key)=>items.filter((x,i)=>items.findIndex(y=>y[key]===x[key])!==i);
