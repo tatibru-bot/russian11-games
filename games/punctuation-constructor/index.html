@@ -266,6 +266,13 @@ main{flex:1 0 auto;min-height:0;overflow:visible}
  .actionLine select{min-width:0;max-width:190px}
 }
 
+
+/* Разметка сохраняется на каждом этапе: союз и оборот — полноценные цветные кирпичики. */
+.brick .word.conj{background:#166c80;color:#fffef4;border:2px solid #57e6ed;box-shadow:inset 0 5px #ffffff25,0 3px #091728}
+.brick .word.turn,.brick .word.pendingTurn{background:#76501c;color:#fff8da;border:2px solid #ffcd67;box-shadow:inset 0 5px #fff4ae35,0 3px #091728}
+.brick .word.pendingTurn{outline:2px solid #ffde82;outline-offset:1px}
+.brick .word.turn.selected,.brick .word.pendingTurn.selected{background:#76501c;color:#fff8da;border-color:#ffcd67}
+.brick .word.conj.selected{background:#166c80;color:#fffef4;border-color:#57e6ed}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -306,7 +313,8 @@ function menu(){
 function pickedText(){return st.picked.map(i=>st.task.words[i]).join(" · ")}
 function clearChoice(){st.picked=[];st.anchor=null;st.question="";st.pending=null}
 function foundTag(i,kind){
- const groups=st.marks[kind];return list(kind).find(x=>has(groups,x.id)&&(kind==="conjs"?x.at===i:x.words.includes(i)));
+ if(kind==="conjs")return list("conjs").find(x=>x.at===i&&st.marks.conjs.includes("c"+i));
+ const groups=st.marks[kind];return list(kind).find(x=>has(groups,x.id)&&x.words.includes(i));
 }
 function descMark(i){
  const a=[];if(st.marks.bases.some(id=>st.task.bases.find(x=>x.id===id)?.words.includes(i)))a.push("base");
@@ -352,13 +360,15 @@ function isInMark(i,kind){return st.marks[kind].some(id=>st.task[kind].find(x=>x
 function wordPiece(i){
  const a=st.task,w=a.words[i],punct=st.step===6;
  let classes=descMark(i),picked=st.picked.includes(i)||(st.pending&&st.anchor===i);
+ const pendingTurn=st.pending?.kind==="turns"?a.turns.find(t=>t.id===st.pending.id):null;
+ if(pendingTurn?.words.includes(i))classes+=" pendingTurn";
  if(st.marks.bases.some(id=>a.bases.find(x=>x.id===id)?.subjects.includes(i)))classes+=" subject";
  if(st.marks.bases.some(id=>a.bases.find(x=>x.id===id)?.predicates.includes(i)))classes+=" predicate";
  if(isInMark(i,"common"))classes+=" common";
  if(picked)classes+=" selected";
- const turns=a.turns.filter(t=>st.marks.turns.includes(t.id));
+ const turns=a.turns.filter(t=>st.marks.turns.includes(t.id)||(pendingTurn?.id===t.id));
  const first=turns.some(t=>t.words[0]===i),last=turns.some(t=>t.words[t.words.length-1]===i);
- const anchor=turns.some(t=>(t.type==="part"||t.type==="appos")&&t.head===i);
+ const anchor=turns.some(t=>(t.type==="part"||t.type==="appos")&&t.head===i&&(st.marks.turns.includes(t.id)||st.anchor===t.head));
  const gap=punct?'<button class="punctGap '+(st.gap===i?"target":"")+(st.marks.punct[i]?" filled":"")+'" data-act="gap" data-i="'+i+'" aria-label="Знак после '+q(w)+'">'+q(st.marks.punct[i]||"·")+'</button>':"";
  return '<span class="brick '+(first?"turnBegin ":"")+(last?"turnEnd":"")+'" data-i="'+i+'">'+(anchor?'<span class="above" aria-label="определяемое слово">×</span>':"")+'<button class="word '+classes+'" data-act="token" data-i="'+i+'" aria-pressed="'+!!picked+'"><span class="wtext">'+q(w)+'</span></button>'+gap+'</span>';
 }
@@ -445,8 +455,9 @@ function toolbar(){
   return '<div class="actionLine"><span class="field">Нажми границу после слова, затем знак:</span><div class="punctBar">'+[[",","Запятая"],["—","Тире"],[":","Двоеточие"],[";","Точка с запятой"],["","Нет знака"]].map(x=>'<button title="'+x[1]+'" data-act="set-sign" data-sign="'+x[0]+'">'+(x[0]||"∅")+'</button>').join("")+'</div><span class="stretch"></span>'+next+'</div>';
  }
  if(st.pending){
-  const p=st.pending,questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+[...new Set([...help.questions,...a.subs.map(s=>s.question)])].map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
-  return '<div class="actionLine"><span class="field">Выделено: '+q(tokenString(p.words).replace(/<[^>]+>/g,""))+'</span>'+questions+'<span class="field">Опорное слово: '+(st.anchor==null?"нажми в предложении":'<b>'+q(a.words[st.anchor])+'</b>')+'</span><span class="stretch"></span><button class="primary" data-act="link">Связать ↗</button><button data-act="cancel">Отмена</button></div>';
+  const p=st.pending,pendingTurn=p.kind==="turns"?a.turns.find(t=>t.id===p.id):null;
+  const headLabel=pendingTurn?(pendingTurn.type==="ger"?"Сказуемое":"Определяемое слово"):"Опорное слово",questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+[...new Set([...help.questions,...a.subs.map(s=>s.question)])].map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
+  return '<div class="actionLine"><span class="field">Выделено: '+q(tokenString(p.words).replace(/<[^>]+>/g,""))+'</span>'+questions+'<span class="field">'+headLabel+': '+(st.anchor==null?"нажми в предложении":'<b>'+q(a.words[st.anchor])+'</b>')+'</span><span class="stretch"></span><button class="primary" data-act="link">Связать ↗</button><button data-act="cancel">Отмена</button></div>';
  }
  if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основы</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
@@ -469,7 +480,7 @@ function render(){
   "Выдели все грамматические основы сразу. Если есть общий второстепенный член, отметь его отдельно.",
   "Спусти всё придаточное целиком. Если внутри есть ещё одно, сначала перенеси внешнее, затем из него — внутреннее. Укажи вопрос и опорное слово.",
   "Найди союз или союзное слово. Выбери тип и связь, затем нажми «Разметить союз».",
-  "Выдели оборот, выбери его вид и слово, к которому он относится. Оборот остаётся на месте.",
+  "Выдели оборот: причастный свяжи с определяемым словом (×), деепричастный — со сказуемым. Выделение сохраняется.",
   "Перенеси на нижнюю дорожку вводные слова, обращения и вставки.",
   "Найди однородные члены и обобщающие слова. Они останутся выделенными.",
   "Расставь знаки препинания в разобранном предложении."
@@ -487,7 +498,13 @@ function render(){
 
 function fail(msg){st.fail++;note(msg,"error");render()}
 function chooseToken(i){
- if(st.pending){st.anchor=i;note("Выбрано опорное слово «"+st.task.words[i]+"». Теперь укажи вопрос, если это придаточное.","");render();return}
+ if(st.pending){
+   st.anchor=i;
+   const t=st.pending.kind==="turns"?st.task.turns.find(x=>x.id===st.pending.id):null;
+   const label=t?(t.type==="ger"?"Сказуемое":"Определяемое слово"):"Опорное слово";
+   note(label+" «"+st.task.words[i]+"» выбрано."+(st.pending.kind==="subs"?" Теперь укажи вопрос.":" Нажми «Связать»."),"");
+   render();return;
+  }
  if(st.step===6)return;
  st.picked=st.picked.includes(i)?st.picked.filter(x=>x!==i):[...st.picked,i].sort((a,b)=>a-b);
  note("");render();
@@ -523,7 +540,9 @@ function mark(kind){
  if(kind==="subs"||kind==="turns"){
    if(kind==="subs"&&parentOf(item)&&!st.marks.subs.includes(parentOf(item).id)){fail("Сначала спусти внешнее придаточное целиком, затем из него — вложенное.");return}
    if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Уточни его тип.");return}
-   st.pending={kind,id:item.id,words:kind==="subs"?fullSubWords(item):item.words};st.picked=[];st.anchor=null;st.question="";note("Выбери опорное слово и, если нужно, вопрос.");render();return;
+   st.pending={kind,id:item.id,words:kind==="subs"?fullSubWords(item):item.words};st.picked=[];st.anchor=null;st.question="";
+   const instruction=kind==="subs"?"Выбери опорное слово и вопрос.":item.type==="ger"?"Деепричастный оборот выделен. Укажи сказуемое, от которого зависит действие.":"Причастный оборот выделен. Укажи определяемое слово (×).";
+   note(instruction);render();return;
   }
   if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
  st.marks[kind].push(item.id);clearChoice();note("Конструкция отмечена.","ok");render();
@@ -531,12 +550,16 @@ function mark(kind){
 function link(){
  if(!st.pending)return;
  const group=st.task[st.pending.kind].find(x=>x.id===st.pending.id);
- if(st.anchor==null){fail("Нажми опорное слово в исходном предложении.");return}
+ if(st.anchor==null){
+  fail(st.pending.kind==="subs"?"Укажи опорное слово в предложении.":group.type==="ger"?"Укажи сказуемое, к которому относится деепричастный оборот.":"Укажи определяемое слово в предложении.");return;
+ }
  if(st.pending.kind==="subs"){
   const question=document.getElementById("question");if(question)st.question=question.value;
   if(st.question!==group.question){fail("Вопрос к придаточному неверный. Подумай, от какого слова он задаётся.");return}
  }
- if(st.anchor!==group.head){fail("Сейчас стрелка направлена не к тому слову. Найди, от чего зависит эта конструкция.");return}
+ if(st.anchor!==group.head){
+  fail(st.pending.kind==="subs"?"Стрелка направлена не к тому слову. Найди опорное слово.":group.type==="ger"?"Выбери сказуемое, к которому относится деепричастный оборот.":"Неверно выбрано определяемое слово. Найди существительное, к которому относится оборот.");return;
+ }
  st.marks[st.pending.kind].push(group.id);clearChoice();note("Связь построена: теперь это часть синтаксической схемы.","ok");render();
 }
 function glue(i){st.glues=st.glues.includes(i)?st.glues.filter(n=>n!==i):[...st.glues,i];note("Склейка — это отсутствие запятой на стыке двух союзов. Проверь, есть ли продолжение ТО.","");render()}
