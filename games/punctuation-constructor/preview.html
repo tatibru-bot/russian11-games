@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#132b48"><meta name="color-scheme" content="dark">
-<title>ЛЕГОПУНКТ · Автономная версия для проверки</title>
+<title>ЛЕГОПУНКТ · Версия 0.3 для проверки</title>
 <script>
 /* Конструктор предложения — авторские диагностические примеры, не перепечатка базы ФИПИ. */
 (function(){
@@ -310,6 +310,112 @@ body{background:radial-gradient(ellipse at 13% 10%,#2b4c70 0,transparent 42%),li
 .schemeTreeBranch{display:flex;align-items:center;gap:6px;position:relative;padding:3px 0 4px 9px;margin-left:5px;border-left:2px solid #a9a1df;flex-wrap:wrap}
 .schemeTreeBranch::before{content:"";width:10px;height:2px;background:#a9a1df;position:absolute;left:0;top:50%}
 .schemeTreeBranch small{font-size:11px;color:#cbd8f4}
+
+/* ЛЕГОПУНКТ 0.3: без вложенных областей прокрутки; весь экран принадлежит рабочему полю. */
+html,body{height:auto;min-height:100%;overflow:visible;overscroll-behavior:auto}
+body{overflow-y:auto}
+.app{height:auto;min-height:100dvh;max-width:none;gap:7px;padding:8px 12px;overflow:visible}
+main{flex:1 0 auto;min-height:0;overflow:visible}
+.game{height:auto;min-height:0;overflow:visible;display:flex;flex-direction:column;gap:8px}
+.top{min-height:40px}
+#status{display:none}
+.brand strong{font-size:23px}
+.brand small{font-size:13px}
+.titleline{min-height:36px}
+.titleline .meta b{font-size:20px;color:#ffe29a}
+.titleline .meta{font-size:14px}
+.titleline button{font-size:15px;min-height:35px}
+.stepTitle{min-height:0;padding:10px 14px;gap:13px}
+.stepNumber{font-size:23px;min-width:68px;padding:8px}
+.stepTitle strong{font-size:clamp(20px,2.1vw,25px)}
+.stepTitle p{font-size:clamp(15px,1.5vw,18px);line-height:1.4;color:#e6edf6}
+.stepSkip{font-size:inherit}
+.workarea{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:visible}
+.wordsPanel{padding:10px 14px;min-height:0;overflow:visible}
+.panelHeader{font-size:15px;line-height:1.35;letter-spacing:.04em;margin-bottom:4px}
+.cleanSentence{font-size:clamp(18px,1.9vw,23px);font-weight:650;max-height:none;overflow:visible;line-height:1.5}
+.buildGrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(250px,1fr);align-items:start;gap:8px;min-height:0;overflow:visible}
+.buildGrid.noSchema{grid-template-columns:minmax(0,1fr)}
+.buildPanel,.diagramPanel{display:flex;flex-direction:column;gap:6px;min-height:0;padding:10px 12px;overflow:visible}
+.blueprint,.diagramPanel .diagram,.blueprintContent{flex:0 0 auto;min-height:0;height:auto;overflow:visible;scrollbar-width:none}
+.blueprintContent{padding:4px 0 6px}
+.track{align-items:center;gap:7px 5px;min-height:0;margin:0 0 10px;padding:8px 10px 10px;overflow:visible}
+.trackLabel{font-size:15px;line-height:1.2;margin-bottom:1px;letter-spacing:.025em}
+.brick{min-height:42px;padding-top:9px}
+.brick .word{min-height:39px;font-size:clamp(17px,1.52vw,21px);padding:7px 10px;line-height:1.25;box-shadow:inset 0 5px #ffffff25,0 3px #091728}
+.brick .above{top:-14px;font-size:22px}
+.brick.turnBegin:before,.brick.turnEnd:after{font-size:27px}
+.syntaxBracket{font-size:clamp(23px,2.3vw,30px);line-height:1.25}
+.schemeCompact{display:flex;flex-direction:column;gap:12px;min-width:0;padding:6px 0}
+.schemeRow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:40px}
+.schemeNode{font-size:clamp(19px,2vw,25px);padding:6px 12px}
+.schemeNode.sub{font-size:clamp(18px,1.65vw,23px)}
+.schemeQuestion{font-size:16px;font-weight:750;color:#dacbff;white-space:nowrap}
+.schemeCommon{font-size:17px;margin-right:8px}
+.schemeJoin{font-size:21px}
+.schemeBranch{border-left:3px solid #b7a7ee;padding-left:10px;margin-top:4px}
+.schemeMarks{font-size:16px;color:#ffd58f;margin-top:5px;line-height:1.5}
+.schemeEmpty{font-size:17px;color:#d4deed}
+.controls{flex:0 0 auto;min-height:0;padding:10px 12px;gap:7px}
+.actionLine{gap:8px}
+.actionLine button{min-height:46px;font-size:17px;padding:8px 14px}
+.actionLine .field{font-size:16px;line-height:1.4}
+.actionLine select{font-size:17px;min-height:43px;padding:6px 10px}
+.hint{font-size:16px;min-height:0;line-height:1.35;padding:0 2px}
+.hint:empty{display:none}
+.selectionHint,.footer,.graphLinks,.schemeNote,.schemeTree{display:none}
+.punctBar{gap:8px;flex-wrap:wrap}
+.punctBar button{min-width:45px;min-height:45px;font-size:20px}
+.punctGap{min-width:25px;min-height:29px;font-size:18px}
+.blueprint .punctGap{min-width:21px}
+.menu{height:auto;overflow:visible;gap:12px}
+.modeGrid{flex:0 0 auto;grid-template-rows:repeat(2,minmax(130px,1fr))}
+.modeTile strong{font-size:24px}
+.modeTile small,.modeTile b{font-size:15px}
+.intro h1{font-size:30px}
+.intro p{font-size:17px}
+.bottomNote{font-size:13px}
+.finish{height:auto;overflow:visible}
+.finish .scroll{overflow:visible;flex:0 0 auto}
+.finish p{font-size:17px}
+.modalBack{position:absolute;min-height:100%;height:auto;inset:0;align-items:flex-start;overflow:visible}
+.modal{max-height:none;overflow:visible;margin:14px auto;padding:18px}
+.answerGrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(230px,1fr);gap:10px}
+.answerGrid .previewBuild,.answerGrid .diagram{max-height:none;overflow:visible}
+.answerGrid .previewBuild{min-width:0}
+@media(max-width:760px){
+ .app{padding:6px 7px;gap:5px}
+ .brand strong{font-size:18px}.brand small{font-size:11px}
+ .titleline .meta b{font-size:17px}
+ .stepTitle{padding:8px;gap:8px}
+ .stepNumber{font-size:20px;min-width:58px;padding:6px}
+ .stepTitle strong{font-size:19px}.stepTitle p{font-size:15px}
+ .wordsPanel{padding:8px 10px}
+ .panelHeader{font-size:13px}
+ .cleanSentence{font-size:19px}
+ .buildGrid,.answerGrid{display:flex;flex-direction:column;gap:8px}
+ .buildPanel,.diagramPanel{width:100%;padding:8px 9px}
+ .track{padding:6px 7px 9px;gap:5px 3px}
+ .trackLabel{font-size:13px}
+ .brick{min-height:38px}.brick .word{font-size:17px;min-height:36px;padding:6px 8px}
+ .syntaxBracket{font-size:23px}
+ .schemeNode{font-size:19px;padding:4px 9px}
+ .schemeNode.sub{font-size:18px}
+ .actionLine button{min-height:42px;font-size:16px;padding:6px 9px}
+ .actionLine select{font-size:16px;min-height:40px;padding:5px 6px}
+ .actionLine .field,.hint{font-size:15px}
+ .controls{padding:7px}
+ .modeGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(115px,1fr))}
+ .modeTile strong{font-size:20px}.modeTile small,.modeTile b{font-size:13px}
+ .intro h1{font-size:24px}.intro p{font-size:15px}
+}
+@media(max-width:390px){
+ .brand strong{font-size:16px}.stepTitle strong{font-size:17px}
+ .stepTitle p{font-size:14px}.cleanSentence{font-size:18px}
+ .brick .word{font-size:16px;padding:5px 6px}
+ .actionLine select{min-width:0;max-width:190px}
+}
+
 </style></head>
 <body><div class="app">
 <header class="top"><div class="brand"><span class="glyph" aria-hidden="true">🧱</span><div><strong>ЛЕГОПУНКТ</strong><small>Собери предложение · ЕГЭ 16–20</small></div></div><span class="status" id="status">черновик 0.1</span></header>
@@ -325,7 +431,7 @@ const SAME=(a,b)=>a.length===b.length&&a.slice().sort((x,y)=>x-y).every((x,i)=>x
 const has=(arr,id)=>arr.includes(id);
 const STORE="punct:constructor:mvp:completed:v1";
 let completed={};try{completed=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch(e){}
-let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,helpOpen:false};
+let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};
 function resetMarks(){return {bases:[],common:[],subs:[],conjs:[],turns:[],extras:[],hom:[],general:[],punct:{}}}
 function list(kind){return st.task[kind]||[]}
 function selectedMatch(kind){return list(kind).find(x=>!has(st.marks[kind],x.id)&&SAME(x.words,st.picked))}
@@ -340,7 +446,7 @@ function progress(){const a=st.task;return [
  ][st.step]}
 function stageReady(){const p=progress();if(!p||p[0]!==p[1]||st.pending)return false;if(st.step===2){return list("junctions").every(j=>st.glues.includes(j.after)===j.glued)}return true}
 function note(s,type=""){st.hint=s;st.hintType=type}
-function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,helpOpen:false};render()}
+function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};render()}
 function launchNext(){const a=tasks.filter(x=>x.num===st.num);launch(st.num,(st.index+1)%a.length)}
 function taskCount(num){return tasks.filter(x=>x.num===num).length}
 function menu(){
@@ -365,13 +471,33 @@ function descMark(i){
 function stripExtras(indices){const hidden=new Set([...st.marks.extras.flatMap(id=>st.task.extras.find(x=>x.id===id)?.words||[])]);return indices.filter(i=>!hidden.has(i))}
 function tokenString(indices){return indices.map(i=>q(st.task.words[i])).join(" ")}
 
+
+function parentOf(sub){return st.task.subs.find(x=>x.id!==sub.id&&x.words.includes(sub.head))||null}
+function subDepth(sub,seen=new Set()){
+ if(seen.has(sub.id))throw Error("Зацикленная зависимость придаточных");
+ seen.add(sub.id);const parent=parentOf(sub);
+ return parent?subDepth(parent,seen)+1:1;
+}
+function fullSubWords(sub){
+ const seen=new Set(),all=new Set(sub.words);
+ function visit(s){if(seen.has(s.id))throw Error("Зацикленная зависимость");seen.add(s.id);
+  for(const child of st.task.subs.filter(x=>parentOf(x)?.id===s.id)){
+   child.words.forEach(i=>all.add(i));visit(child);
+  }
+ }
+ visit(sub);return [...all].sort((a,b)=>a-b);
+}
 function laneOf(i){
- const a=st.task;
- if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return 2;
- if(st.marks.subs.some(id=>a.subs.find(x=>x.id===id)?.words.includes(i)))return 1;
- if(a.conjs.some(c=>c.at===i&&c.role==="between-subs")&&st.marks.subs.length)return 1;
+ const a=st.task,marked=a.subs.filter(x=>st.marks.subs.includes(x.id));
+ const maxDepth=Math.max(0,...marked.map(x=>subDepth(x)));
+ if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return Math.max(1,maxDepth)+1;
+ const inside=marked.filter(x=>fullSubWords(x).includes(i));
+ if(inside.length)return Math.max(...inside.map(x=>subDepth(x)));
+ const between=a.conjs.find(c=>c.at===i&&c.role==="between-subs");
+ if(between&&marked.length>1)return Math.min(...marked.map(x=>subDepth(x)));
  return 0;
 }
+
 function isInMark(i,kind){return st.marks[kind].some(id=>st.task[kind].find(x=>x.id===id)?.words.includes(i))}
 function wordPiece(i){
  const a=st.task,w=a.words[i],punct=st.step===6;
@@ -386,110 +512,82 @@ function wordPiece(i){
  const gap=punct?'<button class="punctGap '+(st.gap===i?"target":"")+(st.marks.punct[i]?" filled":"")+'" data-act="gap" data-i="'+i+'" aria-label="Знак после '+q(w)+'">'+q(st.marks.punct[i]||"·")+'</button>':"";
  return '<span class="brick '+(first?"turnBegin ":"")+(last?"turnEnd":"")+'" data-i="'+i+'">'+(anchor?'<span class="above" aria-label="определяемое слово">×</span>':"")+'<button class="word '+classes+'" data-act="token" data-i="'+i+'" aria-pressed="'+!!picked+'"><span class="wtext">'+q(w)+'</span></button>'+gap+'</span>';
 }
+
 function bracketGroups(level,visible){
- const a=st.task,v=new Set(visible),common=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
- const groups=level===0?(st.marks.bases.length?a.mains:[]):level===1?a.subs.filter(x=>st.marks.subs.includes(x.id)):[];
+ const a=st.task,used=new Set(visible),common=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
+ const groups=level===0?(st.marks.bases.length?a.mains:[]):a.subs.filter(x=>st.marks.subs.includes(x.id)&&subDepth(x)===level);
  return groups.map(g=>{
-  const positions=g.words.filter(i=>v.has(i)&&!(level===0&&common.has(i)));
-  if(!positions.length)return null;
-  return {id:g.id,min:Math.min(...positions),max:Math.max(...positions),sub:level===1};
+  const positions=g.words.filter(i=>used.has(i)&&!(level===0&&common.has(i)));
+  return positions.length?{id:g.id,min:Math.min(...positions),max:Math.max(...positions),sub:level>0}:null;
  }).filter(Boolean);
 }
-function laneHTML(level){
- const a=st.task,visible=a.words.map((_,i)=>i).filter(i=>laneOf(i)===level);
- const name=["1 · Главные части","2 · Придаточные","3 · Не члены предложения"][level];
- const groups=bracketGroups(level,visible);
+function activeLevels(){
+ const depths=st.task.subs.filter(x=>st.marks.subs.includes(x.id)).map(x=>subDepth(x));
+ const levels=[0,...new Set(depths)].sort((a,b)=>a-b);
+ if(st.marks.extras.length)levels.push(Math.max(1,...depths)+1);
+ return levels;
+}
+function laneHTML(level,extraLevel){
+ const a=st.task,visible=a.words.map((_,i)=>i).filter(i=>laneOf(i)===level),extra=level===extraLevel;
+ const groups=extra?[]:bracketGroups(level,visible);
+ const name=extra?"↓ Не члены предложения":level===0?"Главные части":"↓ Придаточные · уровень "+level;
  let pieces="";
  for(const i of visible){
-  const opens=groups.filter(g=>g.min===i).sort((x,y)=>y.max-x.max);
-  for(const g of opens)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?"(":"[")+'</span>';
+  for(const g of groups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))
+   pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?"(":"[")+'</span>';
   pieces+=wordPiece(i);
-  const closes=groups.filter(g=>g.max===i).sort((x,y)=>y.min-x.min);
-  for(const g of closes)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?")":"]")+'</span>';
+  for(const g of groups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))
+   pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?")":"]")+'</span>';
  }
- return '<div class="track '+(level===1?"secondary":level===2?"tertiary":"")+'" data-lane="'+level+'"><div class="trackLabel">'+name+'</div>'+(pieces||'<span class="emptyTrack">'+(level===1?"Пока не спущено ни одного придаточного":level===2?"Пока нет выделенных вводных или обращений":"")+" </span>")+'</div>';
+ return '<div class="track '+(extra?"tertiary":level?"secondary":"")+'" data-lane="'+level+'"><div class="trackLabel">'+name+'</div>'+pieces+'</div>';
 }
 function blueprint(){
- return '<div class="blueprint" id="blueprint"><div class="blueprintContent" id="blueprintSurface">'+[0,1,2].map(laneHTML).join("")+'<svg class="arrowOverlay" aria-hidden="true"><defs><marker id="brickArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#ffdc7c" stroke-width="1.4"/></marker></defs><g id="arrowPaths"></g></svg></div></div>';
+ const levels=activeLevels(),extraLevel=st.marks.extras.length?levels[levels.length-1]:-1;
+ return '<div class="blueprint" id="blueprint"><div class="blueprintContent" id="blueprintSurface">'+levels.map(level=>laneHTML(level,extraLevel)).join("")+'<svg class="arrowOverlay" aria-hidden="true"><defs><marker id="brickArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#ffdc7c" stroke-width="1.4"/></marker></defs><g id="arrowPaths"></g></svg></div></div>';
 }
 function drawArrows(){
  const surface=document.getElementById("blueprintSurface"),svg=surface?.querySelector(".arrowOverlay"),paths=document.getElementById("arrowPaths");
  if(!surface||!svg||!paths||!st.task)return;
  const b=surface.getBoundingClientRect(),items=[];
- const point=i=>{const el=surface.querySelector('.brick[data-i="'+i+'"] .word');if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left+r.width/2-b.left,y:r.top-b.top+surface.parentElement.scrollTop}};
+ const point=i=>{const el=surface.querySelector('.brick[data-i="'+i+'"] .word');if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left+r.width/2-b.left,y:r.top-b.top}};
  for(const id of st.marks.subs){const sub=st.task.subs.find(x=>x.id===id);items.push({from:sub.head,to:sub.words[0],label:sub.question,stroke:"#cab7ff"})}
- for(const id of st.marks.turns){const t=st.task.turns.find(x=>x.id===id);items.push({from:t.head,to:t.words[0],label:t.type==="ger"?"добавочное действие":"×",stroke:"#ffcf80"})}
+ for(const id of st.marks.turns){const t=st.task.turns.find(x=>x.id===id);items.push({from:t.head,to:t.words[0],label:t.type==="ger"?"действие":"×",stroke:"#ffcf80"})}
  const w=Math.max(surface.scrollWidth,surface.clientWidth),h=Math.max(surface.scrollHeight,surface.clientHeight);
  svg.setAttribute("width",w);svg.setAttribute("height",h);
  paths.innerHTML=items.map(x=>{
   const p=point(x.from),t=point(x.to);if(!p||!t)return "";
-  const y1=p.y-2,y2=t.y-2,control=Math.min(y1,y2)-Math.max(16,Math.min(40,Math.abs(p.x-t.x)/4));
+  const y1=p.y-2,y2=t.y-2,control=Math.min(y1,y2)-Math.max(15,Math.min(35,Math.abs(p.x-t.x)/4));
   const middle=(p.x+t.x)/2;
-  const label=String(x.label||"").replace(/^\s+|\s+$/g,"");
-  return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="1.9" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(label)+'</text>';
+  return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="2" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(x.label)+'</text>';
  }).join("");
 }
 
-function schemeTree(){
- const a=st.task,subs=a.subs.filter(x=>st.marks.subs.includes(x.id));
- if(!st.marks.bases.length)return "";
- const common=a.common.filter(x=>st.marks.common.includes(x.id));
- const root='<div class="schemeTreeRoot">'+(common.length?'<span class="schemeNode common">ОВЧ</span><span class="schemeTreeEdge">↘</span>':"")+
-  a.mains.map((m,k)=>'<span class="schemeNode">[ — ═ ]</span>'+(k<a.mains.length-1?'<span class="schemeTreeEdge">'+q(a.conjs.find(x=>x.role==="parts")?.at!=null?a.words[a.conjs.find(x=>x.role==="parts").at]:"↔")+'</span>':"")).join("")+'</div>';
- const depth=(sub,seen=new Set())=>{if(seen.has(sub.id))return 0;seen.add(sub.id);const parent=a.subs.find(x=>x.id!==sub.id&&x.words.includes(sub.head));return parent?1+depth(parent,seen):0};
- const leaf=subs.map(x=>'<div class="schemeTreeBranch" style="margin-left:'+(depth(x)*17)+'px"><span class="schemeTreeEdge">↳ '+q(x.question)+'</span><span class="schemeNode sub">( — ═ )</span><small>← '+q(a.words[x.head])+'</small></div>').join("");
- return '<div class="schemeTree"><div class="schemeTreeTitle">Дерево зависимостей</div>'+root+leaf+'</div>';
-}
+
 function schema(){
- const a=st.task,baseIds=new Set(st.marks.bases),subIds=new Set(st.marks.subs);
- const commonIds=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
- const extraIds=new Set(a.extras.filter(x=>st.marks.extras.includes(x.id)).flatMap(x=>x.words));
- const turnIds=new Set(a.turns.filter(x=>st.marks.turns.includes(x.id)).flatMap(x=>x.words));
- const allGroups=[
-  ...(baseIds.size?a.mains.map(g=>({type:"main",words:g.words.filter(i=>!commonIds.has(i)&&!extraIds.has(i))})):[]),
-  ...a.subs.filter(g=>subIds.has(g.id)).map(g=>({type:"sub",words:g.words.filter(i=>!extraIds.has(i))}))
- ].filter(g=>g.words.length).map(g=>({...g,min:Math.min(...g.words),max:Math.max(...g.words)}));
- const subjects=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.subjects));
- const predicates=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.predicates));
- const seenTurns=new Set();
- const homIds=new Set(a.hom.filter(x=>st.marks.hom.includes(x.id)).flatMap(x=>x.words));
- const generalIds=new Set(a.general.filter(x=>st.marks.general.includes(x.id)).flatMap(x=>x.words));
- let parts="";
- for(let i=0;i<a.words.length;i++){
-  for(const g of allGroups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?"(":"[")+'</span>';
-  let symbol="";
-  if(commonIds.has(i)){
-   if(a.common.some(g=>st.marks.common.includes(g.id)&&g.words[0]===i))symbol='<span class="schemeCommon">ОВЧ</span>'
-  }else if(subjects.has(i)&&predicates.has(i))symbol='<span class="schemeMark">— ═</span>';
-  else if(subjects.has(i))symbol='<span class="schemeMark">—</span>';
-  else if(predicates.has(i))symbol='<span class="schemeMark">═</span>';
-  else if(extraIds.has(i))symbol='<span class="schemeExtra">⊕</span>';
-  else if(turnIds.has(i)){
-   const t=a.turns.find(x=>st.marks.turns.includes(x.id)&&x.words.includes(i));
-   if(t&&!seenTurns.has(t.id)){symbol='<span class="schemeTurn">│об.│</span>';seenTurns.add(t.id)}
-  }else{
-   const c=a.conjs.find(x=>x.at===i&&st.marks.conjs.includes("c"+i));
-   if(c)symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
-   else if(a.subs.some(x=>subIds.has(x.id)&&x.words[0]===i))symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
-   else if(a.hom.some(x=>st.marks.hom.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark hom">○</span>';
-   else if(a.general.some(x=>st.marks.general.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark general">◎</span>';
-  }
-  // A grammatical base may simultaneously be an homogeneous member or generalizing word.
-  if((subjects.has(i)||predicates.has(i))&&generalIds.has(i))symbol='<span class="schemeMark general">'+symbol+'</span>';
-  else if((subjects.has(i)||predicates.has(i))&&homIds.has(i))symbol='<span class="schemeMark hom">'+symbol+'</span>';
-  parts+=symbol;
-  for(const g of allGroups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?")":"]")+'</span>';
- }
- const links=a.subs.filter(x=>subIds.has(x.id)).map(x=>'<div class="graphLink">↳ ('+q(x.question)+') от <b>'+q(a.words[x.head])+'</b></div>').join("");
- const relations=a.subs.filter(x=>subIds.has(x.id));
- const homo=relations.length>=2&&relations.every(x=>x.head===relations[0].head&&x.question===relations[0].question);
- const nested=relations.some(x=>relations.some(y=>x!==y&&y.words.includes(x.head)));
- const pattern=relations.length<2?"":homo?"Однородное подчинение":relations.length===2?(nested?"Последовательное подчинение":"Параллельное подчинение"):nested?"Комбинированное подчинение":"Параллельное или однородное подчинение";
- return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
-  (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
-  schemeTree()+
-  '<div class="schemeNote">[ ] — главная часть; ( ) — придаточная; — подлежащее; ═ сказуемое; ⊕ не член предложения; ○ однородный член.</div>';
+ const a=st.task,markedBases=a.bases.filter(x=>st.marks.bases.includes(x.id));
+ if(!markedBases.length)return '<div class="schemeEmpty">Сначала найди грамматические основы — здесь появится схема.</div>';
+ const common=a.common.some(x=>st.marks.common.includes(x.id));
+ const mainLines=a.mains.map(m=>{
+  const bases=markedBases.filter(b=>b.words.some(i=>m.words.includes(i)));
+  const parts=bases.map(b=>b.subjects.length?"— ═":"═").join(" ");
+  return '<span class="schemeNode">[ '+(parts||"— ═")+' ]</span>';
+ });
+ const mainConj=a.conjs.find(c=>c.role==="parts");
+ const join=mainConj&&st.marks.conjs.includes("c"+mainConj.at)?q(a.words[mainConj.at]):"";
+ const main='<div class="schemeRow schemeMain">'+(common?'<span class="schemeCommon">ОВЧ</span>':"")+mainLines.join(join?'<span class="schemeJoin">'+join+'</span>':" ")+'</div>';
+ const markedSubs=a.subs.filter(x=>st.marks.subs.includes(x.id)).sort((a,b)=>subDepth(a)-subDepth(b));
+ const branches=markedSubs.map(x=>{
+  const base=markedBases.find(b=>b.words.some(i=>x.words.includes(i)));
+  const hasSubject=!!base?.subjects?.length;
+  const conjunction=a.conjs.find(c=>x.words.includes(c.at)&&c.role==="inside"&&st.marks.conjs.includes("c"+c.at));
+  const role=conjunction?q(a.words[conjunction.at])+" ":"";
+  return '<div class="schemeRow schemeBranch" style="margin-left:'+(subDepth(x)-1)*22+'px"><span class="schemeQuestion">↳ '+q(x.question)+'</span><span class="schemeNode sub">( '+role+(hasSubject?"— ═":"═")+' )</span></div>';
+ }).join("");
+ const turnCount=st.marks.turns.length,homCount=st.marks.hom.length,generalCount=st.marks.general.length;
+ const note=(turnCount||homCount||generalCount)?'<div class="schemeMarks">'+(turnCount?"× ─ │оборот│ ":"")+(homCount?" ◯ однородные ":"")+(generalCount?" ◎ обобщающее":"")+'</div>':"";
+ return '<div class="schemeCompact">'+main+branches+note+'</div>';
 }
+
 function toolbar(){
  const a=st.task,step=st.step,done=stageReady();
  const next='<button class="primary" data-act="nextstage">'+(step===6?"Проверить пунктуацию":"Следующий этап →")+'</button>';
@@ -500,43 +598,43 @@ function toolbar(){
   const p=st.pending,questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+[...new Set([...help.questions,...a.subs.map(s=>s.question)])].map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
   return '<div class="actionLine"><span class="field">Выделено: '+q(tokenString(p.words).replace(/<[^>]+>/g,""))+'</span>'+questions+'<span class="field">Опорное слово: '+(st.anchor==null?"нажми в предложении":'<b>'+q(a.words[st.anchor])+'</b>')+'</span><span class="stretch"></span><button class="primary" data-act="link">Связать ↗</button><button data-act="cancel">Отмена</button></div>';
  }
- if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основу</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
+ if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основы</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
- if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind"><option value="coord">Сочинительный</option><option value="sub">Подчинительный</option><option value="relative">Союзное слово</option><option value="correlate">Указательное «то»</option></select></label><label class="field">Связь: <select id="role"><option value="parts">Между главными</option><option value="members">Между однородными</option><option value="between-subs">Между придаточными</option><option value="inside">Внутри придаточного</option></select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
- if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind"><option value="part">Причастный │ │</option><option value="ger">Деепричастный │ │</option><option value="appos">Приложение</option><option value="detail">Уточнение</option><option value="compare">Сравнительный</option></select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
- if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind"><option value="intro">Вводное</option><option value="address">Обращение</option><option value="insert">Вставная конструкция</option></select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
- return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+ if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind">'+[["coord","Сочинительный"],["sub","Подчинительный"],["relative","Союзное слово"],["correlate","Указательное «то»"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><label class="field">Связь: <select id="role">'+[["parts","Между главными"],["members","Между однородными"],["between-subs","Между придаточными"],["inside","Внутри придаточного"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceRole===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
+  if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["part","Причастный"],["ger","Деепричастный"],["appos","Приложение"],["detail","Уточнение"],["compare","Сравнительный"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+  if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["intro","Вводное"],["address","Обращение"],["insert","Вставка"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+  return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
 }
 function junctionButtons(){
  const a=list("junctions");if(!a.length)return "";
  return '<div class="actionLine">'+a.map(x=>'<button data-act="glue" data-i="'+x.after+'" class="'+(st.glues.includes(x.after)?"gold":"ghost")+'">⛓ Стык «'+q(st.task.words[x.after])+' + '+q(st.task.words[x.right])+'»: '+(st.glues.includes(x.after)?"склеено":"не склеено")+'</button>').join("")+'</div>';
 }
+
 function render(){
  if(st.view==="menu"){menu();return}
  if(st.view==="finish"){finish();return}
  const a=st.task,step=st.step,p=progress();
  status.textContent="этап "+(step+1)+" / 7";
  const instructions=[
-  "Выдели грамматическую основу; если их ровно две, вторая подчеркнётся автоматически. Есть ли общий второстепенный член (ОВЧ)? Если есть — выдели его: он остаётся за квадратными скобками.",
-  "Выдели придаточное ЦЕЛИКОМ, сохраняя все слова и порядок. Оно опустится на вторую дорожку. Задай вопрос и свяжи его с опорным словом.",
-  "Найди союз и определи его роль. Сочинительный союз между придаточными остаётся между круглыми скобками, а не внутри них.",
-  "Выдели оборот на месте: он НЕ переносится. Поставь × над определяемым словом и соедини его с оборотом стрелкой.",
-  "Найди вводное, обращение или вставку: это не члены предложения, поэтому они опускаются на третью дорожку.",
-  "Отметь однородные члены кружками; обобщающее слово — двойным кружком. Всё ранее отмеченное остаётся видимым.",
-  "Расставь знаки в уже собранной конструкции. Исходное предложение сверху всегда можно прочитать без пометок."
-];
- main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Хард-уровень":"ЕГЭ № "+a.num)+' · '+q(a.short)+'</b>Пример '+(st.index+1)+' из '+taskCount(a.num)+' · элементов '+p[0]+'/'+p[1]+'</div><div><button class="ghost" data-act="help">? Теория</button> <button class="ghost" data-act="menu">✕ Меню</button></div></div>'+
-  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(step>0&&step<6?' <span class="stepSkip">Если такого элемента нет, переходи дальше.</span>':"")+'</p></div></div>'+
-  '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">ИСХОДНОЕ ПРЕДЛОЖЕНИЕ — ЧИТАЙ БЕЗ ПОМЕТОК</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
-  '<div class="buildGrid"><section class="buildPanel panel"><div class="panelHeader">РАЗБОР — ПЕРЕМЕЩАЙ КИРПИЧИКИ И СОХРАНЯЙ СВЯЗИ</div>'+blueprint()+'<div class="selectionHint">'+(st.picked.length?'Выбрано кирпичиков: '+st.picked.length:'Касайся слов ниже, чтобы выделить конструкцию.')+'</div></section>'+
-  '<section class="diagramPanel panel"><div class="panelHeader">ГРАФИЧЕСКАЯ СХЕМА РЯДОМ С РАЗБОРОМ</div><div class="diagram">'+schema()+'</div></section></div></div>'+
-  '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||((!p[1]&&step!==6)?"Такого элемента нет — переходи к следующему этапу.":""))+'</div></div>'+
-  '<div class="footer"><span>ЛЕГОПУНКТ · прототип, без записи в бот</span><button class="ghost" data-act="show-answer">Готовый разбор</button></div></div>'+(st.helpOpen?renderModal():"");
-  requestAnimationFrame(drawArrows);
+  "Выдели все грамматические основы сразу. Если есть общий второстепенный член, отметь его отдельно.",
+  "Спусти всё придаточное целиком. Если внутри есть ещё одно, сначала перенеси внешнее, затем из него — внутреннее. Укажи вопрос и опорное слово.",
+  "Найди союз или союзное слово. Выбери тип и связь, затем нажми «Разметить союз».",
+  "Выдели оборот, выбери его вид и слово, к которому он относится. Оборот остаётся на месте.",
+  "Перенеси на нижнюю дорожку вводные слова, обращения и вставки.",
+  "Найди однородные члены и обобщающие слова. Они останутся выделенными.",
+  "Расставь знаки препинания в разобранном предложении."
+ ];
+ const hasNoItems=step>0&&step<6&&p[1]===0;
+ const needsSchema=st.marks.bases.length>0;
+ main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Сложный уровень":"№ "+a.num)+' · '+q(a.short)+'</b></div><button class="ghost" data-act="menu">Меню</button></div>'+
+  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+(hasNoItems?' <span class="stepSkip">Здесь такого элемента нет — переходи дальше.</span>':"")+'</p></div></div>'+
+  '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">Предложение</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
+  '<div class="buildGrid '+(!needsSchema?"noSchema":"")+'"><section class="buildPanel panel"><div class="panelHeader">Разбор по дорожкам</div>'+blueprint()+'</section>'+
+  (needsSchema?'<section class="diagramPanel panel"><div class="panelHeader">Схема</div><div class="diagram">'+schema()+'</div></section>':"")+'</div></div>'+
+  '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||"")+'</div></div></div>';
+ requestAnimationFrame(drawArrows);
 }
-function renderModal(){
- return '<div class="modalBack"><section class="modal panel"><h3>📖 Почему именно такой порядок?</h3><p>'+q(help.theory[st.step])+'</p><p>Приём: сначала определи устройство предложения, затем сравни границы, и только после этого решай, где нужен знак. Разбор пока не подсказывает, какие слова выделять.</p><button class="primary" data-act="help">Продолжить</button></section></div>'
-}
+
 function fail(msg){st.fail++;note(msg,"error");render()}
 function chooseToken(i){
  if(st.pending){st.anchor=i;note("Выбрано опорное слово «"+st.task.words[i]+"». Теперь укажи вопрос, если это придаточное.","");render();return}
@@ -548,28 +646,27 @@ function mark(kind){
  if(!st.picked.length){fail("Сначала выдели нужное слово или группу слов.");return}
  const a=st.task;
  if(kind==="bases"){
-   const id=a.bases.findIndex((x,i)=>!st.marks.bases.includes(x.id)&&SAME(st.picked,x.words));
-   if(id<0){fail("Это не полная грамматическая основа. Проверь подлежащее и составное/однородное сказуемое.");return}
-   st.marks.bases.push(a.bases[id].id);
-   // Если в предложении ровно две основы, вторая подсвечивается автоматически.
-   if(a.bases.length===2)for(const b of a.bases)if(!st.marks.bases.includes(b.id))st.marks.bases.push(b.id);
-   clearChoice();note("Основа найдена. Проверь, есть ли общий второстепенный член: он должен оказаться ЗА квадратными скобками.","ok");render();return;
+   const expected=[...new Set(a.bases.flatMap(x=>x.words))].sort((x,y)=>x-y);
+   if(!SAME(st.picked,expected)){fail("Неверно выделены основы");return}
+   st.marks.bases=a.bases.map(x=>x.id);
+   clearChoice();note(a.common.length?"Все основы найдены! Теперь выдели общий второстепенный член.":"Все основы выделены верно.","ok");render();return;
   }
   if(kind==="conjs"){
   if(st.picked.length!==1){fail("Выбери один союз или союзное слово, затем его функцию.");return}
   const at=st.picked[0],target=a.conjs.find(x=>x.at===at&&!st.marks.conjs.includes("c"+at));
   if(!target){fail("Это слово не является союзом/союзным словом в данном предложении или уже разобрано.");return}
-  const userKind=document.getElementById("kind").value,role=document.getElementById("role").value;
+  const userKind=st.choiceKind,role=st.choiceRole;
   if(userKind!==target.type||role!==target.role){fail("Проверь функцию: союз соединяет части, однородные члены или однородные придаточные? Союзное слово — член придаточного.");return}
   st.marks.conjs.push("c"+at);clearChoice();note("Связующее слово распознано.","ok");render();return;
  }
- const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(x.words,st.picked));
+ const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(kind==="subs"?fullSubWords(x):x.words,st.picked));
  if(!item){fail("Границы конструкции выбраны неточно. Её нужно выделить целиком (допускаются разорванные части).");return}
  if(kind==="subs"||kind==="turns"){
-  if(kind==="turns"&&item.type!==document.getElementById("kind").value){fail("Это другой вид оборота. Сначала уточни, чем он выражен.");return}
-  st.pending={kind,id:item.id,words:item.words};st.picked=[];st.anchor=null;st.question="";note("Конструкция спущена. Нажми в исходном предложении слово, от которого она зависит.");render();return;
- }
- if(kind==="extras"&&document.getElementById("kind").value!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
+   if(kind==="subs"&&parentOf(item)&&!st.marks.subs.includes(parentOf(item).id)){fail("Сначала спусти внешнее придаточное целиком, затем из него — вложенное.");return}
+   if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Уточни его тип.");return}
+   st.pending={kind,id:item.id,words:kind==="subs"?fullSubWords(item):item.words};st.picked=[];st.anchor=null;st.question="";note("Выбери опорное слово и, если нужно, вопрос.");render();return;
+  }
+  if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
  st.marks[kind].push(item.id);clearChoice();note("Конструкция отмечена.","ok");render();
 }
 function link(){
@@ -596,35 +693,34 @@ function nextStage(){
   completed[st.task.id]=true;try{localStorage.setItem(STORE,JSON.stringify(completed))}catch(e){}
   st.view="finish";render();return;
  }
- st.step++;st.picked=[];st.pending=null;st.anchor=null;st.question="";note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
+ st.step++;st.picked=[];st.pending=null;st.anchor=null;st.question="";
+ st.choiceKind=({2:"coord",3:"part",4:"intro"})[st.step]||"coord";st.choiceRole="parts";note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
 }
 function finish(){
  const a=st.task,punctText=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
  const dots=a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.sign)+' — '+q(p.why)+'</div>').join("")||'<div class="reviewRow">Запятых нет: '+q(a.insight)+'</div>';
  main.innerHTML='<div class="finish"><div class="head panel"><h2>🏁 Конструктор собран!</h2><p><b>'+q(a.num==="HARD"?"Хард":("№ "+a.num))+' · '+q(a.short)+'</b></p><p>'+q(punctText)+'</p><p>'+q(a.insight)+'</p></div><div class="scroll panel"><strong>Почему стоят именно эти знаки</strong>'+dots+'</div><div class="actionLine"><button class="primary" data-act="nexttask">Следующее предложение →</button><button class="ghost" data-act="menu">В меню</button></div></div>';
 }
+
 function showAnswer(){
  const a=st.task,oldMarks=st.marks,oldStep=st.step;
  st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};
  st.step=6;
- const visual='<div class="previewBuild">'+[0,1,2].map(laneHTML).join("").replace(/data-act="(token|gap)"/g,'data-act="noop"')+'</div>';
- const graphic=schema();
- st.marks=oldMarks;st.step=oldStep;
+ const levels=activeLevels(),extra=st.marks.extras.length?levels[levels.length-1]:-1;
+ const visual='<div class="previewBuild">'+levels.map(level=>laneHTML(level,extra)).join("").replace(/data-act="(token|gap)"/g,'data-act="noop"')+'</div>';
+ const graphic=schema();st.marks=oldMarks;st.step=oldStep;
  const full=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
- const text='<div class="reviewRow">'+q(a.insight)+'</div>'+a.punct.map(p=>'<div class="reviewRow"><b>После «'+q(a.words[p.after])+'»:</b> '+q(p.why)+'</div>').join("");
- const id="answerModal";document.getElementById(id)?.remove();
- const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
- modal.innerHTML='<section class="modal panel" style="width:min(1000px,100%);max-height:93dvh"><h3>🧱 Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,1fr);gap:8px">'+visual+'<div class="diagram">'+graphic+'</div></div>'+text+'<button class="primary" data-act="close-answer">Вернуться к заданию</button></section>';
+ const id="answerModal";document.getElementById(id)?.remove();const modal=document.createElement("div");modal.id=id;modal.className="modalBack";
+ modal.innerHTML='<section class="modal panel"><h3>Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid">'+visual+'<div class="diagram">'+graphic+'</div></div><p>'+q(a.insight)+'</p><button class="primary" data-act="close-answer">Закрыть</button></section>';
  document.body.append(modal);
 }
-document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value});
+document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value;else if(e.target.id==="kind")st.choiceKind=e.target.value;else if(e.target.id==="role")st.choiceRole=e.target.value});
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-act]");if(!b)return;
  const act=b.dataset.act;
  if(act==="close-answer"){document.getElementById("answerModal")?.remove();return}
  if(act==="menu"){menu();return}
  if(act==="launch"){launch(b.dataset.num);return}
- if(act==="help"){st.helpOpen=!st.helpOpen;render();return}
  if(act==="show-answer"){showAnswer();return}
  if(act==="token"){chooseToken(Number(b.dataset.i));return}
  if(act==="mark"){mark(b.dataset.kind);return}
