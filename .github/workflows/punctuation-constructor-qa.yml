@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - "feature/punctuation-constructor-mvp-20261116"
+      - "feature/legopunkt-reassembly-seams-20261117"
     paths:
       - "games/punctuation-constructor/**"
       - ".github/workflows/punctuation-constructor-qa.yml"
@@ -24,7 +25,7 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium webkit
-      - name: Verify annotated examples, stages and mobile layouts
+      - name: Verify assembled sentences, seam audit and phone/tablet layouts
         run: node games/punctuation-constructor/browser-qa.cjs
       - uses: actions/upload-artifact@v4
         if: always()
