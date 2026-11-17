@@ -201,43 +201,116 @@ function descMark(i){
 }
 function stripExtras(indices){const hidden=new Set([...st.marks.extras.flatMap(id=>st.task.extras.find(x=>x.id===id)?.words||[])]);return indices.filter(i=>!hidden.has(i))}
 function tokenString(indices){return indices.map(i=>q(st.task.words[i])).join(" ")}
-function schema(){
- const a=st.task,sections=[];
- const marked=a.conjs.filter(c=>st.marks.conjs.includes("c"+c.at));
- const between=marked.filter(c=>c.role==="parts").map(c=>a.words[c.at]);
- const clausesJoin=between.length?" <span class=\"junction\"> "+between.map(q).join(" + ")+" </span> ":" <span class=\"junction\"> ↔ </span> ";
- if(st.marks.bases.length){
-  const mains=a.mains.map(m=>'<span class="bracket">[ '+tokenString(stripExtras(m.words.filter(i=>!st.marks.subs.some(id=>a.subs.find(s=>s.id===id)?.words.includes(i)))))+' ]</span>').join(clausesJoin);
-  sections.push('<div class="lane"><b>1-я дорожка</b> '+mains+'</div>');
- }else sections.push('<div class="emptyLane">Схема появится над предложением после выделения первой основы.</div>');
- for(const id of st.marks.subs){const s=a.subs.find(x=>x.id===id),head=a.words[s.head],extra=stripExtras(s.words);
-  const parent=a.subs.find(x=>x.id!==id&&x.words.includes(s.head)),level=parent?"↳ ↳":"↳";
-  sections.push('<div class="lane lower"><span class="branch">'+level+'</span><span class="bracket subbr">( '+tokenString(extra)+' )</span><span class="branch">'+q(s.question)+' → «'+q(head)+'»</span></div>');
- }
- const homogeneous=marked.filter(c=>c.role==="between-subs");
- if(homogeneous.length){
-  const parts=a.subs.filter(x=>st.marks.subs.includes(x.id)),sameQuestion=parts.length>=2&&new Set(parts.map(x=>x.question)).size===1;
-  sections.push('<div class="lane lower"><b>Однородные придаточные</b><span class="junction">'+homogeneous.map(c=>q(a.words[c.at])).join(" + ")+'</span><span class="branch">союз вне круглых скобок'+(sameQuestion?'; общий вопрос «'+q(parts[0].question)+'»':"")+'</span></div>');
- }
- const within=marked.filter(c=>c.role==="members");
- if(within.length)sections.push('<div class="lane"><b>Однородные члены</b><span class="junction">'+within.map(c=>q(a.words[c.at])).join(" · ")+'</span><span class="branch">сочинительный союз внутри части</span></div>');
- if(st.marks.turns.length){
-  const lines=st.marks.turns.map(id=>{const t=a.turns.find(x=>x.id===id);return '<span>│ '+tokenString(t.words)+' │ → ×'+q(a.words[t.head])+'</span>'}).join(" · ");
-  sections.push('<div class="lane turnlane"><b>Обороты</b> '+lines+'</div>');
- }
- if(st.marks.extras.length){
-  const words=st.marks.extras.map(id=>a.extras.find(x=>x.id===id)).map(x=>tokenString(x.words)+' ('+q(help.types[x.type])+')').join(" · ");
-  sections.push('<div class="lane extra"><b>Не члены предложения</b> '+words+'</div>');
- }
- return sections.join("");
+
+function laneOf(i){
+ const a=st.task;
+ if(st.marks.extras.some(id=>a.extras.find(e=>e.id===id)?.words.includes(i)))return 2;
+ if(st.marks.subs.some(id=>a.subs.find(x=>x.id===id)?.words.includes(i)))return 1;
+ if(a.conjs.some(c=>c.at===i&&c.role==="between-subs")&&st.marks.subs.length)return 1;
+ return 0;
 }
-function sentence(){
- const a=st.task,punct=st.step===6,words=a.words.map((w,i)=>{
-  const picked=st.picked.includes(i)?' selected':'',heads=st.pending&&st.anchor===i?' selected':'';
-  const gap=punct?'<button class="punctGap '+(st.gap===i?"target":"")+(st.marks.punct[i]?" filled":"")+'" data-act="gap" data-i="'+i+'" aria-label="Знак после '+q(w)+'">'+q(st.marks.punct[i]||"·")+'</button>':'';
-  return '<span class="tokenWrap"><button class="word '+descMark(i)+picked+heads+'" data-act="token" data-i="'+i+'" aria-pressed="'+st.picked.includes(i)+'">'+q(w)+'</button>'+gap+'</span>'
+function isInMark(i,kind){return st.marks[kind].some(id=>st.task[kind].find(x=>x.id===id)?.words.includes(i))}
+function wordPiece(i){
+ const a=st.task,w=a.words[i],punct=st.step===6;
+ let classes=descMark(i),picked=st.picked.includes(i)||(st.pending&&st.anchor===i);
+ if(st.marks.bases.some(id=>a.bases.find(x=>x.id===id)?.subjects.includes(i)))classes+=" subject";
+ if(st.marks.bases.some(id=>a.bases.find(x=>x.id===id)?.predicates.includes(i)))classes+=" predicate";
+ if(isInMark(i,"common"))classes+=" common";
+ if(picked)classes+=" selected";
+ const turns=a.turns.filter(t=>st.marks.turns.includes(t.id));
+ const first=turns.some(t=>t.words[0]===i),last=turns.some(t=>t.words[t.words.length-1]===i);
+ const anchor=turns.some(t=>(t.type==="part"||t.type==="appos")&&t.head===i);
+ const gap=punct?'<button class="punctGap '+(st.gap===i?"target":"")+(st.marks.punct[i]?" filled":"")+'" data-act="gap" data-i="'+i+'" aria-label="Знак после '+q(w)+'">'+q(st.marks.punct[i]||"·")+'</button>':"";
+ return '<span class="brick '+(first?"turnBegin ":"")+(last?"turnEnd":"")+'" data-i="'+i+'">'+(anchor?'<span class="above" aria-label="определяемое слово">×</span>':"")+'<button class="word '+classes+'" data-act="token" data-i="'+i+'" aria-pressed="'+!!picked+'"><span class="wtext">'+q(w)+'</span></button>'+gap+'</span>';
+}
+function bracketGroups(level,visible){
+ const a=st.task,v=new Set(visible),common=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
+ const groups=level===0?(st.marks.bases.length?a.mains:[]):level===1?a.subs.filter(x=>st.marks.subs.includes(x.id)):[];
+ return groups.map(g=>{
+  const positions=g.words.filter(i=>v.has(i)&&!(level===0&&common.has(i)));
+  if(!positions.length)return null;
+  return {id:g.id,min:Math.min(...positions),max:Math.max(...positions),sub:level===1};
+ }).filter(Boolean);
+}
+function laneHTML(level){
+ const a=st.task,visible=a.words.map((_,i)=>i).filter(i=>laneOf(i)===level);
+ const name=["1 · Главные части","2 · Придаточные","3 · Не члены предложения"][level];
+ const groups=bracketGroups(level,visible);
+ let pieces="";
+ for(const i of visible){
+  const opens=groups.filter(g=>g.min===i).sort((x,y)=>y.max-x.max);
+  for(const g of opens)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?"(":"[")+'</span>';
+  pieces+=wordPiece(i);
+  const closes=groups.filter(g=>g.max===i).sort((x,y)=>y.min-x.min);
+  for(const g of closes)pieces+='<span class="syntaxBracket '+(g.sub?"sub":"")+'">'+(g.sub?")":"]")+'</span>';
+ }
+ return '<div class="track '+(level===1?"secondary":level===2?"tertiary":"")+'" data-lane="'+level+'"><div class="trackLabel">'+name+'</div>'+(pieces||'<span class="emptyTrack">'+(level===1?"Пока не спущено ни одного придаточного":level===2?"Пока нет выделенных вводных или обращений":"")+" </span>")+'</div>';
+}
+function blueprint(){
+ return '<div class="blueprint" id="blueprint"><div class="blueprintContent" id="blueprintSurface">'+[0,1,2].map(laneHTML).join("")+'<svg class="arrowOverlay" aria-hidden="true"><defs><marker id="brickArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#ffdc7c" stroke-width="1.4"/></marker></defs><g id="arrowPaths"></g></svg></div></div>';
+}
+function drawArrows(){
+ const surface=document.getElementById("blueprintSurface"),svg=surface?.querySelector(".arrowOverlay"),paths=document.getElementById("arrowPaths");
+ if(!surface||!svg||!paths||!st.task)return;
+ const b=surface.getBoundingClientRect(),items=[];
+ const point=i=>{const el=surface.querySelector('.brick[data-i="'+i+'"] .word');if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left+r.width/2-b.left,y:r.top-b.top+surface.parentElement.scrollTop}};
+ for(const id of st.marks.subs){const sub=st.task.subs.find(x=>x.id===id);items.push({from:sub.head,to:sub.words[0],label:sub.question,stroke:"#cab7ff"})}
+ for(const id of st.marks.turns){const t=st.task.turns.find(x=>x.id===id);items.push({from:t.head,to:t.words[0],label:t.type==="ger"?"добавочное действие":"×",stroke:"#ffcf80"})}
+ const w=Math.max(surface.scrollWidth,surface.clientWidth),h=Math.max(surface.scrollHeight,surface.clientHeight);
+ svg.setAttribute("width",w);svg.setAttribute("height",h);
+ paths.innerHTML=items.map(x=>{
+  const p=point(x.from),t=point(x.to);if(!p||!t)return "";
+  const y1=p.y-2,y2=t.y-2,control=Math.min(y1,y2)-Math.max(16,Math.min(40,Math.abs(p.x-t.x)/4));
+  const middle=(p.x+t.x)/2;
+  const label=String(x.label||"").replace(/^\s+|\s+$/g,"");
+  return '<path d="M'+p.x+' '+y1+' Q'+middle+' '+control+' '+t.x+' '+y2+'" fill="none" stroke="'+x.stroke+'" stroke-width="1.9" marker-end="url(#brickArrow)"/><text x="'+middle+'" y="'+(control+7)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+x.stroke+'" paint-order="stroke" stroke="#132a43" stroke-width="3">'+q(label)+'</text>';
  }).join("");
- return words+(punct?'<span class="noGap">.</span>':'');
+}
+function schema(){
+ const a=st.task,baseIds=new Set(st.marks.bases),subIds=new Set(st.marks.subs);
+ const commonIds=new Set(a.common.filter(x=>st.marks.common.includes(x.id)).flatMap(x=>x.words));
+ const extraIds=new Set(a.extras.filter(x=>st.marks.extras.includes(x.id)).flatMap(x=>x.words));
+ const turnIds=new Set(a.turns.filter(x=>st.marks.turns.includes(x.id)).flatMap(x=>x.words));
+ const allGroups=[
+  ...(baseIds.size?a.mains.map(g=>({type:"main",words:g.words.filter(i=>!commonIds.has(i)&&!extraIds.has(i))})):[]),
+  ...a.subs.filter(g=>subIds.has(g.id)).map(g=>({type:"sub",words:g.words.filter(i=>!extraIds.has(i))}))
+ ].filter(g=>g.words.length).map(g=>({...g,min:Math.min(...g.words),max:Math.max(...g.words)}));
+ const subjects=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.subjects));
+ const predicates=new Set(a.bases.filter(x=>baseIds.has(x.id)).flatMap(x=>x.predicates));
+ const seenCommon=new Set(),seenTurns=new Set(),shownBase=new Set();
+ let parts="";
+ for(let i=0;i<a.words.length;i++){
+  for(const g of allGroups.filter(x=>x.min===i).sort((x,y)=>y.max-x.max))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?"(":"[")+'</span>';
+  let symbol="";
+  if(commonIds.has(i)){
+   if(!seenCommon.has(i)){symbol='<span class="schemeCommon">ОВЧ</span>';seenCommon.add(i)}
+  }else if(subjects.has(i)&&predicates.has(i))symbol='<span class="schemeMark">— ═</span>';
+  else if(subjects.has(i))symbol='<span class="schemeMark">—</span>';
+  else if(predicates.has(i))symbol='<span class="schemeMark">═</span>';
+  else if(extraIds.has(i))symbol='<span class="schemeExtra">⊕</span>';
+  else if(turnIds.has(i)){
+   const t=a.turns.find(x=>st.marks.turns.includes(x.id)&&x.words.includes(i));
+   if(t&&!seenTurns.has(t.id)){symbol='<span class="schemeTurn">│об.│</span>';seenTurns.add(t.id)}
+  }else{
+   const c=a.conjs.find(x=>x.at===i&&st.marks.conjs.includes("c"+i));
+   if(c)symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
+   else if(a.subs.some(x=>subIds.has(x.id)&&x.words[0]===i))symbol='<span class="schemeJoin">'+q(a.words[i])+'</span>';
+   else if(a.hom.some(x=>st.marks.hom.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark hom">○</span>';
+   else if(a.general.some(x=>st.marks.general.includes(x.id)&&x.words.includes(i)))symbol='<span class="schemeMark general">◎</span>';
+  }
+  // Common or connecting words remain outside brackets whenever they are not part of any clause.
+  parts+=symbol;
+  for(const g of allGroups.filter(x=>x.max===i).sort((x,y)=>y.min-x.min))parts+='<span class="schemePart '+(g.type==="sub"?"sub":"")+'">'+(g.type==="sub"?")":"]")+'</span>';
+ }
+ const links=a.subs.filter(x=>subIds.has(x.id)).map(x=>'<div class="graphLink">↳ ('+q(x.question)+') от <b>'+q(a.words[x.head])+'</b></div>').join("");
+ const relations=a.subs.filter(x=>subIds.has(x.id));
+ const homo=relations.length>=2&&relations.every(x=>x.head===relations[0].head&&x.question===relations[0].question);
+ const nested=relations.some(x=>relations.some(y=>x!==y&&y.words.includes(x.head)));
+ const pattern=relations.length<2?"":homo?"Однородное подчинение":nested?"Последовательное или комбинированное подчинение":"Параллельное или комбинированное подчинение";
+ return (parts?'<div class="schemeGraphic">'+parts+'</div>':'<div class="emptyLane">После выделения основ появятся скобки и условные знаки.</div>')+
+  (pattern?'<div class="schemeNote"><b>'+pattern+'</b></div>':"")+
+  (links?'<div class="graphLinks">'+links+'</div>':"")+
+  '<div class="schemeNote">[ ] — главная часть; ( ) — придаточная; — подлежащее; ═ сказуемое; ⊕ не член предложения; ○ однородный член.</div>';
 }
 function toolbar(){
  const a=st.task,step=st.step,done=stageReady();
