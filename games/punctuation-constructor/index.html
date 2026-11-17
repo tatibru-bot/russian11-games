@@ -175,7 +175,7 @@ const SAME=(a,b)=>a.length===b.length&&a.slice().sort((x,y)=>x-y).every((x,i)=>x
 const has=(arr,id)=>arr.includes(id);
 const STORE="punct:constructor:mvp:completed:v1";
 let completed={};try{completed=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch(e){}
-let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,helpOpen:false};
+let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};
 function resetMarks(){return {bases:[],common:[],subs:[],conjs:[],turns:[],extras:[],hom:[],general:[],punct:{}}}
 function list(kind){return st.task[kind]||[]}
 function selectedMatch(kind){return list(kind).find(x=>!has(st.marks[kind],x.id)&&SAME(x.words,st.picked))}
@@ -190,7 +190,7 @@ function progress(){const a=st.task;return [
  ][st.step]}
 function stageReady(){const p=progress();if(!p||p[0]!==p[1]||st.pending)return false;if(st.step===2){return list("junctions").every(j=>st.glues.includes(j.after)===j.glued)}return true}
 function note(s,type=""){st.hint=s;st.hintType=type}
-function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,helpOpen:false};render()}
+function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game",num,index,task:a[index%a.length],step:0,picked:[],pending:null,anchor:null,question:"",marks:resetMarks(),glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,choiceKind:"coord",choiceRole:"parts"};render()}
 function launchNext(){const a=tasks.filter(x=>x.num===st.num);launch(st.num,(st.index+1)%a.length)}
 function taskCount(num){return tasks.filter(x=>x.num===num).length}
 function menu(){
@@ -350,12 +350,12 @@ function toolbar(){
   const p=st.pending,questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+[...new Set([...help.questions,...a.subs.map(s=>s.question)])].map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
   return '<div class="actionLine"><span class="field">Выделено: '+q(tokenString(p.words).replace(/<[^>]+>/g,""))+'</span>'+questions+'<span class="field">Опорное слово: '+(st.anchor==null?"нажми в предложении":'<b>'+q(a.words[st.anchor])+'</b>')+'</span><span class="stretch"></span><button class="primary" data-act="link">Связать ↗</button><button data-act="cancel">Отмена</button></div>';
  }
- if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основу</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
+ if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основы</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
- if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind"><option value="coord">Сочинительный</option><option value="sub">Подчинительный</option><option value="relative">Союзное слово</option><option value="correlate">Указательное «то»</option></select></label><label class="field">Связь: <select id="role"><option value="parts">Между главными</option><option value="members">Между однородными</option><option value="between-subs">Между придаточными</option><option value="inside">Внутри придаточного</option></select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
- if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind"><option value="part">Причастный │ │</option><option value="ger">Деепричастный │ │</option><option value="appos">Приложение</option><option value="detail">Уточнение</option><option value="compare">Сравнительный</option></select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
- if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind"><option value="intro">Вводное</option><option value="address">Обращение</option><option value="insert">Вставная конструкция</option></select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
- return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+ if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind">'+[["coord","Сочинительный"],["sub","Подчинительный"],["relative","Союзное слово"],["correlate","Указательное «то»"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><label class="field">Связь: <select id="role">'+[["parts","Между главными"],["members","Между однородными"],["between-subs","Между придаточными"],["inside","Внутри придаточного"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceRole===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
+  if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["part","Причастный"],["ger","Деепричастный"],["appos","Приложение"],["detail","Уточнение"],["compare","Сравнительный"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+  if(step===4)return '<div class="actionLine"><label class="field">Вид: <select id="kind">'+[["intro","Вводное"],["address","Обращение"],["insert","Вставка"]].map(([v,label])=>'<option value="'+v+'"'+(st.choiceKind===v?" selected":"")+'>'+label+'</option>').join("")+'</select></label><button class="primary" data-act="mark" data-kind="extras">На отдельную дорожку ↓</button><span class="stretch"></span>'+(done?next:"")+'</div>';
+  return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="hom">Однородные ◯</button><button class="gold" data-act="mark" data-kind="general">Обобщающее ◎</button><span class="stretch"></span>'+(done?next:"")+'</div>';
 }
 function junctionButtons(){
  const a=list("junctions");if(!a.length)return "";
@@ -398,28 +398,26 @@ function mark(kind){
  if(!st.picked.length){fail("Сначала выдели нужное слово или группу слов.");return}
  const a=st.task;
  if(kind==="bases"){
-   const id=a.bases.findIndex((x,i)=>!st.marks.bases.includes(x.id)&&SAME(st.picked,x.words));
-   if(id<0){fail("Это не полная грамматическая основа. Проверь подлежащее и составное/однородное сказуемое.");return}
-   st.marks.bases.push(a.bases[id].id);
-   // Если в предложении ровно две основы, вторая подсвечивается автоматически.
-   if(a.bases.length===2)for(const b of a.bases)if(!st.marks.bases.includes(b.id))st.marks.bases.push(b.id);
-   clearChoice();note("Основа найдена. Проверь, есть ли общий второстепенный член: он должен оказаться ЗА квадратными скобками.","ok");render();return;
+   const expected=[...new Set(a.bases.flatMap(x=>x.words))].sort((x,y)=>x-y);
+   if(!SAME(st.picked,expected)){fail("Неверно выделены основы");return}
+   st.marks.bases=a.bases.map(x=>x.id);
+   clearChoice();note(a.common.length?"Все основы найдены! Теперь выдели общий второстепенный член.":"Все основы выделены верно.","ok");render();return;
   }
   if(kind==="conjs"){
   if(st.picked.length!==1){fail("Выбери один союз или союзное слово, затем его функцию.");return}
   const at=st.picked[0],target=a.conjs.find(x=>x.at===at&&!st.marks.conjs.includes("c"+at));
   if(!target){fail("Это слово не является союзом/союзным словом в данном предложении или уже разобрано.");return}
-  const userKind=document.getElementById("kind").value,role=document.getElementById("role").value;
+  const userKind=st.choiceKind,role=st.choiceRole;
   if(userKind!==target.type||role!==target.role){fail("Проверь функцию: союз соединяет части, однородные члены или однородные придаточные? Союзное слово — член придаточного.");return}
   st.marks.conjs.push("c"+at);clearChoice();note("Связующее слово распознано.","ok");render();return;
  }
  const candidates=a[kind],item=candidates.find(x=>!st.marks[kind].includes(x.id)&&SAME(x.words,st.picked));
  if(!item){fail("Границы конструкции выбраны неточно. Её нужно выделить целиком (допускаются разорванные части).");return}
  if(kind==="subs"||kind==="turns"){
-  if(kind==="turns"&&item.type!==document.getElementById("kind").value){fail("Это другой вид оборота. Сначала уточни, чем он выражен.");return}
+  if(kind==="turns"&&item.type!==st.choiceKind){fail("Это другой вид оборота. Сначала уточни, чем он выражен.");return}
   st.pending={kind,id:item.id,words:item.words};st.picked=[];st.anchor=null;st.question="";note("Конструкция спущена. Нажми в исходном предложении слово, от которого она зависит.");render();return;
  }
- if(kind==="extras"&&document.getElementById("kind").value!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
+ if(kind==="extras"&&st.choiceKind!==item.type){fail("Слова выбраны правильно, но тип конструкции не совпал: вводное, обращение или вставка?");return}
  st.marks[kind].push(item.id);clearChoice();note("Конструкция отмечена.","ok");render();
 }
 function link(){
@@ -446,7 +444,8 @@ function nextStage(){
   completed[st.task.id]=true;try{localStorage.setItem(STORE,JSON.stringify(completed))}catch(e){}
   st.view="finish";render();return;
  }
- st.step++;st.picked=[];st.pending=null;st.anchor=null;st.question="";note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
+ st.step++;st.picked=[];st.pending=null;st.anchor=null;st.question="";
+ st.choiceKind=({2:"coord",3:"part",4:"intro"})[st.step]||"coord";st.choiceRole="parts";note(st.step===6?"Финал: запятые теперь должны вытекать из твоей схемы.":"Конструкция готова — теперь добавь следующий слой.","ok");render();
 }
 function finish(){
  const a=st.task,punctText=a.words.map((w,i)=>w+(a.punct.find(p=>p.after===i)?.sign||"")).join(" ")+".";
@@ -467,7 +466,7 @@ function showAnswer(){
  modal.innerHTML='<section class="modal panel" style="width:min(1000px,100%);max-height:93dvh"><h3>🧱 Собранная конструкция</h3><div class="cleanSentence">'+q(full)+'</div><div class="answerGrid" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,1fr);gap:8px">'+visual+'<div class="diagram">'+graphic+'</div></div>'+text+'<button class="primary" data-act="close-answer">Вернуться к заданию</button></section>';
  document.body.append(modal);
 }
-document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value});
+document.addEventListener("change",e=>{if(e.target.id==="question")st.question=e.target.value;else if(e.target.id==="kind")st.choiceKind=e.target.value;else if(e.target.id==="role")st.choiceRole=e.target.value});
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-act]");if(!b)return;
  const act=b.dataset.act;
