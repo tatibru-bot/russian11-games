@@ -163,11 +163,11 @@ const has=(arr,id)=>arr.includes(id);
 const STORE="punct:constructor:mvp:completed:v1";
 let completed={};try{completed=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch(e){}
 let st={view:"menu",task:null,step:0,picked:[],pending:null,anchor:null,question:"",marks:null,glues:[],gap:null,sign:",",hint:"",hintType:"",fail:0,helpOpen:false};
-function resetMarks(){return {bases:[],subs:[],conjs:[],turns:[],extras:[],hom:[],general:[],punct:{}}}
+function resetMarks(){return {bases:[],common:[],subs:[],conjs:[],turns:[],extras:[],hom:[],general:[],punct:{}}}
 function list(kind){return st.task[kind]||[]}
 function selectedMatch(kind){return list(kind).find(x=>!has(st.marks[kind],x.id)&&SAME(x.words,st.picked))}
 function progress(){const a=st.task;return [
- [st.marks.bases.length,a.bases.length],
+ [st.marks.bases.length+st.marks.common.length,a.bases.length+a.common.length],
  [st.marks.subs.length,a.subs.length],
  [st.marks.conjs.length,a.conjs.length],
  [st.marks.turns.length,a.turns.length],
@@ -181,8 +181,8 @@ function launch(num,index=0){const a=tasks.filter(x=>x.num===num);st={view:"game
 function launchNext(){const a=tasks.filter(x=>x.num===st.num);launch(st.num,(st.index+1)%a.length)}
 function taskCount(num){return tasks.filter(x=>x.num===num).length}
 function menu(){
- st.view="menu";status.textContent="черновик 0.1";
- main.innerHTML='<div class="menu"><div class="intro panel"><h1>Разбери предложение по этажам</h1><p>Сначала основы и связи, затем обороты и вводные, только потом знаки. Касайся нужных слов — они превратятся в схему. Это прототип для методического испытания: оценки не отправляются в бот.</p></div><div class="modeGrid">'+modes.map(n=>'<button class="modeTile '+(n==="HARD"?"hard":"")+'" data-act="launch" data-num="'+n+'"><strong>'+(n==="HARD"?"⚡ Хард-уровень":"№ "+n)+'</strong><small>'+subtitles[n]+'</small><b>'+taskCount(n)+' '+(taskCount(n)===1?"пример":"примера")+' · '+tasks.filter(t=>t.num===n&&completed[t.id]).length+' решено</b></button>').join("")+'</div><div class="bottomNote">Это исследовательский черновик. Управление касаниями, без системной клавиатуры и без Telegram-статистики.</div></div>';
+ st.view="menu";status.textContent="методический прототип";
+ main.innerHTML='<div class="menu"><div class="intro panel"><h1>🧱 ЛЕГОПУНКТ: построй предложение!</h1><p>Каждое слово — кирпичик. Найди основы, опусти придаточные, соедини стрелками, выдели обороты — и собери точную пунктуационную схему. Это учебный прототип, пока без передачи оценок в Telegram.</p></div><div class="modeGrid">'+modes.map(n=>'<button class="modeTile '+(n==="HARD"?"hard":"")+'" data-act="launch" data-num="'+n+'"><strong>'+(n==="HARD"?"⚡ Хард-уровень":"№ "+n)+'</strong><small>'+subtitles[n]+'</small><b>'+taskCount(n)+' '+(taskCount(n)===1?"пример":"примера")+' · '+tasks.filter(t=>t.num===n&&completed[t.id]).length+' решено</b></button>').join("")+'</div><div class="bottomNote">Три дорожки и схемы собираются из слов предложения. Без системной клавиатуры; статистика пока локальная.</div></div>';
 }
 function pickedText(){return st.picked.map(i=>st.task.words[i]).join(" · ")}
 function clearChoice(){st.picked=[];st.anchor=null;st.question="";st.pending=null}
@@ -319,10 +319,10 @@ function toolbar(){
   return '<div class="actionLine"><span class="field">Нажми границу после слова, затем знак:</span><div class="punctBar">'+[[",","Запятая"],["—","Тире"],[":","Двоеточие"],[";","Точка с запятой"],["","Нет знака"]].map(x=>'<button title="'+x[1]+'" data-act="set-sign" data-sign="'+x[0]+'">'+(x[0]||"∅")+'</button>').join("")+'</div><span class="stretch"></span>'+next+'</div>';
  }
  if(st.pending){
-  const p=st.pending,questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+help.questions.map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
+  const p=st.pending,questions=p.kind==="subs"?'<label class="field">Вопрос: <select id="question"><option value="">Выбери вопрос</option>'+[...new Set([...help.questions,...a.subs.map(s=>s.question)])].map(x=>'<option value="'+q(x)+'"'+(st.question===x?" selected":"")+'>'+q(x)+'</option>').join("")+'</select></label>':'';
   return '<div class="actionLine"><span class="field">Выделено: '+q(tokenString(p.words).replace(/<[^>]+>/g,""))+'</span>'+questions+'<span class="field">Опорное слово: '+(st.anchor==null?"нажми в предложении":'<b>'+q(a.words[st.anchor])+'</b>')+'</span><span class="stretch"></span><button class="primary" data-act="link">Связать ↗</button><button data-act="cancel">Отмена</button></div>';
  }
- if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основу</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
+ if(step===0)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="bases">Подчеркнуть основу</button><button class="gold" data-act="mark" data-kind="common">Выделить ОВЧ</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+ (done?next:"")+'</div>';
  if(step===1)return '<div class="actionLine"><button class="primary" data-act="mark" data-kind="subs">Спустить придаточное ↓</button><span class="stretch"></span><button data-act="clear">Снять выделение</button>'+(done?next:"")+'</div>';
  if(step===2)return '<div class="actionLine"><label class="field">Тип: <select id="kind"><option value="coord">Сочинительный</option><option value="sub">Подчинительный</option><option value="relative">Союзное слово</option><option value="correlate">Указательное «то»</option></select></label><label class="field">Связь: <select id="role"><option value="parts">Между главными</option><option value="members">Между однородными</option><option value="between-subs">Между придаточными</option><option value="inside">Внутри придаточного</option></select></label><button class="primary" data-act="mark" data-kind="conjs">Разметить союз</button><span class="stretch"></span>'+(done?next:"")+'</div>'+junctionButtons();
  if(step===3)return '<div class="actionLine"><label class="field">Вид: <select id="kind"><option value="part">Причастный │ │</option><option value="ger">Деепричастный │ │</option><option value="appos">Приложение</option><option value="detail">Уточнение</option><option value="compare">Сравнительный</option></select></label><button class="primary" data-act="mark" data-kind="turns">Выделить оборот │ │</button><span class="stretch"></span>'+(done?next:"")+'</div>';
@@ -339,15 +339,22 @@ function render(){
  const a=st.task,step=st.step,p=progress();
  status.textContent="этап "+(step+1)+" / 7";
  const instructions=[
- "Нажми слова, образующие одну грамматическую основу (они могут быть не рядом). Затем подчеркни её.",
- "Выдели ВСЕ слова каждого придаточного, в том числе союз, но без вложенного придаточного. Перенеси вниз, задай вопрос и нажми опорное слово.",
- "Выбери ОДНО слово-союз, установи тип и роль. Если рядом стоят два союза, реши, нужна ли склейка.",
- "Выдели оборот целиком, выбери тип, затем нажми главное слово, к которому он относится.",
- "Выдели вводное слово, обращение или вставную конструкцию целиком и перенеси на отдельную дорожку.",
- "Собери однородные члены в кружок ◯; обобщающее слово — в двойной круг ◎.",
- "Теперь реши пунктуацию: коснись промежутка после слова, затем поставь запятую, тире, двоеточие, точку с запятой или ничего."
- ];
- main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Хард-уровень":"ЕГЭ № "+a.num)+' · '+q(a.short)+'</b>Пример '+(st.index+1)+' из '+taskCount(a.num)+' · конструкций готово '+p[0]+'/'+p[1]+'</div><div><button class="ghost" data-act="help">? Теория</button> <button class="ghost" data-act="menu">✕ Меню</button></div></div><div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+'</p></div></div><div class="workarea"><section class="diagramPanel panel"><div class="panelHeader">СХЕМА — СОБИРАЕТСЯ ПО МЕРЕ РАЗБОРА</div><div class="diagram">'+schema()+'</div></section><section class="wordsPanel panel"><div class="panelHeader">ИСХОДНОЕ ПРЕДЛОЖЕНИЕ · ВЫДЕЛЯЙ СЛОВА КАСАНИЯМИ</div><div class="sentence">'+sentence()+'</div><div class="selectionHint">Выделено: '+q(pickedText()||"ничего")+'</div></section></div><div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||((!p[1]&&step!==6)?"В этом примере таких элементов нет — переходи дальше.":""))+'</div></div><div class="footer"><span>Черновик · отдельные этапы, без оценки в журнал</span><button class="ghost" data-act="show-answer">Показать готовый разбор</button></div></div>'+(st.helpOpen?renderModal(): "");
+  "Выдели грамматическую основу; если их ровно две, вторая подчеркнётся автоматически. Есть ли общий второстепенный член (ОВЧ)? Если есть — выдели его: он остаётся за квадратными скобками.",
+  "Выдели придаточное ЦЕЛИКОМ, сохраняя все слова и порядок. Оно опустится на вторую дорожку. Задай вопрос и свяжи его с опорным словом.",
+  "Найди союз и определи его роль. Сочинительный союз между придаточными остаётся между круглыми скобками, а не внутри них.",
+  "Выдели оборот на месте: он НЕ переносится. Поставь × над определяемым словом и соедини его с оборотом стрелкой.",
+  "Найди вводное, обращение или вставку: это не члены предложения, поэтому они опускаются на третью дорожку.",
+  "Отметь однородные члены кружками; обобщающее слово — двойным кружком. Всё ранее отмеченное остаётся видимым.",
+  "Расставь знаки в уже собранной конструкции. Исходное предложение сверху всегда можно прочитать без пометок."
+];
+ main.innerHTML='<div class="game"><div class="titleline"><div class="meta"><b>'+(a.num==="HARD"?"⚡ Хард-уровень":"ЕГЭ № "+a.num)+' · '+q(a.short)+'</b>Пример '+(st.index+1)+' из '+taskCount(a.num)+' · элементов '+p[0]+'/'+p[1]+'</div><div><button class="ghost" data-act="help">? Теория</button> <button class="ghost" data-act="menu">✕ Меню</button></div></div>'+
+  '<div class="stepTitle panel"><span class="stepNumber">'+(step+1)+'/7</span><div><strong>'+q(help.stages[step])+'</strong><p>'+q(instructions[step])+' <span class="stepSkip">Если такого элемента нет, этап можно пропустить.</span></p></div></div>'+
+  '<div class="workarea"><section class="wordsPanel panel"><div class="panelHeader">ИСХОДНОЕ ПРЕДЛОЖЕНИЕ — ЧИТАЙ БЕЗ ПОМЕТОК</div><div class="cleanSentence">'+q(a.words.join(" "))+'</div></section>'+
+  '<div class="buildGrid"><section class="buildPanel panel"><div class="panelHeader">РАЗБОР — ПЕРЕМЕЩАЙ КИРПИЧИКИ И СОХРАНЯЙ СВЯЗИ</div>'+blueprint()+'<div class="selectionHint">'+(st.picked.length?'Выбрано кирпичиков: '+st.picked.length:'Касайся слов ниже, чтобы выделить конструкцию.')+'</div></section>'+
+  '<section class="diagramPanel panel"><div class="panelHeader">ГРАФИЧЕСКАЯ СХЕМА РЯДОМ С РАЗБОРОМ</div><div class="diagram">'+schema()+'</div></section></div></div>'+
+  '<div class="controls panel">'+toolbar()+'<div class="hint '+q(st.hintType)+'" role="status">'+q(st.hint||((!p[1]&&step!==6)?"Такого элемента нет — переходи к следующему этапу.":""))+'</div></div>'+
+  '<div class="footer"><span>ЛЕГОПУНКТ · прототип, без записи в бот</span><button class="ghost" data-act="show-answer">Готовый разбор</button></div></div>'+(st.helpOpen?renderModal():"");
+  requestAnimationFrame(drawArrows);
 }
 function renderModal(){
  return '<div class="modalBack"><section class="modal panel"><h3>📖 Почему именно такой порядок?</h3><p>'+q(help.theory[st.step])+'</p><p>Приём: сначала определи устройство предложения, затем сравни границы, и только после этого решай, где нужен знак. Разбор пока не подсказывает, какие слова выделять.</p><button class="primary" data-act="help">Продолжить</button></section></div>'
@@ -363,11 +370,14 @@ function mark(kind){
  if(!st.picked.length){fail("Сначала выдели нужное слово или группу слов.");return}
  const a=st.task;
  if(kind==="bases"){
-  const id=a.bases.findIndex((x,i)=>!st.marks.bases.includes(x.id)&&SAME(st.picked,x.words));
-  if(id<0){fail("Это не полная грамматическая основа. Проверь подлежащее и составное/однородное сказуемое.");return}
-  st.marks.bases.push(a.bases[id].id);clearChoice();note("Основа найдена. Теперь посмотри, сколько самостоятельных частей получилось.","ok");render();return;
- }
- if(kind==="conjs"){
+   const id=a.bases.findIndex((x,i)=>!st.marks.bases.includes(x.id)&&SAME(st.picked,x.words));
+   if(id<0){fail("Это не полная грамматическая основа. Проверь подлежащее и составное/однородное сказуемое.");return}
+   st.marks.bases.push(a.bases[id].id);
+   // Если в предложении ровно две основы, вторая подсвечивается автоматически.
+   if(a.bases.length===2)for(const b of a.bases)if(!st.marks.bases.includes(b.id))st.marks.bases.push(b.id);
+   clearChoice();note("Основа найдена. Проверь, есть ли общий второстепенный член: он должен оказаться ЗА квадратными скобками.","ok");render();return;
+  }
+  if(kind==="conjs"){
   if(st.picked.length!==1){fail("Выбери один союз или союзное слово, затем его функцию.");return}
   const at=st.picked[0],target=a.conjs.find(x=>x.at===at&&!st.marks.conjs.includes("c"+at));
   if(!target){fail("Это слово не является союзом/союзным словом в данном предложении или уже разобрано.");return}
@@ -452,6 +462,6 @@ document.addEventListener("click",e=>{
 if(!tasks.length){main.innerHTML='<div class="panel">База заданий не загрузилась.</div>';return}
 menu();
 window.__PUNCT_QA={tasks:tasks.length,launch, getTask:()=>st.task, getState:()=>st,render,mark,link,glue,nextStage,select(indices){st.picked=indices;render()},markAllForTest(){
-  const a=st.task;st.marks={bases:a.bases.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};st.glues=a.junctions.filter(x=>x.glued).map(x=>x.after);st.step=6;render();}};
+  const a=st.task;st.marks={bases:a.bases.map(x=>x.id),common:a.common.map(x=>x.id),subs:a.subs.map(x=>x.id),conjs:a.conjs.map(x=>"c"+x.at),turns:a.turns.map(x=>x.id),extras:a.extras.map(x=>x.id),hom:a.hom.map(x=>x.id),general:a.general.map(x=>x.id),punct:Object.fromEntries(a.punct.map(x=>[x.after,x.sign]))};st.glues=a.junctions.filter(x=>x.glued).map(x=>x.after);st.step=6;render();}};
 })();
 </script></body></html>
