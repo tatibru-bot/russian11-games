@@ -4,7 +4,8 @@
 const source=[
 { id:"16-common",num:"16",short:"Общий член",text:"В саду расцвели яблони и зажужжали пчёлы",
  bases:[["яблони","расцвели"],["пчёлы","зажужжали"]],
- mains:[{id:"m1",words:["В саду расцвели яблони"]},{id:"m2",words:["зажужжали пчёлы"]}],
+ mains:[{id:"m1",words:["расцвели яблони"]},{id:"m2",words:["зажужжали пчёлы"]}],
+ common:[["В саду"]],
  conjs:[["и","coord","parts"]],punct:[],
  insight:"Перед одиночным И нет запятой: обстоятельство «в саду» общее для обеих частей ССП. Граница основ есть, запятой нет."},
 { id:"16-double",num:"16",short:"Два главных",text:"Ветер утих и в саду стало тихо",
@@ -47,6 +48,13 @@ const source=[
  conjs:[["что","sub","inside"],["которое","relative","inside"]],
  punct:[["понял",",","Граница главного и изъяснительного придаточного."],["письмо",",","Определительное придаточное относится к слову «письмо»."],["столе",",","Закрывается вложенное определительное придаточное."]],
  insight:"Первое придаточное разорвано вторым. Поэтому его слова при переносе могут оказаться не рядом."},
+{ id:"19-insert",num:"19",short:"Придаточное разрывает главное",text:"Наш класс когда станет тепло отправится в поход",
+  bases:[["класс","отправится"],["станет тепло"]],
+  mains:[{id:"m1",words:["Наш класс","отправится в поход"]}],
+  subs:[{id:"s1",words:["когда станет тепло"],question:"когда?",head:"отправится"}],
+  conjs:[["когда","sub","inside"]],
+  punct:[["класс",",","Придаточное времени стоит внутри главной части."],["тепло",",","Придаточное закончилось, главная часть продолжается."]],
+  insight:"Придаточное полностью перемещается на вторую дорожку: на первой остаётся «Наш класс отправится в поход»."},
 { id:"19-homo",num:"19",short:"Однородные придаточные",text:"Я помнил как огни отражались в реке и как медленно поднимался туман",
  bases:[["Я","помнил"],["огни","отражались"],["туман","поднимался"]],
  mains:[{id:"m1",words:["Я помнил"]}],
@@ -105,8 +113,9 @@ function indices(words,spec){
 }
 const items=source.map(raw=>{
  const words=raw.text.trim().split(/\s+/),base=raw.id;
- const bases=raw.bases.map((parts,i)=>({id:"b"+i,words:indices(words,parts)}));
+ const bases=raw.bases.map((parts,i)=>({id:"b"+i,words:indices(words,parts),subjects:parts.length===1?[]:indices(words,parts[0]),predicates:indices(words,parts.length===1?parts[0]:parts[1])}));
  const mains=raw.mains.map(x=>({id:x.id,words:indices(words,x.words)}));
+  const common=(raw.common||[]).map((x,i)=>({id:"v"+i,words:indices(words,x)}));
  const subs=(raw.subs||[]).map(x=>({id:x.id,words:indices(words,x.words),question:x.question,head:indices(words,[x.head])[0]}));
  const conjs=(raw.conjs||[]).map(x=>({at:indices(words,[x[0]])[0],type:x[1],role:x[2]}));
  const turns=(raw.turns||[]).map((x,i)=>({id:"t"+i,words:indices(words,x[0]),type:x[1],head:indices(words,[x[2]])[0]}));
@@ -120,15 +129,15 @@ const items=source.map(raw=>{
  if(junctions.some(x=>x.right!==x.after+1))throw Error("Junction must be adjacent "+base);
  if(subs.some(x=>!bases.some(b=>b.words.some(n=>x.words.includes(n)))))throw Error("Sub missing base "+base);
  const allSub=new Set(subs.flatMap(x=>x.words));if(subs.reduce((n,x)=>n+x.words.length,0)!==allSub.size)throw Error("Overlapping sub word spans: "+base);
- return {id:base,num:raw.num,short:raw.short,words,bases,mains,subs,conjs,turns,extras,hom,general,junctions,punct,insight:raw.insight};
+ return {id:base,num:raw.num,short:raw.short,words,bases,mains,common,subs,conjs,turns,extras,hom,general,junctions,punct,insight:raw.insight};
 });
 window.PUNCT_DATA=items;
 window.PUNCT_HELP={
- stages:["Грамматические основы","Придаточные и зависимость","Союзы и стыки","Обороты и определяемые слова","Вводные, обращения, вставки","Однородные и обобщающие","Пунктуация и объяснение"],
+ stages:["Грамматические основы и общий член","Придаточные и зависимость","Союзы и стыки","Обороты и определяемые слова","Вводные, обращения, вставки","Однородные и обобщающие","Пунктуация и объяснение"],
  types:{coord:"Сочинительный союз",sub:"Подчинительный союз",relative:"Союзное слово",correlate:"Указательное ТО",part:"Причастный оборот",ger:"Деепричастный оборот",intro:"Вводная конструкция",address:"Обращение",insert:"Вставная конструкция"},
- questions:["что?","какой?","какая?","какие?","где?","куда?","откуда?","когда?","при каком условии?","почему?","зачем?","как?","несмотря на что?"],
+ questions:["что?","какой?","какая?","какое?","какие?","чей?","чья?","чьё?","чьи?","где?","куда?","откуда?","когда?","при каком условии?","почему?","зачем?","как?","несмотря на что?"],
  theory:[
- "Не путай число сказуемых и число частей. Однородные сказуемые — одна основа; бывают односоставные и неполные части.",
+ "Не путай число сказуемых и число частей. Однородные сказуемые — одна основа; бывают односоставные и неполные части. Найди общий второстепенный член (ОВЧ), если он относится к обеим частям ССП: он остаётся за квадратными скобками.",
  "Придаточное может вклиниваться в другое. Выделяй все слова конкретной части, даже если они не подряд. Задай вопрос и покажи опорное слово.",
  "Сочинительный союз может соединять главные части, однородные придаточные или члены одной части. Союзное слово, в отличие от союза, является членом придаточного.",
  "Причастный оборот соединяй с определяемым существительным (×); деепричастный — со сказуемым. Наличие оборота не означает автоматическую запятую.",
