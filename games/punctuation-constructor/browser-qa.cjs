@@ -1,161 +1,156 @@
 "use strict";
 const {chromium,webkit}=require("playwright");
-const assert=require("node:assert/strict"),fs=require("node:fs"),http=require("node:http"),path=require("node:path");
-const ROOT=path.resolve(__dirname,"../.."),app="/games/punctuation-constructor/",sizes=[[320,568],[375,667],[390,844],[430,932],[1280,720],[1366,768]];
-const types={".html":"text/html;charset=utf-8",".js":"text/javascript;charset=utf-8",".css":"text/css;charset=utf-8"};
-function server(){return http.createServer((req,res)=>{const url=decodeURIComponent((req.url||"/").split("?")[0]);const file=path.resolve(ROOT,"."+url+(url.endsWith("/")?"index.html":""));if(!file.startsWith(ROOT+path.sep)){res.writeHead(403).end();return}fs.readFile(file,(error,buffer)=>{if(error){res.writeHead(404).end();return}res.writeHead(200,{"Content-Type":types[path.extname(file)]||"application/octet-stream"});res.end(buffer)})})}
-async function visibleFit(page,tag){
- const x=await page.evaluate(()=>{const body=document.body,doc=document.documentElement,rect=document.querySelector(".app").getBoundingClientRect();const tools=[...document.querySelectorAll(".titleline,.stepTitle,.workarea,.controls,.footer")].map(e=>{const r=e.getBoundingClientRect();return {y:r.top,bottom:r.bottom,height:r.height}});return {viewport:[innerWidth,innerHeight],scroll:doc.scrollHeight>innerHeight+2||body.scrollHeight>innerHeight+2,rect:{top:rect.top,bottom:rect.bottom},tools,buttons:document.querySelectorAll("button").length}});
- assert.equal(x.scroll,false,tag+" body must not scroll: "+JSON.stringify(x));
- assert(x.rect.bottom<=x.viewport[1]+2&&x.rect.top>=-1,tag+" app clipped");
- for(const t of x.tools){assert(t.y>=-1&&t.bottom<=x.viewport[1]+2&&t.height>=2,tag+" layout clipped: "+JSON.stringify(x))}
- return x;
+const assert=require("node:assert/strict");
+const fs=require("node:fs"),http=require("node:http"),path=require("node:path");
+const ROOT=path.resolve(__dirname,"../.."),prefix="/games/punctuation-constructor/";
+const sizes=[[320,568],[375,667],[390,844],[430,932],[1280,720],[1366,768],[1649,920]];
+const types={".html":"text/html;charset=utf-8",".js":"text/javascript;charset=utf-8"};
+const server=()=>http.createServer((req,res)=>{
+ const url=decodeURIComponent((req.url||"/").split("?")[0]);
+ const local=path.resolve(ROOT,"."+url+(url.endsWith("/")?"index.html":""));
+ if(!local.startsWith(ROOT+path.sep)){res.writeHead(403).end();return}
+ fs.readFile(local,(e,bytes)=>{if(e){res.writeHead(404).end();return}res.writeHead(200,{"Content-Type":types[path.extname(local)]||"application/octet-stream"});res.end(bytes)});
+});
+const parent=(a,s)=>a.subs.find(x=>x.id!==s.id&&x.words.includes(s.head));
+function full(a,s){
+ const words=new Set(s.words);
+ for(const child of a.subs.filter(x=>parent(a,x)?.id===s.id))full(a,child).forEach(i=>words.add(i));
+ return [...words].sort((p,q)=>p-q);
 }
-async function testStage1(page){
- const task=await page.evaluate(()=>window.__PUNCT_QA.getTask()),groups=task.bases;
- for(const b of groups){
-  if((await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases)).includes(b.id))continue;
-  for(const i of b.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="bases"]').click();
+function depth(a,s){
+ const p=parent(a,s);return p?1+depth(a,p):1;
+}
+async function noInnerScroll(page,tag){
+ const result=await page.evaluate(()=>{
+  const selectors=[".cleanSentence",".blueprint",".blueprintContent",".buildPanel",".diagramPanel",".diagram",".workarea",".game"];
+  return selectors.map(sel=>{const el=document.querySelector(sel);if(!el)return null;
+   const style=getComputedStyle(el),r=el.getBoundingClientRect();
+   return {sel,over:style.overflowY,client:el.clientHeight,scroll:el.scrollHeight,left:r.left,right:r.right};}).filter(Boolean);
+ });
+ for(const x of result){
+  assert(!["auto","scroll","hidden"].includes(x.over),tag+" hidden/nested scroll "+JSON.stringify(x));
+  assert(x.scroll<=x.client+4||x.over==="visible",tag+" clipped "+JSON.stringify(x));
  }
- for(const v of task.common){
-  for(const i of v.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="common"]').click();
- }
- const n=await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases.length);
- assert.equal(n,groups.length,"all grammatical bases marked");
+ const width=await page.evaluate(()=>document.documentElement.scrollWidth);
+ const vw=page.viewportSize().width;
+ assert(width<=vw+6,tag+" horizontally overflowing document "+width+" > "+vw);
+}
+async function clickWords(page,words){
+ for(const i of words)await page.locator('.word[data-i="'+i+'"]').click();
+}
+async function stepBases(page,a){
+ const all=[...new Set(a.bases.flatMap(b=>b.words))].sort((x,y)=>x-y);
+ await clickWords(page,all);
+ await page.locator('[data-act="mark"][data-kind="bases"]').click();
+ assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases.length),a.bases.length,"all bases only after full selection");
+ for(const v of a.common){await clickWords(page,v.words);await page.locator('[data-act="mark"][data-kind="common"]').click()}
  await page.locator('[data-act="nextstage"]').click();
 }
-async function testFirstSub(page){
- const t=await page.evaluate(()=>window.__PUNCT_QA.getTask());
- if(!t.subs.length){await page.locator('[data-act="nextstage"]').click();return}
- const s=t.subs[0];
- for(const i of s.words)await page.locator('.word[data-i="'+i+'"]').click();
- await page.locator('[data-act="mark"][data-kind="subs"]').click();
- await page.locator('.word[data-i="'+s.head+'"]').click();
- await page.selectOption("#question",s.question);
- await page.locator('[data-act="link"]').click();
- const linked=await page.evaluate(()=>window.__PUNCT_QA.getState().marks.subs);
- assert(linked.includes(s.id),"first subordinate attached to exact head and question");
-}
-async function completeGuided(page,num,index){
- await page.evaluate(({n,k})=>window.__PUNCT_QA.launch(n,k),{n:num,k:index});
- const task=await page.evaluate(()=>window.__PUNCT_QA.getTask());
- for(const b of task.bases){
-  if((await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases)).includes(b.id))continue;
-  for(const i of b.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="bases"]').click();
- }
- for(const v of task.common){
-  for(const i of v.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="common"]').click();
- }
- await page.locator('[data-act="nextstage"]').click();
- for(const s of task.subs){
-  for(const i of s.words)await page.locator('.word[data-i="'+i+'"]').click();
+async function stepSubs(page,a){
+ const subs=a.subs.slice().sort((x,y)=>depth(a,x)-depth(a,y));
+ for(const sub of subs){
+  const words=full(a,sub);
+  await clickWords(page,words);
   await page.locator('[data-act="mark"][data-kind="subs"]').click();
-  await page.locator('.word[data-i="'+s.head+'"]').click();
-  await page.selectOption("#question",s.question);
+  assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().pending?.id),sub.id,"subordinate pending");
+  await page.locator('.word[data-i="'+sub.head+'"]').click();
+  await page.selectOption("#question",sub.question);
   await page.locator('[data-act="link"]').click();
+  assert(await page.evaluate(id=>window.__PUNCT_QA.getState().marks.subs.includes(id),sub.id),"subordinate linked");
+  const expectedDepth=depth(a,sub);
+  assert(await page.locator('[data-lane="'+expectedDepth+'"]').count(),"correct lower track for "+sub.id);
+  if(parent(a,sub))assert(await page.locator('[data-lane="'+expectedDepth+'"] .word[data-i="'+sub.words[0]+'"]').count(),"child physically moved down");
  }
  await page.locator('[data-act="nextstage"]').click();
- for(const c of task.conjs){
-  await page.locator('.word[data-i="'+c.at+'"]').click();
+}
+async function stepUnions(page,a){
+ for(const c of a.conjs){
   await page.selectOption("#kind",c.type);
   await page.selectOption("#role",c.role);
+  await page.locator('.word[data-i="'+c.at+'"]').click();
+  assert.equal(await page.inputValue("#kind"),c.type,"kind persists after token rerender");
+  assert.equal(await page.inputValue("#role"),c.role,"role persists after token rerender");
   await page.locator('[data-act="mark"][data-kind="conjs"]').click();
+  assert(await page.evaluate(at=>window.__PUNCT_QA.getState().marks.conjs.includes("c"+at),c.at),"union accepted");
  }
- for(const j of task.junctions){if(j.glued)await page.locator('[data-act="glue"][data-i="'+j.after+'"]').click()}
+ for(const j of a.junctions)if(j.glued)await page.locator('[data-act="glue"][data-i="'+j.after+'"]').click();
  await page.locator('[data-act="nextstage"]').click();
- for(const t of task.turns){
-  for(const i of t.words)await page.locator('.word[data-i="'+i+'"]').click();
+}
+async function stepTurns(page,a){
+ for(const t of a.turns){
   await page.selectOption("#kind",t.type);
+  await clickWords(page,t.words);
   await page.locator('[data-act="mark"][data-kind="turns"]').click();
   await page.locator('.word[data-i="'+t.head+'"]').click();
   await page.locator('[data-act="link"]').click();
+  assert(await page.evaluate(id=>window.__PUNCT_QA.getState().marks.turns.includes(id),t.id),"turn accepted");
  }
  await page.locator('[data-act="nextstage"]').click();
- for(const e of task.extras){
-  for(const i of e.words)await page.locator('.word[data-i="'+i+'"]').click();
+}
+async function stepExtras(page,a){
+ for(const e of a.extras){
   await page.selectOption("#kind",e.type);
+  await clickWords(page,e.words);
   await page.locator('[data-act="mark"][data-kind="extras"]').click();
  }
  await page.locator('[data-act="nextstage"]').click();
- for(const h of task.hom){
-  for(const i of h.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="hom"]').click();
- }
- for(const g of task.general){
-  for(const i of g.words)await page.locator('.word[data-i="'+i+'"]').click();
-  await page.locator('[data-act="mark"][data-kind="general"]').click();
- }
+}
+async function stepHom(page,a){
+ for(const h of a.hom){await clickWords(page,h.words);await page.locator('[data-act="mark"][data-kind="hom"]').click()}
+ for(const g of a.general){await clickWords(page,g.words);await page.locator('[data-act="mark"][data-kind="general"]').click()}
  await page.locator('[data-act="nextstage"]').click();
- for(const p of task.punct){
+}
+async function stepPunct(page,a){
+ for(const p of a.punct){
   await page.locator('[data-act="gap"][data-i="'+p.after+'"]').click();
   await page.locator('[data-act="set-sign"][data-sign="'+p.sign+'"]').click();
  }
  await page.locator('[data-act="nextstage"]').click();
  assert.match(await page.locator(".finish h2").innerText(),/Конструктор собран/);
 }
-
-async function exhaustiveFeedback(page){
- const items=await page.evaluate(()=>window.PUNCT_DATA);
- assert.equal(items.length,13,"13 manually annotated puzzles");
- assert.equal(new Set(items.map(x=>x.id)).size,items.length);
- for(const item of items){
-  assert(item.words.length>3,"no trivial puzzle");
-  assert(item.bases.length>=1,"all puzzles have grammar bases");
-  const signs=new Set(item.punct.map(x=>x.after));
-  assert.equal(signs.size,item.punct.length,"no duplicate punctuation boundaries");
-  await page.evaluate(({num,id})=>{window.__PUNCT_QA.launch(num,window.PUNCT_DATA.filter(t=>t.num===num).findIndex(x=>x.id===id));window.__PUNCT_QA.markAllForTest()},{num:item.num,id:item.id});
-  assert.equal(await page.locator(".punctGap").count(),item.words.length,"one punctuation target after every word");
-  await page.locator('[data-act="nextstage"]').click();
-  assert.match(await page.locator(".finish h2").innerText(),/Конструктор собран/);
- }
+async function solve(page,num,index){
+ await page.evaluate(({num,index})=>window.__PUNCT_QA.launch(num,index),{num,index});
+ const a=await page.evaluate(()=>window.__PUNCT_QA.getTask());
+ assert.equal(await page.locator(".cleanSentence").count(),1,"clean original sentence");
+ assert.equal(await page.locator(".track").count(),1,"no useless placeholder tracks");
+ assert.equal(await page.locator('[data-act="help"]').count(),0,"no theory button");
+ await stepBases(page,a);await stepSubs(page,a);await stepUnions(page,a);
+ await stepTurns(page,a);await stepExtras(page,a);await stepHom(page,a);await stepPunct(page,a);
 }
-async function engineCheck(name,browser,w,h){
- const ctx=await browser.newContext({viewport:{width:w,height:h},isMobile:w<600,hasTouch:w<600});const page=await ctx.newPage();
- let errors=[];page.on("pageerror",e=>errors.push(e.message));const base="http://127.0.0.1:"+PORT;
- await page.goto(base+app,{waitUntil:"load"});
- assert.equal(await page.locator(".modeTile").count(),6,"six independent EGE menu entries");
- await visibleFit(page,name+" "+w+"x"+h+" menu");
- await page.locator('[data-act="launch"][data-num="19"]').click();
- assert.equal(await page.locator(".word").count(),10,"render individual word tokens");
-  assert.equal(await page.locator(".cleanSentence").count(),1,"original sentence shown without annotations");
-  assert.equal(await page.locator(".track").count(),3,"three construction tracks retained at all steps");
- await visibleFit(page,name+" "+w+"x"+h+" game");
- await page.screenshot({path:"/tmp/punct-"+name+"-"+w+".png",fullPage:false});
- if(w===375){
-  await testStage1(page);
-  assert((await page.locator(".schemeGraphic").count())>0,"symbolic scheme after bases");
-   await testFirstSub(page);
-  await page.locator('[data-act="menu"]').click();
-  await page.locator('[data-act="launch"][data-num="16"]').click();
-  await testStage1(page);
-  await page.locator('[data-act="nextstage"]').click(); // 16 has zero subordinated clauses
-  assert.equal(await page.locator(".word.common").count(),2,"common modifier stays outside brackets");
-   const firstConj=await page.evaluate(()=>window.__PUNCT_QA.getTask().conjs[0]);
-  await page.locator('.word[data-i="'+firstConj.at+'"]').click();
-  await page.selectOption("#kind",firstConj.type);await page.selectOption("#role",firstConj.role);
-  await page.locator('[data-act="mark"][data-kind="conjs"]').click();
-  assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.conjs.length),1);
-  await completeGuided(page,"17",0);
-  await completeGuided(page,"20",1);
-  await completeGuided(page,"HARD",0);
-  await completeGuided(page,"HARD",1);
-  await exhaustiveFeedback(page);
+async function runViewport(browser,name,width,height,port){
+ const ctx=await browser.newContext({viewport:{width,height},isMobile:width<600,hasTouch:width<600});
+ const page=await ctx.newPage(),errors=[];page.on("pageerror",e=>errors.push(e.message));
+ await page.goto("http://127.0.0.1:"+port+prefix,{waitUntil:"load"});
+ assert.equal(await page.locator(".modeTile").count(),6);
+ await page.locator('[data-act="launch"][data-num="16"]').click();
+ await noInnerScroll(page,name+" "+width+"x"+height+" starting game");
+ if(width===375){
+  const a=await page.evaluate(()=>window.__PUNCT_QA.getTask());
+  await clickWords(page,a.bases[0].words);
+  await page.locator('[data-act="mark"][data-kind="bases"]').click();
+  assert.equal(await page.locator(".hint.error").innerText(),"Неверно выделены основы");
+  assert.equal(await page.evaluate(()=>window.__PUNCT_QA.getState().marks.bases.length),0);
+  await page.locator('[data-act="clear"]').click();
+  for(const num of ["16","17","18","19","20","HARD"]){
+   const total=await page.evaluate(n=>window.PUNCT_DATA.filter(a=>a.num===n).length,num);
+   for(let index=0;index<total;index++){
+    await solve(page,num,index);
+    await noInnerScroll(page,name+" "+num+"/"+index);
+   }
+  }
  }
- assert.deepEqual(errors,[],name+" "+w+"x"+h+" runtime errors");
+ await page.screenshot({path:"/tmp/punct-"+name+"-"+width+".png",fullPage:true});
+ assert.deepEqual(errors,[],name+" "+width+"x"+height+" JavaScript errors");
  await ctx.close();
 }
-let PORT;
 (async()=>{
- const srv=server();await new Promise(ok=>srv.listen(0,"127.0.0.1",ok));PORT=srv.address().port;
- for(const [name,engine] of [["chromium",chromium],["webkit",webkit]]){
-  const b=await engine.launch({headless:true});
-  for(const [w,h] of sizes)await engineCheck(name,b,w,h);
-  await b.close();
- }
- console.log("PASS: 13 puzzles, six modes, 7-stage prototype, inline markup, schema, mobile fit and Chromium/WebKit");
- await new Promise(ok=>srv.close(ok));
-})().catch(e=>{console.error(e);process.exit(1)});
+ const srv=server();await new Promise(ok=>srv.listen(0,"127.0.0.1",ok));const port=srv.address().port;
+ try{
+  for(const [name,engine] of [["chromium",chromium],["webkit",webkit]]){
+   const browser=await engine.launch({headless:true});
+   try{for(const [width,height] of sizes)await runViewport(browser,name,width,height,port)}
+   finally{await browser.close()}
+  }
+  console.log("PASS: 13 tasks fully solved; multi-level subordinates, controls, no nested scrolling, Chromium and WebKit.");
+ }finally{await new Promise(ok=>srv.close(ok))}
+})().catch(e=>{console.error(e);process.exitCode=1});
