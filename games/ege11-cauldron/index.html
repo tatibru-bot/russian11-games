@@ -222,6 +222,19 @@ const a=avg(),r=league(a);screen.innerHTML='<div class="finished"><div class="fi
 function finishDrill(){state.view="drill-finish";screen.innerHTML='<div class="finished">'+heading("Тренировка завершена","Правильные ответы убраны из «Моих ошибок». Ошибочные остались для повторения.")+'<div class="panel finishBody"><div class="scoreBig">'+(state.feedback.words.length-state.feedback.wrong.length)+' / '+state.feedback.words.length+'</div><p>Из них ошибок: '+state.feedback.wrong.length+'. Рейтинг ЕГЭ не изменился.</p><p>Осталось повторить слов: '+Object.keys(mem.misses).length+'.</p></div><div class="toolbar"><button data-action="home" class="primary">Вернуться в котёл</button><button data-action="'+(state.mode==="rule"?"repeat-rule":"errors")+'" class="ghost">Ещё раунд</button></div></div>';updateTop()}
 function send(){
  if(!state.payload)return;
+ // Совместимость с раундами, завершёнными до исправления: в старом
+ // отчёте числом проверок ошибочно были слова (до 50), а балл — из 5.
+ // Нормируем именно отправляемый отчёт, сохраняя детальные ошибки в игре.
+ if(state.payload.gameId==="ege11-cauldron" && state.payload.total===5){
+   const testedSum=Object.values(state.payload.tested||{}).reduce(function(n,v){return n+Number(v||0)},0);
+   const errorSum=Object.values(state.payload.errors||{}).reduce(function(n,v){return n+Number(v||0)},0);
+   if(testedSum!==5||errorSum>5-state.payload.correct){
+     const rule="ЕГЭ № 11 — суффиксы";
+     state.payload.errors=state.payload.correct<5?{[rule]:5-state.payload.correct}:{};
+     state.payload.tested={[rule]:5};
+     mem.lastPayload=state.payload;persist();
+   }
+ }
  const status=document.getElementById("saveStatus");
  function tell(message){if(status)status.textContent=message}
  if(!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function"){
