@@ -127,11 +127,13 @@ function lpSend(num,retry=false){
   try{tg.sendData(JSON.stringify(old));}catch(err){alert('Не удалось повторить отправку: '+String(err?.message||err))}
   return;
  }
- const ids=lpPending(num);if(!ids.length){render();return}
+ const pending=lpPending(num);if(!pending.length){render();return}
+ // Одна отправка = одно завершённое предложение: старый бот считает попытки, не суммирует correct.
+ const ids=pending.slice(0,1);
  // Telegram sendData ограничен 4096 байт; здесь только счётчик, без текста и ошибок.
  // ID попытки создаётся один раз и сохраняется для идемпотентного повтора.
  const id='LP'+num+'_'+(window.crypto?.randomUUID?.().replace(/-/g,'')||Date.now().toString(36)+Math.random().toString(36).slice(2));
- const payload={v:1,type:'game_result',gameId:'LEGO'+num,attemptId:id,correct:ids.length,total:ids.length,errors:{}};
+ const payload={v:1,type:'game_result',gameId:'LEGO'+num,attemptId:id,correct:1,total:1,errors:{}};
  const json=JSON.stringify(payload);
  if(json.length>4096)throw Error('Слишком длинное сообщение Telegram');
  const old={queued:(progress.lpQueued[String(num)]||[]).slice(),last:progress.lpLast[String(num)]};
@@ -151,7 +153,7 @@ function lpSavingBlock(num){
  const rows=ns.map(n=>({n,qty:lpPending(n).length,previous:!!lpRetryPayload(n)})).filter(x=>x.qty||x.previous);
  if(!rows.length)return num==null?'':`<section class="lpSavePanel"><strong>✅ Разбор сохранён на устройстве</strong><p>Это предложение уже передавалось в бот. Повторное прохождение не увеличивает счётчик.</p></section>`;
  const actions=rows.map(({n,qty,previous})=>
-   (qty?`<button type="button" class="primary" data-act="lp-save" data-num="${n}">💾 Сохранить № ${n}: <span class="lpCount">${qty}</span> предл.</button>`:'')+
+   (qty?`<button type="button" class="primary" data-act="lp-save" data-num="${n}">💾 Сохранить 1 предложение № ${n} <span class="lpCount">(ожидает ${qty})</span></button>`:'')+
    (previous?`<button type="button" class="ghost" data-act="lp-retry" data-num="${n}" title="Повторить последний отчёт без двойного начисления">↻ № ${n}</button>`:'')
  ).join('');
  const total=rows.reduce((v,r)=>v+r.qty,0);
