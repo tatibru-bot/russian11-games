@@ -2,18 +2,18 @@
  * Текстория — серверная надстройка для существующего QuizBot.gs.
  * ВАЖНО: не самостоятельный бот; присоединяется к тому же контейнерному
  * Google Apps Script, в котором уже работает russian11_island_bot.
- * Статистика берётся ТОЛЬКО из проверенной вкладки «Тренажёры — результаты».
+ * Статистика берётся из подтверждённых вкладок «Тренажёры — результаты» и «Результаты».
  * Никакого приёма игровых процентов непосредственно из браузера здесь нет.
  * 20.11.2026 — этап интеграции, рассылки по умолчанию выключены.
  */
 var TEXTORIA_ = {
   tabs: {
-    students: 'Ученики', results: 'Тренажёры — результаты',
+    students: 'Ученики', results: 'Тренажёры — результаты', tests: 'Результаты',
     citizens: 'Текстория — жители', clans: 'Текстория — рода',
     duels: 'Текстория — дуэли', events: 'Текстория — события',
     settings: 'Текстория — настройки'
   },
-  totalSubjects: 26,
+  totalSubjects: 21, // № 1–15, 21–26; № 16–20 — отдельная активность
   maxDuellingGlory: 12,
   maxClanSize: 4,
   seasonless: true
@@ -73,6 +73,20 @@ function textoriaResultData_(book) {
     };
     (map[uid] || (map[uid] = [])).push(e);
   });
+  // Обычные тесты по № 4 (ударения) и № 7 (морфология) хранятся
+  // в другой вкладке. Все полные прохождения учитываются наравне с играми.
+  var quizRows = textoriaRows_(textoriaSheet_(book, TEXTORIA_.tabs.tests));
+  quizRows.forEach(function(row, idx) {
+    var uid=String(row[1]||'').trim(), id=String(row[4]||'');
+    var task = /^E4_/.test(id) ? 4 : /^E7_/.test(id) ? 7 : null;
+    var correct=Number(row[6]), total=Number(row[7]);
+    if(!uid || task===null || !Number.isFinite(correct) ||
+       !Number.isFinite(total) || total<=0 || correct<0 || correct>total)return;
+    var e={userId:uid,gameId:'QUIZ'+task,subject:task,
+      attemptId:'quiz-'+(idx+2),correct:correct,total:total,
+      accuracy:100*correct/total,at:textoriaTimestamp_(row[0])};
+    (map[uid]||(map[uid]=[])).push(e);
+  });
   return map;
 }
 function textoriaTimestamp_(v) {
@@ -83,48 +97,63 @@ function textoriaTimestamp_(v) {
   // Даты результатов в листе записаны по Москве.
   return Date.UTC(+m[3], +m[2] - 1, +m[1], +m[4] - 3, +m[5], +(m[6] || 0));
 }
-function textoriaRoundScore_(items, isLego) {
-  if (!items.length) return 0;
-  if (isLego) {
-    // Первое полностью разобранное предложение даёт 40/100, а семь — 100/100.
-    // Примечание: окончательное подтверждение уникальности делает ЛЕГОПУНКТ.
-    var solved=items.reduce(function(s, a) {return s + a.correct;}, 0);
-    return solved ? Math.min(100, 30 + solved * 10) : 0;
-  }
-  var best = Math.max.apply(null, items.map(function(r) {return r.accuracy;}));
-  var recent = items.slice().sort(function(a,b) {return a.at - b.at;}).slice(-5);
-  var avg = recent.reduce(function(s, a) {return s + a.accuracy;}, 0) / recent.length;
-  var activity = Math.min(10, items.length) / 10 * 100;
-  return best * 0.5 + avg * 0.3 + activity * 0.2;
+function textoriaRoundScore_(items) {
+  if(!items.length)return 0;
+  var best=Math.max.apply(null,items.map(function(r){return r.accuracy;}));
+  var recent=items.slice().sort(function(a,b){return a.at-b.at;}).slice(-5);
+  var avg=recent.reduce(function(total,r){return total+r.accuracy;},0)/recent.length;
+  // Максимум 20 очков активности на номер; 11-я попытка не добавляет активность.
+  return best*0.5+avg*0.3+Math.min(10,items.length)*2;
 }
 function textoriaStudyRating_(items) {
-  var subjects = {}, trainers = {}, extra = {words:0, parts:0};
+  var subjects={},trainers={},legoSentences=0;
   items.forEach(function(r) {
-    trainers[textoriaTrainerIdentity_(r.gameId)] = true;
-    (subjects[r.subject] || (subjects[r.subject] = [])).push(r);
-  });
-  var values = [];
-  Object.keys(subjects).forEach(function(n) {
-    if (n === 'words' || n === 'parts') {
-      extra[n] = textoriaRoundScore_(subjects[n], false);
-      return;
+    trainers[textoriaTrainerIdentity_(r.gameId)]=true;
+    var number=Number(r.subject);
+    if(Number.isInteger(number)&&number>=16&&number<=20) {
+      legoSentences+=r.correct; // Только завершённые разборы ЛЕГОПУНКТА.
+    } else {
+      (subjects[r.subject]||(subjects[r.subject]=[])).push(r);
     }
-    values.push(textoriaRoundScore_(subjects[n], /^LEGO/.test(subjects[n][0].gameId)));
   });
-  var quality = values.length ?
-    values.reduce(function(s,n){return s+n;},0) / values.length : 0;
-  var coverage = values.length / TEXTORIA_.totalSubjects * 100;
-  // Качество 65%, разнообразие освоенных номеров 35%.
-  // Бонусные тренировки — не основной путь к престолу.
-  var score = 0.65 * quality + 0.35 * coverage +
-              0.03 * extra.words + 0.02 * extra.parts;
+  var scored=[],words=0,parts=0;
+  Object.keys(subjects).forEach(function(k){
+    var value=textoriaRoundScore_(subjects[k]);
+    if(k==='words'){words=value;return;}
+    if(k==='parts'){parts=value;return;}
+    var n=Number(k);
+    if(Number.isInteger(n)&&((n>=1&&n<=15)||(n>=21&&n<=26)))
+      scored.push(value);
+  });
+  var topFive=scored.slice().sort(function(a,b){return b-a;}).slice(0,5);
+  var quality=topFive.reduce(function(total,v){return total+v;},0)/5;
+  var qualityPoints=0.60*quality;
+  var coveragePoints=30*Math.min(21,scored.length)/21;
+  var legoPoints=5*Math.min(20,legoSentences)/20;
+  var wordsPoints=0.03*words,partsPoints=0.02*parts;
+  var score=qualityPoints+coveragePoints+legoPoints+wordsPoints+partsPoints;
   return {
-    score: Math.round(score * 100) / 100,
-    attempts: items.length,
-    differentTrainers: Object.keys(trainers).length,
-    subjects: values.length,
-    quality: Math.round(quality * 100)/100
+    score:Math.round(Math.min(100,score)*100)/100,
+    attempts:items.length,
+    differentTrainers:Object.keys(trainers).length,
+    subjects:scored.length,
+    quality:Math.round(quality*100)/100,
+    legoSentences:legoSentences,
+    breakdown:{
+      quality:Math.round(qualityPoints*100)/100,
+      coverage:Math.round(coveragePoints*100)/100,
+      lego:Math.round(legoPoints*100)/100,
+      words:Math.round(wordsPoints*100)/100,
+      parts:Math.round(partsPoints*100)/100
+    }
   };
+}
+function textoriaClanPower_(members,bonus) {
+  // Одиночка и род из одного участника имеют ровно личный рейтинг.
+  if(!members.length)return 0;
+  var sum=members.reduce(function(total,p){return total+p.total;},0);
+  var mean=sum/members.length;
+  return members.length>=2 ? mean*(1+bonus) : mean;
 }
 function textoriaGlory_(book) {
   var totals = {};
@@ -193,8 +222,11 @@ function textoriaRebuild() {
       try{ids=JSON.parse(String(c[9]||'[]')).map(String);}catch(e){return;}
       var members=all.filter(function(p){return ids.indexOf(p.uid)>=0;});
       if(!members.length)return;
-      var power=members.reduce(function(sum,p){return sum+p.total;},0);
-      if(members.length>=2)power*=1.10;
+      // Среднее личных рейтингов всех участников с коалиционным бонусом.
+      // Иначе сумма делает одиночное правление заведомо невозможным.
+      var bonus=Number(textoriaSetting_(book,'clan_bonus',0.10));
+      if(!Number.isFinite(bonus)||bonus<0||bonus>0.25)bonus=0.10;
+      var power=textoriaClanPower_(members,bonus);
       var lead=members.slice().sort(function(a,b){return b.total-a.total||a.index-b.index;})[0];
       if(!lead.eligible)return;
       candidates.push({power:power,leader:lead,house:String(c[1])});
