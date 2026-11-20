@@ -173,6 +173,41 @@ nav button[aria-selected="true"]{background:linear-gradient(180deg,#ffe3a4 0%,#e
 .duel-badge{display:block;color:#e6c78b;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:5px 0}
 @media(max-width:440px){.duel-salon{padding:16px 15px}.duel-salon h2{font-size:27px}.duel-salon .duel-row .btn{width:100%}.duel-salon .duel-actions{width:100%}.duel-salon .duel-actions>*{flex:1}.duel-battlers{grid-template-columns:1fr 28px 1fr;gap:4px}.duel-battlers .vs{font-size:15px}}
 
+
+/* Текстория 6 — живые карточки на художественной карте */
+.t6-map-grid{position:relative;z-index:4;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;align-items:start;gap:26px 22px;padding:210px 34px 85px;min-height:1000px}
+.map-canvas{height:auto!important;min-height:1120px!important;min-width:1130px!important}
+.t6-castle{position:absolute;top:55px;left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:17px;min-width:330px;max-width:480px;padding:17px 23px;text-align:left;border:2px solid #f5d390;border-radius:18px;background:linear-gradient(110deg,#341d26ef,#101e33f7);color:#ffecbf;box-shadow:0 12px 30px #050a16ef,0 0 0 4px #b99a5670,0 0 40px #f6d18280;font-family:Georgia,serif}
+.t6-castle-crown{font-size:48px;line-height:1;color:#ffdf9b;text-shadow:0 2px 12px #d7a456}
+.t6-castle b{font-size:21px;display:block;line-height:1.2}.t6-castle small{display:block;margin-top:6px;font-size:13px;color:#d8bb8d}
+.t6-person{appearance:none;display:flex;align-items:center;gap:12px;padding:14px 12px;min-height:100px;color:#f9e5bf;border:1px solid #d3a568bb;border-radius:13px;background:linear-gradient(135deg,#111f2df0,#352c35ee);text-align:left;box-shadow:0 12px 22px #070c18a8,0 0 0 2px #12141d75;min-width:0;transition:transform .25s ease,border-color .25s,box-shadow .25s;animation:t6-arrive .28s ease-out}
+.t6-person:hover,.t6-person:focus-visible{transform:translateY(-4px);border-color:#ffe0a1;box-shadow:0 17px 26px #050914ba,0 0 10px #d7a66570}
+.t6-person-current{border-color:#fce8ae;box-shadow:0 0 0 2px #d7a85777,0 13px 24px #040a18ab}
+.t6-person-seal{display:grid;place-items:center;flex:none;width:47px;height:58px}.t6-person-seal .crest-emblem{max-width:100%;max-height:100%}
+.t6-person-lines{display:flex;min-width:0;flex-direction:column;gap:5px}.t6-person-lines b{font:700 16px Georgia,serif;line-height:1.15;overflow-wrap:anywhere}.t6-person-lines small{font:11px/1.25 system-ui,sans-serif;color:#d5bd9a}.t6-person-lines strong{font:700 21px Georgia,serif;color:#ffe4a7;white-space:nowrap}.t6-person-lines em{font:normal 10px system-ui,sans-serif;color:#b8bbbf}
+.t6-icon{display:flex;align-items:center;justify-content:center;width:46px;height:55px;font-size:30px;line-height:1}.t6-icon.nobility{color:#f8d38b;border:1px solid #c9a16bb0;border-radius:12px;background:linear-gradient(#5a3449,#1d2a38);text-shadow:0 2px 10px #ffc5655c}
+.t6-estate{grid-column:span 2;display:flex;gap:12px;align-items:stretch;min-width:0;min-height:225px;padding:13px;border:1px solid #efd19bbf;border-radius:19px;background:linear-gradient(120deg,#491d2ecc,#13263edb);box-shadow:0 17px 30px #000a,0 0 0 4px #0b152599;animation:t6-arrive .3s ease-out}
+.t6-house-plaque{display:flex;align-items:center;flex-direction:column;gap:9px;flex:0 0 44%;min-width:0;padding:12px;text-align:center;color:#ffe6b6;background:linear-gradient(#65404d99,#0f2031c0);border:1px solid #f2cd8c88;border-radius:14px;box-shadow:inset 0 0 20px #daa76623}
+.t6-house-plaque:hover{border-color:#ffeab8}.t6-house-seal{height:90px;width:85px;display:grid;place-items:center;filter:drop-shadow(0 6px 6px #0009)}.t6-house-seal .crest-emblem{height:87px!important;width:85px!important}
+.t6-house-text{display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0}.t6-house-text b{font:700 18px/1.1 Georgia,serif;overflow-wrap:anywhere}.t6-house-text strong{font:700 22px Georgia,serif;color:#ffe9af}.t6-house-text strong em{display:block;font:normal 10px system-ui,sans-serif;color:#d1c2ab}.t6-house-text small{font-size:11px;color:#dccfb3}.t6-overline{font:700 10px system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#e3bb7f}.t6-house-explain{font-size:10px;color:#c9b5a0}
+.t6-house-members{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:8px}.t6-house-members .t6-person{min-height:64px;padding:7px 9px;gap:8px}.t6-house-members .t6-person-seal{width:31px;height:40px}.t6-house-members .t6-person-lines{gap:3px}.t6-house-members .t6-person-lines b{font-size:13px}.t6-house-members .t6-person-lines small{font-size:9px}.t6-house-members .t6-person-lines strong{font-size:17px}
+@keyframes t6-arrive{from{opacity:.2;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.t6-resident .resident-crest{display:grid;place-items:center}.t6-resident .resident-crest .t6-icon{transform:scale(.75)}
+.t6-extra-action{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;padding-top:11px;border-top:1px solid #c9a77d44;position:relative;z-index:2}.t6-extra-action label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:#e2d3b5}.t6-extra-action select{min-height:40px;border:1px solid #b99c62;color:#fff1d6;background:#1e2936;border-radius:7px;padding:7px 11px;font-size:12px}.t6-small{font-size:10px;color:#bbb1a9;flex-basis:100%;line-height:1.4}
+.t6-pending{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;color:#e9ca92;font-size:12px;position:relative;z-index:2}
+.t6-king-actions{display:flex;gap:6px;align-items:center}.t6-king-actions .btn{min-height:46px}
+.t6-person-detail,.t6-house-detail{display:flex;gap:15px;align-items:center;padding:15px;margin-bottom:16px;border:1px solid #ab855d74;background:#16263590;border-radius:14px}.t6-person-detail h3,.t6-house-detail h3{font-size:26px;color:#ffe0a5;margin:7px 0}.t6-person-detail p,.t6-house-detail p{font-size:12px;margin:5px 0;color:#d1c4b1}.t6-detail-crest{width:70px;flex:none;display:grid;place-items:center}.t6-detail-crest .t6-icon{font-size:48px;width:70px;height:79px}
+.t6-house-big{width:94px;min-height:105px;flex:none}.t6-house-big .crest-emblem{height:112px!important;width:94px!important}
+.t6-annotation{font-size:12px;line-height:1.55;color:#bcb6ab;margin:12px 0}.t6-breakdown{display:grid;gap:12px;margin:17px 0}.t6-break-item>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#efdfc7}.t6-break-item strong{font-variant-numeric:tabular-nums;color:#ffe0a3}.t6-meter{height:9px;border-radius:8px;margin-top:6px;overflow:hidden;background:#243341;box-shadow:inset 0 1px 4px #0007}.t6-meter span{display:block;height:100%;background:linear-gradient(90deg,#97754c,#f9d38c);border-radius:8px}
+.t6-rating-header{display:flex;align-items:center;gap:15px}.t6-rating-header>div{display:flex;flex-direction:column;gap:4px}.t6-rating-header strong{font:700 30px Georgia,serif;color:#ffe2a9}.t6-rating-header strong small{font:normal 12px system-ui,sans-serif;color:#c4b8ab}.t6-rating-header>div>span:last-child{font-size:11px;color:#bdc4c7}
+.t6-tips{display:grid;gap:10px}.t6-tips p{padding:11px 13px;margin:0;border-left:2px solid #e3bd79;background:#d0a75a14;border-radius:0 8px 8px 0;color:#f3e1c4;font-size:12px;line-height:1.6}.t6-game-ledger{border:1px solid #cdb08066;border-radius:8px;overflow:hidden}.t6-game-ledger>div{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:12px;border-bottom:1px solid #a9957340}.t6-game-ledger>div:last-child{border-bottom:0}.t6-game-ledger b{white-space:nowrap;color:#ffe6ac}
+.t6-member-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0}.t6-member-entry{display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid #a98d6577;padding:10px;border-radius:8px;background:#203244;color:#f3e3c8}.t6-member-entry strong{color:#ffe3ac}
+.t6-house-directory{display:grid;gap:9px}.t6-dir-entry{display:flex;gap:12px;align-items:center;border:1px solid #b4a17666;border-radius:10px;padding:10px;background:#253648;color:#ffebc9;text-align:left}.t6-dir-entry .crest-emblem{width:48px;height:58px}.t6-dir-entry span:last-child{display:flex;flex-direction:column;font-size:15px}.t6-dir-entry small{color:#d1bb98;font-size:11px;margin-top:6px}
+.t6-forecast{padding:12px;border-radius:10px;border:1px solid #dfbb7a89;background:#f7dca015;font-size:13px;color:#f7e3b6}.t6-request{border:1px solid #bc9d6c77;border-radius:12px;padding:14px;margin:12px 0;background:#1a2b39}.t6-request>strong{display:block;color:#ffe4b0;font-size:15px}.t6-request>small{display:block;color:#d5c0a3;margin-top:6px}.t6-request .btn{margin:3px}.t6-error{color:#edb1a2;font-size:11px}.t6-herald-preview{display:flex;justify-content:center;align-items:center;min-height:115px;border:1px solid #aa94696a;border-radius:12px;margin:12px 0;background:linear-gradient(#372a3580,#111e30aa)}.t6-herald-preview .crest-emblem{width:100px;height:111px}
+#t6-invitations{color:#ffe0a2;font-weight:650}
+@media(max-width:680px){.t6-map-grid{padding:190px 25px 55px;gap:19px 14px}.map-canvas{min-width:1010px!important;min-height:1060px!important}.t6-person{min-height:104px;padding:10px}.t6-person-lines b{font-size:14px}.t6-estate{gap:7px;padding:9px}.t6-house-plaque{flex-basis:45%;padding:9px}.t6-house-seal{height:74px}.t6-house-seal .crest-emblem{height:74px!important}.t6-house-text b{font-size:16px}.t6-house-members .t6-person-lines strong{font-size:16px}.t6-castle{min-width:320px;top:43px}.t6-member-list{grid-template-columns:1fr}.t6-extra-action{align-items:stretch}.t6-extra-action .btn{width:100%}.t6-king-actions{flex-wrap:wrap}.t6-king-actions .btn{min-height:40px}}
+@media(prefers-reduced-motion:reduce){.t6-person,.t6-estate{animation:none;transition:none}}
+
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -180,7 +215,7 @@ nav button[aria-selected="true"]{background:linear-gradient(180deg,#ffe3a4 0%,#e
 <div id="app">
 <header>
   <div class="brand"><span class="brandmark">♜</span><div><b>Текстория</b><small>Всё дело в правильных связях!</small></div></div>
-  <div class="meta"><span class="demo">ПРОТОТИП</span><button class="tiny-button" type="button" id="about" aria-label="О демонстрации">?</button></div>
+  <div class="meta"><span class="demo">ДЕМО</span><button class="tiny-button" type="button" id="about" aria-label="О демонстрации">?</button></div>
 </header>
 <main>
 <section id="home-screen">
@@ -229,7 +264,7 @@ const titles=['Королева','Наследник','Наследница','Г
 // Имена из списка класса; баллы, эпитеты, титулы и составы родов ВЫМЫШЛЕННЫЕ.
 const players=[['Таисия Великолепная','lion',96.1],['Игорь Непоколебимый','lion',93.7],['Агата Стремительная','lion',90.1],['Анастасия Премудрая','dragon',88.6],['Александр Победоносный','dragon',85.4],['Мирра Мудрая','dragon',83.2],['София Зоркая','raven',79.6],['Евгения Отважная','raven',76.9],['Ульяна Сияющая','raven',72.5],['Вера Решительная',null,70.1],['Даниил Верный',null,67.3],['Илья Искусный',null,58.4],['Василий Спокойный',null,22.0]];
 const groups={dragon:{name:'Род Дракона',color:'#6d2739',symbol:'dragon',shape:'gothic',members:[3,4,5],leader:3},lion:{name:'Род Золотого Льва',color:'#315579',symbol:'lion',shape:'kite',members:[0,1,2],leader:0},raven:{name:'Род Ворона',color:'#396656',symbol:'raven',shape:'round',members:[6,7,8],leader:6}};
-const me=5; // участница, чей экран открыт в демонстрации
+let me=1; // сменяемая демонстрационная перспектива
 let membership='dragon', pendingHouse=null;const personalCrestHistory=new Set([11]);
 const childCounts=[15,14,11,10,9,11,8,7,6,5,4,3,2];
 
@@ -338,7 +373,7 @@ for(let i=0;i<players.length;i++){
 }
 function showPerson(i){const [name,house,score]=players[i];openModal(name,`<div class="person-modal">${roleCrest(i)}</div><p><b>${escapeHtml(titles[i])}</b></p><p>Демонстрационный рейтинг: <b>${score.toFixed(1)}</b></p><p>${house?escapeHtml(groups[house].name):i===11?'Сохранился герб прежней знати':'Пока без рода'}</p><p>Участие в трёх разных завершённых тренажёрах открывает статус свободного жителя. При ранге барона можно выбрать личный герб.</p>${house?`<button class="btn full" id="person-house" type="button">Открыть ${escapeHtml(groups[house].name)}</button>`:''}${i!==me?`<button class="btn gold full duel-roster-button" id="person-challenge" type="button">⚔ Бросить вызов ${escapeHtml(challengeTitle(titles[i]))}</button>`:''}`);if(house)$('person-house').onclick=()=>openHousePanel(house);if(i!==me)$('person-challenge').onclick=()=>offerDuel(i);}
 renderCrests();
-function tab(which){const home=which==='home';$('home-screen').hidden=!home;$('kingdom-screen').hidden=home;$('tab-home').setAttribute('aria-selected',String(home));$('tab-kingdom').setAttribute('aria-selected',String(!home));if(!home){const sc=document.querySelector('.map-scroll');if(sc&&!sc.dataset.viewed){sc.scrollLeft=Math.max(0,sc.scrollWidth*0.31-sc.clientWidth/2);sc.dataset.viewed='1';}}scrollTo({top:0,behavior:'instant'});}
+function tab(which){const home=which==='home';$('home-screen').hidden=!home;$('kingdom-screen').hidden=home;$('tab-home').setAttribute('aria-selected',String(home));$('tab-kingdom').setAttribute('aria-selected',String(!home));if(!home){const sc=document.querySelector('.map-scroll');if(sc&&!sc.dataset.viewed){sc.scrollLeft=Math.max(0,(sc.scrollWidth-sc.clientWidth)/2);sc.dataset.viewed='1';}}scrollTo({top:0,behavior:'instant'});}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
 const modal=$('modal'),mt=$('modal-title'),mb=$('modal-body');function closeModal(){modal.hidden=true;mb.replaceChildren();lastFocus?.focus();}function openModal(title,html){lastFocus=document.activeElement;mt.textContent=title;mb.innerHTML=html;modal.hidden=false;$('modal-close').focus();}
 $('modal-close').addEventListener('click',closeModal);modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal();});
@@ -444,6 +479,210 @@ $('duel-open').onclick=openDuelPanel;$('duel-preview-incoming').onclick=demoInco
 renderDuelHome();
 // Часы обновляются в демонстрационном окне; в рабочей версии дедлайны проверяет сервер.
 setInterval(()=>{if(duel?.status==='accepted'){if(Date.now()>=duel.acceptedAt+86400000)settleDuel();else renderDuelHome();}},60000);
+
+// === ТЕКСТОРИЯ 6: реальные проверенные рейтинги, динамические карточки и дворянские союзы ===
+// Эта конфигурация — снимок на дату, не подключена к Telegram и не изменяет данные учеников.
+const textoriaSnapshot = {"asOf":"демонстрационные значения","source":"синтетические тестовые данные (не ученики)","people":[{"name":"Игрок 1","score":15.36,"attempts":3,"distinct":2,"covered":2,"lego":2,"breakdown":{"quality":12.0,"coverage":2.86,"lego":0.5,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 2","score":18.89,"attempts":4,"distinct":3,"covered":3,"lego":0,"breakdown":{"quality":14.6,"coverage":4.29,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 3","score":22.91,"attempts":5,"distinct":4,"covered":4,"lego":0,"breakdown":{"quality":17.2,"coverage":5.71,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 4","score":27.44,"attempts":6,"distinct":5,"covered":5,"lego":2,"breakdown":{"quality":19.8,"coverage":7.14,"lego":0.5,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 5","score":30.97,"attempts":7,"distinct":6,"covered":6,"lego":0,"breakdown":{"quality":22.4,"coverage":8.57,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 6","score":35.0,"attempts":8,"distinct":7,"covered":7,"lego":0,"breakdown":{"quality":25.0,"coverage":10.0,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 7","score":39.53,"attempts":9,"distinct":8,"covered":8,"lego":2,"breakdown":{"quality":27.6,"coverage":11.43,"lego":0.5,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 8","score":33.06,"attempts":10,"distinct":2,"covered":2,"lego":0,"breakdown":{"quality":30.2,"coverage":2.86,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 9","score":37.09,"attempts":11,"distinct":3,"covered":3,"lego":0,"breakdown":{"quality":32.8,"coverage":4.29,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 10","score":41.61,"attempts":12,"distinct":4,"covered":4,"lego":2,"breakdown":{"quality":35.4,"coverage":5.71,"lego":0.5,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 11","score":45.14,"attempts":13,"distinct":5,"covered":5,"lego":0,"breakdown":{"quality":38.0,"coverage":7.14,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 12","score":49.17,"attempts":14,"distinct":6,"covered":6,"lego":0,"breakdown":{"quality":40.6,"coverage":8.57,"lego":0,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true},{"name":"Игрок 13","score":53.7,"attempts":15,"distinct":7,"covered":7,"lego":2,"breakdown":{"quality":43.2,"coverage":10.0,"lego":0.5,"words":0,"parts":0},"games":{"8":{"n":2,"best":80,"rating":70}},"registered":true}]};
+const people = textoriaSnapshot.people.map((p,i)=>({...p,id:i,epithet:'',personalSymbol:null,personalColor:'#334e70',personalShape:'gothic',wasNoble:false}));
+const foundingProposals=[];
+const joinProposals=[];
+const goldSymbols=['dragon','lion','raven','unicorn','rose','tree','sun','moon'];
+const shapelabels={gothic:'Готический',kite:'Рыцарский',round:'Округлый'};
+const fmt=n=>Number(n||0).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const rounded=n=>Math.round((Number(n)||0)*100)/100;
+const ownScore=i=>people[i].score;
+const activeHouse=i=>Object.keys(groups).find(k=>groups[k].members.includes(i))||null;
+const givenName=i=>people[i].name+(people[i].epithet?' '+people[i].epithet:'');
+const genderMale=new Set(['Игорь','Александр','Даниил','Илья','Василий']);
+function eligiblePlayer(i){return people[i].registered&&people[i].distinct>=3;}
+function partyStrength(members){return members.length?(members.reduce((s,i)=>s+ownScore(i),0)/members.length)*(members.length>=2?1.1:1):0;}
+function groupStrength(g){return partyStrength(g.members);}
+function crownCandidate(){
+  const solo=people.map((p,i)=>({type:'solo',i,score:p.score})).filter(x=>eligiblePlayer(x.i)&&!activeHouse(x.i));
+  const unions=Object.keys(groups).filter(k=>groups[k].members.length>=2).map(k=>({type:'house',key:k,score:groupStrength(groups[k]),i:groups[k].members.slice().sort((a,b)=>ownScore(b)-ownScore(a))[0]}));
+  return solo.concat(unions).sort((a,b)=>b.score-a.score||a.i-b.i)[0]||null;
+}
+function rankingList(){return people.map((p,i)=>i).sort((a,b)=>ownScore(b)-ownScore(a)||people[b].distinct-people[a].distinct||a-b);}
+function recalcTitles(){
+  const sorted=rankingList().filter(i=>eligiblePlayer(i));
+  const crown=crownCandidate();
+  for(let i=0;i<people.length;i++){
+    let j=sorted.indexOf(i)+1,m=genderMale.has(people[i].name);
+    if(!j){titles[i]=people[i].wasNoble?'Свободный житель, потомок бывшей знати':'Городской бездельник';continue;}
+    if(crown&&i===crown.i){titles[i]=m?'Король':'Королева';continue;}
+    if(j===1)j=2; // Личный лидер может уступить корону союзу.
+    titles[i]=j<=3?(m?'Наследник':'Наследница'):j<=6?(m?'Герцог':'Герцогиня'):j<=10?(m?'Граф':'Графиня'):(m?'Барон':'Баронесса');
+  }
+}
+function decorateBadge(i){
+  const p=people[i],clan=activeHouse(i);
+  if(p.personalSymbol)return crest({symbol:p.personalSymbol,color:p.personalColor,shape:p.personalShape});
+  if(clan)return crest(groups[clan]);
+  if(titles[i].startsWith('Городской'))return '<span class="t6-icon">🥿</span>';
+  if(titles[i].startsWith('Свободный'))return '<span class="t6-icon">⚒️</span>';
+  return '<span class="t6-icon nobility">'+(titles[i].startsWith('Кор')?'♛':'⚜')+'</span>';
+}
+function rankNumber(i){return rankingList().indexOf(i)+1;}
+function mapPersonCard(i,inner=false){
+ const p=people[i],b=document.createElement('button');
+ b.type='button';b.className='t6-person'+(inner?' t6-in-house':'')+(i===me?' t6-person-current':'');b.dataset.person=String(i);
+ b.innerHTML=`<span class="t6-person-seal">${decorateBadge(i)}</span><span class="t6-person-lines"><b>${escapeHtml(givenName(i))}</b><small>${escapeHtml(titles[i])}</small><strong>${fmt(p.score)} <em>личных</em></strong></span>`;
+ b.onclick=()=>showPerson(i);return b;
+}
+function syncHouseAssignments(){for(let i=0;i<players.length;i++){players[i][0]=givenName(i);players[i][1]=activeHouse(i);players[i][2]=ownScore(i);}membership=activeHouse(me);}
+function refreshT6(){
+ recalcTitles();syncHouseAssignments();
+ const king=crownCandidate();const monarch=king?givenName(king.i):'пока не определён';
+ const monarchHouse=king?.type==='house'?groups[king.key].name:'независимый правитель';
+ const houseCount=Object.keys(groups).filter(k=>groups[k].members.length>=2).length;
+ const map=$('map-canvas');map.replaceChildren();
+ const compass=document.createElement('div');compass.className='map-compass';compass.innerHTML='✧<span>СЕВЕР</span>';
+ const castle=document.createElement('button');castle.type='button';castle.className='t6-castle';castle.innerHTML=`<span class="t6-castle-crown">♛</span><span><b>Королевский дворец</b><small>${escapeHtml(monarch)} · ${king?fmt(king.score):'—'} очков</small></span>`;
+ castle.onclick=()=>king?showPerson(king.i):openModal('Дворец','<p>Правитель появится после первых трёх разных завершённых тренажёров.</p>');map.append(compass,castle);
+ const layout=document.createElement('div');layout.className='t6-map-grid';layout.id='t6-map-grid';
+ const houseEntries=Object.entries(groups).filter(([,g])=>g.members.length>=2).sort((a,b)=>groupStrength(b[1])-groupStrength(a[1]));
+ for(const [k,g] of houseEntries){
+  const e=document.createElement('div');e.className='t6-estate';e.dataset.house=k;
+  const lead=g.members.slice().sort((a,b)=>ownScore(b)-ownScore(a))[0];
+  const crestBtn=document.createElement('button');crestBtn.type='button';crestBtn.className='t6-house-plaque';crestBtn.innerHTML=`<span class="t6-house-seal">${crest(g)}</span><span class="t6-house-text"><span class="t6-overline">Знатный род · ${g.members.length}/4</span><b>${escapeHtml(g.name)}</b><strong>${fmt(groupStrength(g))} <em>рейтинг рода</em></strong><small>Глава: ${escapeHtml(givenName(g.leader??lead))}</small><span class="t6-house-explain">Среднее личных баллов × 1,10</span></span>`;
+  crestBtn.onclick=()=>openHousePanel(k);e.append(crestBtn);
+  const mates=document.createElement('div');mates.className='t6-house-members';g.members.slice().sort((a,b)=>ownScore(b)-ownScore(a)).forEach(i=>mates.append(mapPersonCard(i,true)));e.append(mates);layout.append(e);
+ }
+ const free=rankingList().filter(i=>!activeHouse(i));
+ for(const i of free)layout.append(mapPersonCard(i));
+ map.append(layout);
+ const roster=$('roster');roster.replaceChildren();rankingList().forEach((i,place)=>{
+   const p=people[i],house=activeHouse(i),row=document.createElement('button');row.className='resident t6-resident';row.type='button';row.dataset.index=i;
+   row.innerHTML=`<span class="place">${String(place+1).padStart(2,'0')}</span><span class="resident-crest">${decorateBadge(i)}</span><span class="names"><strong>${escapeHtml(givenName(i))}</strong><span class="title">${escapeHtml(titles[i])}</span><small>${house?escapeHtml(groups[house].name)+' · ':''}${fmt(p.score)} личных · ${p.attempts} прохожд.</small></span>`;
+   row.onclick=()=>showPerson(i);roster.append(row);
+ });
+ const profile=people[me],status=activeHouse(me);
+ $('profile-name').textContent=givenName(me);$('profile-status').textContent=titles[me]+(status?' · '+groups[status].name:' · без рода');
+ $('profile-crest').innerHTML=decorateBadge(me);
+ const body=$('home-screen');const metrics=body.querySelectorAll('.profile-metrics .metric strong');if(metrics.length>=3){metrics[0].textContent=fmt(profile.score);metrics[1].textContent=String(profile.attempts);metrics[2].textContent=String(rankNumber(me));}
+ const sub=body.querySelector('.profile-desc .small.muted');if(sub)sub.textContent='Личный рейтинг · место '+rankNumber(me)+' из 13 · '+profile.distinct+' разных игр и тестов';
+ $('my-house').textContent=status?'⚜ Мой род · заявления':'⚜ Родовые союзы';
+ const bulletin=document.querySelectorAll('.bulletin-info');if(bulletin[0]){bulletin[0].querySelector('strong').textContent='Правит '+monarch;bulletin[0].querySelector('span:not(.bulletin-icon)').textContent=monarchHouse;}
+ if(bulletin[1]){bulletin[1].querySelector('strong').textContent=houseCount?houseCount+' действующих рода':'Родов пока нет';bulletin[1].querySelector('span:not(.bulletin-icon)').textContent='Все 13 учеников на карте';}
+ $('bullet-crest').innerHTML=king?.type==='house'?crest(groups[king.key]):'<span class="t6-icon nobility">♛</span>';
+ const legend=$('kingdom-screen').querySelector('.map-legend');const lbold=legend.querySelector('strong'),lsmall=legend.querySelector('small');if(lbold)lbold.textContent='♛ У трона — '+monarch+(king?.type==='house'?' · '+groups[king.key].name:'');if(lsmall)lsmall.textContent='Сила правителя: '+(king?fmt(king.score):'0,00')+' · '+(houseCount?houseCount+' родов в королевстве':'пока все жители самостоятельны');
+ const above=$('kingdom-screen').querySelector('.people-head .small');if(above)above.textContent='13 учеников · рейтинги из учебной статистики';
+ const note=$('kingdom-screen').querySelector('.small-note');if(note)note.textContent='Данные из реальных результатов 11 «К» на '+textoriaSnapshot.asOf+'. Родовые союзы и заявления здесь демонстрационные; Telegram и оценки не изменяются.';
+ $('profile-rating-button').disabled=false;
+ const heraldButton=$('t6-personal-herald');if(heraldButton)heraldButton.hidden=!eligiblePlayer(me);
+ const chosen=document.getElementById('view-as-t6');if(chosen)chosen.value=String(me);
+ const pending=document.getElementById('t6-invitations');if(pending){const incoming=foundingProposals.filter(x=>x.invitee===me&&x.status==='pending');const apps=joinProposals.filter(x=>x.status==='pending'&&groups[x.house]?.leader===me);let mess=[];if(incoming.length)mess.push('📜 '+incoming.length+' приглаш. основать род');if(apps.length)mess.push('📜 '+apps.length+' прошений в род');pending.textContent=mess.length?mess.join(' · '):'Нет ожидающих приглашений';}
+}
+function scoreBar(label,value,max){const pct=Math.min(100,(value/max)*100);return `<div class="t6-break-item"><div><span>${escapeHtml(label)}</span><strong>${fmt(value)} / ${max}</strong></div><div class="t6-meter"><span style="width:${pct}%"></span></div></div>`;}
+function scoreTips(i){const p=people[i],suggestions=[];
+  const q=Object.entries(p.games).filter(([n])=>n!=='words').map(([n,g])=>({n,g}));
+  if(!p.registered)suggestions.push('Для начала нужно активировать личный кабинет Telegram-бота — без него новые результаты не привяжутся к игроку.');
+  if(p.covered<21){const tried=new Set(q.map(x=>String(x.n)));const available=[4,7,5,8,9,10,11,14,21,22,26];const fresh=available.find(n=>!tried.has(String(n)));suggestions.push('Пройди новый номер ЕГЭ'+(fresh?' — например, № '+fresh:'')+': это принесёт около 1,43 балла за разнообразие, а хороший результат может усилить пятёрку лучших.');}
+  const pool=q.filter(x=>x.g.n<10&&x.g.rating>=25&&x.g.rating<95).sort((a,b)=>b.g.rating-a.g.rating);
+  if(pool.length){const v=pool[0];suggestions.push('Повтори № '+v.n+' (сейчас '+v.g.n+' подход'+(v.g.n===1?'':'а')+', рейтинг номера '+fmt(v.g.rating)+'). Каждое полное прохождение до десятого даёт ещё 2 балла активности внутри номера; при улучшении качества может вырасти и общий рейтинг.');}
+  else if(q.some(x=>x.g.n>=10))suggestions.push('У тебя уже есть минимум десять подходов в одном номере: новые прохождения улучшают только рекорд и средний результат, но не счётчик активности в этом номере.');
+  if(p.lego<20)suggestions.push('ЛЕГОПУНКТ: разбери новое предложение без ошибок. Это даст ещё 0,25 балла в разделе активности (сейчас '+p.lego+' из 20 предложений).');
+  if(!p.games.words)suggestions.push('Попробуй «Словарный штурм»: он может дать до 3 дополнительных учебных очков.');
+  if(p.covered<5)suggestions.push('Пока освоено меньше пяти обычных номеров: любой новый уверенный результат заполнит свободное место в твоей пятёрке лучших.');
+  return suggestions.slice(0,4);
+}
+function ratingContent(i){const p=people[i],d=p.breakdown;const games=Object.entries(p.games).filter(([n])=>n!=='words').sort((a,b)=>Number(a[0])-Number(b[0]));
+return `<div class="t6-rating-header"><span class="t6-icon nobility">⚜</span><div><span class="t6-overline">Личный учебный рейтинг</span><strong>${fmt(p.score)} <small>из 100</small></strong><span>${p.attempts} полных прохождений · ${p.covered} номеров ЕГЭ</span></div></div><div class="t6-breakdown">
+${scoreBar('Пять лучших номеров · качество',d.quality,60)}${scoreBar('Разнообразие номеров',d.coverage,30)}${scoreBar('ЛЕГОПУНКТ · активность',d.lego,5)}${scoreBar('Словарные слова',d.words,3)}${scoreBar('Части речи',d.parts,2)}</div><p class="t6-annotation">Качество: 50% лучший результат номера, 30% среднее последних пяти прохождений, 20% активность (до десяти подходов). Пять лучших номеров дают максимум 60 очков. № 4 и № 7 уже учитываются по результатам тестов.</p><h3>Как увеличить рейтинг</h3><div class="t6-tips">${scoreTips(i).map(x=>`<p>✦ ${escapeHtml(x)}</p>`).join('')}</div><h3>Задания, которые уже выполнены</h3><div class="t6-game-ledger">${games.length?games.map(([n,g])=>`<div><span>№ ${escapeHtml(n)} · ${g.n} прохожд.</span><b>${fmt(g.rating)} / 100</b></div>`).join(''):'Пока нет сохранённых результатов по номерам ЕГЭ.'}</div><p class="t6-annotation">Дополнительные дуэльные баллы и награды королевства учитываются отдельно. В этом снимке таких начислений нет.</p>`;}
+function showRating(i){openModal('Из чего складывается рейтинг · '+givenName(i),ratingContent(i));}
+// После обновления реквизитов все карточки перерисовываются: это не часть фона!
+showPerson=function(i){
+ const p=people[i],house=activeHouse(i),isSelf=i===me;
+ openModal(givenName(i),`<div class="t6-person-detail"><div class="t6-detail-crest">${decorateBadge(i)}</div><div><span class="t6-overline">${escapeHtml(titles[i])}</span><h3>${fmt(p.score)} личных очков</h3><p>${p.attempts} подходов · ${p.covered} номеров ЕГЭ · ${p.lego} разборов ЛЕГОПУНКТА</p><p>${house?escapeHtml(groups[house].name):'Независимый житель королевства'}</p></div></div><button class="btn gold full" id="t6-person-details">Как заработаны эти баллы? + подсказки</button>${house?'<button class="btn full" id="t6-person-house">Карточка рода</button>':''}${!isSelf?`<button class="btn full" id="t6-person-duel">⚔ Бросить вызов ${escapeHtml(challengeTitle(titles[i]))}</button>`:''}${isSelf&&eligiblePlayer(i)?'<button class="btn full" id="t6-person-create">⚜ Основать новый род</button>':''}<p class="t6-annotation">Полные прохождения в дуэлях также засчитываются в обычную учебную статистику. Числа на этом экране — зафиксированный снимок.</p>`);
+ $('t6-person-details').onclick=()=>showRating(i);
+ if(house)$('t6-person-house').onclick=()=>openHousePanel(house);
+ if(!isSelf)$('t6-person-duel').onclick=()=>offerDuel(i);
+ if(isSelf&&eligiblePlayer(i))$('t6-person-create').onclick=openFoundingRoom;
+};
+function houseForecast(k,i){const g=groups[k];return partyStrength(g.members.concat([i]));}
+function housePanelMarkup(k){const g=groups[k];const member=g.members.includes(me);const canApply=!member&&!activeHouse(me)&&eligiblePlayer(me)&&g.members.length<4&&!joinProposals.some(q=>q.applicant===me&&q.status==='pending');const existing=joinProposals.find(q=>q.applicant===me&&q.house===k&&q.status==='pending');
+  return `<div class="t6-house-detail"><div class="t6-house-big">${crest(g)}</div><div><span class="t6-overline">Родовой рейтинг</span><h3>${fmt(groupStrength(g))}</h3><strong>${escapeHtml(g.name)}</strong><p>${g.members.length}/4 участника · глава ${escapeHtml(givenName(g.leader))}</p><p>Средний личный балл × 1,10</p></div></div><div class="t6-member-list">${g.members.map(i=>`<button type="button" class="t6-member-entry" data-open-member="${i}">${escapeHtml(givenName(i))} <strong>${fmt(ownScore(i))}</strong></button>`).join('')}</div>
+  ${canApply?`<p class="t6-forecast">Если тебя примут: <b>${fmt(groupStrength(g))} → ${fmt(houseForecast(k,me))}</b> (${fmt(houseForecast(k,me)-groupStrength(g))} балла)</p><button class="btn gold full" id="t6-apply-house">Подать прошение главе</button>`:''}
+  ${existing?`<p class="t6-annotation">Прошение ожидает решения главы.</p><button class="btn full" id="t6-retract-house">Отозвать прошение</button>`:''}
+  ${member?`<button class="btn full" id="t6-leave-house">Покинуть род</button>`:''}
+  ${!member&&!canApply&&!existing?'<p class="t6-annotation">Для прошения нужно пройти три разных тренажёра, не состоять в другом роду и дождаться свободного места.</p>':''}
+  <p class="t6-annotation">Все действия с родами в этом просмотре демонстрационные и не отправляются ученикам.</p>`;
+}
+function applyHouse(k){if(activeHouse(me)||!eligiblePlayer(me)||groups[k].members.length>=4)return;
+  joinProposals.push({id:'j'+Date.now()+me,applicant:me,house:k,status:'pending'});openHousePanel(k);
+}
+function leaveHouse(k){const g=groups[k],member=me;if(!g||!g.members.includes(member))return;
+  const wasHead=g.leader===member;g.members=g.members.filter(i=>i!==member);
+  if(g.members.length<2){for(const idx of g.members)players[idx][1]=null;delete groups[k];}
+  else if(wasHead)g.leader=g.members.slice().sort((a,b)=>ownScore(b)-ownScore(a))[0];
+  membership=null;refreshT6();openHouseDirectory();
+}
+openHousePanel=function(k){const g=groups[k];if(!g)return openHouseDirectory();openModal(g.name,housePanelMarkup(k));
+ document.querySelectorAll('[data-open-member]').forEach(b=>b.onclick=()=>showPerson(+b.dataset.openMember));
+ const apply=$('t6-apply-house');if(apply)apply.onclick=()=>applyHouse(k);
+ const retract=$('t6-retract-house');if(retract)retract.onclick=()=>{const x=joinProposals.find(x=>x.applicant===me&&x.house===k&&x.status==='pending');if(x)x.status='withdrawn';openHousePanel(k);};
+ const leave=$('t6-leave-house');if(leave)leave.onclick=()=>{openModal('Выход из '+g.name,`<p>Карточка ${escapeHtml(givenName(me))} переместится из владений рода к самостоятельным жителям. Все учебные и личные очки сохраняются. Если останется один участник, род распускается.</p><button class="btn gold full" id="t6-confirm-leave">Подтвердить выход</button>`);$('t6-confirm-leave').onclick=()=>leaveHouse(k);};
+};
+function allRequestsHtml(){const pending=foundingProposals.filter(p=>p.status==='pending'&&(p.founder===me||p.invitee===me));const joins=joinProposals.filter(p=>p.status==='pending'&&(p.applicant===me||(groups[p.house]?.leader===me)));
+ return `${pending.map(p=>`<div class="t6-request"><strong>Основание: ${escapeHtml(p.name)}</strong><small>${escapeHtml(givenName(p.founder))} пригласил(а) ${escapeHtml(givenName(p.invitee))}</small><p>Будущий рейтинг: ${fmt(partyStrength([p.founder,p.invitee]))}</p>${p.invitee===me?`<button class="btn gold" data-f-accept="${p.id}">Принять приглашение</button> <button class="btn" data-f-deny="${p.id}">Отклонить</button>`:`<button class="btn" data-f-cancel="${p.id}">Отозвать предложение</button>`}</div>`).join('')}${joins.map(p=>`<div class="t6-request"><strong>Прошение в ${escapeHtml(groups[p.house]?.name||'род')}</strong><small>Претендент: ${escapeHtml(givenName(p.applicant))}</small><p>После принятия: ${fmt(houseForecast(p.house,p.applicant))} (${fmt(houseForecast(p.house,p.applicant)-groupStrength(groups[p.house]))} к текущему)</p>${groups[p.house]?.leader===me?`<button class="btn gold" data-j-accept="${p.id}">Принять</button> <button class="btn" data-j-deny="${p.id}">Отклонить</button>`:`<button class="btn" data-j-cancel="${p.id}">Отозвать</button>`}</div>`).join('')}`;}
+function refreshRequestHandlers(){
+ document.querySelectorAll('[data-f-accept]').forEach(b=>b.onclick=()=>{let q=foundingProposals.find(q=>q.id===b.dataset.fAccept);if(!q||q.invitee!==me)return;q.status='accepted';const key='house'+Date.now().toString(36);groups[key]={name:q.name,symbol:q.symbol,color:q.color,shape:q.shape,members:[q.founder,q.invitee],leader:q.founder};refreshT6();openHousePanel(key);});
+ document.querySelectorAll('[data-f-deny],[data-f-cancel]').forEach(b=>b.onclick=()=>{let id=b.dataset.fDeny||b.dataset.fCancel,q=foundingProposals.find(q=>q.id===id);if(q)q.status='declined';openHouseDirectory();});
+ document.querySelectorAll('[data-j-accept]').forEach(b=>b.onclick=()=>{const q=joinProposals.find(q=>q.id===b.dataset.jAccept);if(!q||!groups[q.house]||groups[q.house].leader!==me)return;if(!activeHouse(q.applicant)&&groups[q.house].members.length<4){groups[q.house].members.push(q.applicant);q.status='accepted';refreshT6();openHousePanel(q.house);}});
+ document.querySelectorAll('[data-j-deny],[data-j-cancel]').forEach(b=>b.onclick=()=>{const id=b.dataset.jDeny||b.dataset.jCancel,q=joinProposals.find(q=>q.id===id);if(q)q.status='declined';openHouseDirectory();});
+}
+openHouseDirectory=function(){const keys=Object.keys(groups);openModal('Гербовая палата · родовые союзы',`<p>Род основывается <b>только вдвоём</b>: предложи название, символ и пригласи второго игрока. После его согласия на карте появятся родовое владение и карточки обоих участников.</p><button class="btn gold full" id="t6-found-from-directory">⚜ Предложить создать новый род</button><h3>Действующие рода</h3>${keys.length?`<div class="t6-house-directory">${keys.map(k=>`<button class="t6-dir-entry" data-directory-house="${k}">${crest(groups[k])}<span>${escapeHtml(groups[k].name)}<small>${fmt(groupStrength(groups[k]))} · ${groups[k].members.length}/4</small></span></button>`).join('')}</div>`:'<p class="t6-annotation">Пока нет основанных родов. Все 13 жителей начинают независимо.</p>'}<h3>Прошения и приглашения</h3>${allRequestsHtml()||'<p class="t6-annotation">Нет ожидающих прошений от тебя и к тебе.</p>'}<p class="t6-annotation">Это интерактивная демонстрация. Для проверки согласия другого игрока поменяй роль просмотра в личном кабинете.</p>`);
+ $('t6-found-from-directory').onclick=openFoundingRoom;
+ document.querySelectorAll('[data-directory-house]').forEach(b=>b.onclick=()=>openHousePanel(b.dataset.directoryHouse));refreshRequestHandlers();
+};
+function takenSymbols(){const taken=new Set(Object.values(groups).map(g=>g.symbol));foundingProposals.filter(p=>p.status==='pending').forEach(p=>taken.add(p.symbol));people.filter(p=>p.personalSymbol).forEach(p=>taken.add(p.personalSymbol));return taken;}
+function openFoundingRoom(){if(!eligiblePlayer(me)){openModal('Основать род','<p>Сначала нужно закончить три разных тренажёра и стать свободным жителем королевства.</p>');return;}
+ if(activeHouse(me)){openModal('Основать род','<p>Ты уже состоишь в роду. Для основания нового рода сначала выйди из нынешнего.</p>');return;}
+ if(foundingProposals.some(p=>p.founder===me&&p.status==='pending')){openHouseDirectory();return;}
+ const peers=people.map((p,i)=>({p,i})).filter(({i})=>i!==me&&eligiblePlayer(i)&&!activeHouse(i)&&!foundingProposals.some(q=>q.invitee===i&&q.status==='pending'));
+ const available=goldSymbols.filter(s=>!takenSymbols().has(s));
+ if(!peers.length||!available.length){openModal('Основать род','<p>Сейчас нет доступных кандидатов или свободных гербовых символов.</p>');return;}
+ openModal('Основать новый род',`<p><b>Шаг 1.</b> Придумай название (например, «Золотого Льва»). На карте появится «Род Золотого Льва».</p><label class="option-label" for="t6-name">Название после слова «Род»</label><input id="t6-name" maxlength="32" placeholder="Золотого Льва" required><p><b>Шаг 2.</b> Выбери единственный свободный символ герба, цвет и форму щита.</p><label class="option-label" for="t6-symbol">Символ</label><select class="shape-select" id="t6-symbol">${goldSymbols.map(sym=>`<option value="${sym}" ${available.includes(sym)?'':'disabled'}>${symbols[sym].label}${available.includes(sym)?'':' · занят'}</option>`).join('')}</select><label class="option-label" for="t6-color">Цвет щита</label><select class="shape-select" id="t6-color">${palette.map(([name,color])=>`<option value="${color}">${name}</option>`).join('')}</select><label class="option-label" for="t6-shape">Форма щита</label><select class="shape-select" id="t6-shape">${Object.entries(shapelabels).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select><div class="t6-herald-preview" id="t6-herald-preview"></div><p><b>Шаг 3.</b> Пригласи второго участника. Союз возникнет только после его согласия.</p><label class="option-label" for="t6-invite">Кого пригласить</label><select class="shape-select" id="t6-invite">${peers.map(({p,i})=>`<option value="${i}">${escapeHtml(givenName(i))} · ${fmt(p.score)} очков</option>`).join('')}</select><p class="t6-forecast" id="t6-new-forecast"></p><p class="t6-error" id="t6-new-error"></p><button class="btn gold full" id="t6-submit-foundation">Отправить предложение союза</button><p class="t6-annotation">Пока это пример: приглашённый ученик не получает настоящего сообщения Telegram.</p>`);
+ $('t6-symbol').value=available[0];const upd=()=>{let symbol=$('t6-symbol').value,color=$('t6-color').value,shape=$('t6-shape').value,target=+$('t6-invite').value; $('t6-herald-preview').innerHTML=crest({symbol,color,shape}); $('t6-new-forecast').textContent='Прогноз силы будущего рода: '+fmt(partyStrength([me,target]))+' очков (с бонусом 10%).';};
+ ['t6-symbol','t6-color','t6-shape','t6-invite'].forEach(id=>$(id).onchange=upd);upd();
+ $('t6-submit-foundation').onclick=()=>{let text=$('t6-name').value.trim().replace(/\s+/g,' ').replace(/^Род\s+/i,'');if(!/^[А-Яа-яЁё\- ]{2,32}$/.test(text)){$('t6-new-error').textContent='Название должно содержать от 2 до 32 русских букв, пробелы или дефис.';return;}let name='Род '+text;if(Object.values(groups).some(g=>g.name.toLocaleLowerCase()===name.toLocaleLowerCase())||foundingProposals.some(g=>g.name.toLocaleLowerCase()===name.toLocaleLowerCase()&&g.status==='pending')){$('t6-new-error').textContent='Такое название уже используется.';return;}
+ const invitee=+$('t6-invite').value;let symbol=$('t6-symbol').value;if(takenSymbols().has(symbol)||!eligiblePlayer(invitee)||activeHouse(invitee)){$('t6-new-error').textContent='Символ или приглашённый участник уже занят.';return;}
+ foundingProposals.push({id:'f'+Date.now().toString(36),status:'pending',name,symbol,color:$('t6-color').value,shape:$('t6-shape').value,founder:me,invitee});openHouseDirectory();};
+}
+// Личный герб не выдаётся автоматически: с титула барона его можно выбрать самому.
+function openPersonalHerald(){
+ if(!eligiblePlayer(me)){openModal('Личный герб','<p>Право выбора личного герба открывается после трёх разных завершённых тренажёров.</p>');return;}
+ const p=people[me];const busy=takenSymbols();if(p.personalSymbol)busy.delete(p.personalSymbol);
+ const free=goldSymbols.filter(s=>!busy.has(s));if(!free.length){openModal('Личный герб','<p>Сейчас все восемь геральдических символов заняты.</p>');return;}
+ openModal('Личная гербовая палата',`<p>Достигнув дворянского положения, ты можешь выбрать личный герб. Он останется с тобой, даже если положение в рейтинге изменится.</p><label class="option-label" for="t6-person-symbol">Символ</label><select id="t6-person-symbol" class="shape-select">${goldSymbols.map(id=>`<option value="${id}" ${free.includes(id)?'':'disabled'}>${symbols[id].label}${free.includes(id)?'':' · занят'}</option>`).join('')}</select><label class="option-label" for="t6-person-color">Цвет щита</label><select id="t6-person-color" class="shape-select">${palette.map(([name,col])=>`<option value="${col}">${name}</option>`).join('')}</select><label class="option-label" for="t6-person-shape">Форма щита</label><select id="t6-person-shape" class="shape-select">${Object.entries(shapelabels).map(([id,title])=>`<option value="${id}">${title}</option>`).join('')}</select><div id="t6-person-herald-preview" class="t6-herald-preview"></div><button id="t6-person-save" class="btn gold full">Выбрать личный герб</button><p class="t6-annotation">Герб не сохраняется на сервере в этой демонстрации.</p>`);
+ $('t6-person-symbol').value=free.includes(p.personalSymbol)?p.personalSymbol:free[0];$('t6-person-color').value=p.personalColor;$('t6-person-shape').value=p.personalShape;
+ const render=()=>{$('t6-person-herald-preview').innerHTML=crest({symbol:$('t6-person-symbol').value,color:$('t6-person-color').value,shape:$('t6-person-shape').value});};
+ ['t6-person-symbol','t6-person-color','t6-person-shape'].forEach(id=>$(id).onchange=render);render();
+ $('t6-person-save').onclick=()=>{p.personalSymbol=$('t6-person-symbol').value;p.personalColor=$('t6-person-color').value;p.personalShape=$('t6-person-shape').value;p.wasNoble=true;refreshT6();closeModal();};
+}
+// Личная карточка переключается для проверки двухстороннего согласия без реальных Telegram действий.
+function changePerspective(i){me=i;refreshT6();closeModal();tab('home');}
+function decorateHomeUI(){
+ const actions=$('home-screen').querySelector('.profile .actions');if(!actions)return;
+ const el=document.createElement('div');el.className='t6-extra-action';el.innerHTML=`<button class="btn gold" id="profile-rating-button" type="button">📊 Из чего мой рейтинг? · Подсказки</button><label for="view-as-t6">Просмотр от имени: <select id="view-as-t6">${people.map((p,i)=>`<option value="${i}">${escapeHtml(p.name)}</option>`).join('')}</select></label><span class="t6-small">Переключение только для проверки макета, без входа в чужие аккаунты.</span>`;
+ actions.insertAdjacentElement('afterend',el);$('profile-rating-button').onclick=()=>showRating(me);$('view-as-t6').onchange=e=>changePerspective(+e.target.value);
+ const personal=document.createElement('button');personal.type='button';personal.className='btn ghost';personal.id='t6-personal-herald';personal.textContent='✦ Мой личный герб';personal.onclick=openPersonalHerald;actions.append(personal);
+ const div=document.createElement('div');div.className='t6-pending';div.innerHTML='<span id="t6-invitations">Нет ожидающих приглашений</span><button class="btn inline" id="t6-open-requests">Прошения и союзы</button>';el.insertAdjacentElement('afterend',div);$('t6-open-requests').onclick=openHouseDirectory;
+ const top=$('kingdom-screen').querySelector('.king-top');const a=document.createElement('div');a.className='t6-king-actions';a.innerHTML='<button class="btn gold" id="t6-new-house">⚜ Создать род</button>';top.append(a);$('t6-new-house').onclick=openFoundingRoom;
+ const e=$('home-screen').querySelector('.footnote');if(e)e.textContent='Реальные учебные результаты из таблицы бота на '+textoriaSnapshot.asOf+'. Изменения гербов, родов, дуэли и заявки в этой версии только демонстрируются. Автоматическое обновление через Telegram пока подключается.';
+ const key=$('home-screen').querySelector('.eyebrow');if(key)key.textContent='Личный кабинет · снимок подтверждённых данных';
+ const about=$('about');about.addEventListener('click',evt=>{evt.stopImmediatePropagation();openModal('О просмотре королевства',`<p>Здесь настоящие <b>учебные рейтинги всех 13 учеников</b>, рассчитанные по утверждённой формуле. Источник: сохранённые результаты тренажёров и тестов № 4 и № 7, срез ${textoriaSnapshot.asOf}.</p><p>Родов в исходной таблице пока нет. Можно создать союз, подтвердить его от имени второго участника, подать прошение и выйти — это интерактивная демонстрация без записи в бот.</p><p>Меню «Просмотр от имени» не является входом в чужой аккаунт. Оно служит только для тестирования интерфейса.</p>`);},true);
+ $('open-rules').addEventListener('click',evt=>{evt.stopImmediatePropagation();openModal('Как стать королём Текстории?',`<p><b>Личный учебный рейтинг — до 100 очков.</b> 60 — пять лучших номеров ЕГЭ, 30 — количество разных выполненных номеров (1–15, 21–26), 5 — разборы № 16–20 в ЛЕГОПУНКТЕ, 3 — словарные слова, 2 — части речи. № 4 и 7 считаются из тестов в боте. Каждый обычный номер: 50% лучший результат, 30% среднее последних пяти, 20% количество полных прохождений (не более десяти).</p><p><b>Родовые союзы.</b> Новый род возникает после согласия двух участников. Основатель придумывает название, выбирает свободный герб и приглашает союзника. Глава существующего рода может принять прошение другого игрока. Максимум четыре игрока. Рейтинг рода — среднее их личных рейтингов с прибавкой 10%. Рейтинг одиночки — его личные баллы. У короны оказывается сильнейший самостоятельный игрок либо глава победившего рода, чей участник имеет наибольший личный рейтинг.</p><p><b>Дуэли.</b> 24 часа после принятия; лучший полный раунд решает исход. Победитель +3, проигравший +1, ничья по +2; техническая победа +1,5; если оба приняли и не играли — обоим −0,5. До трёх зачётных поединков за семь дней. Каждое полное прохождение одновременно учитывается в учебной статистике.</p><p><b>Тренажёр дня.</b> Особые полномочия наследников и герцогов: назначение одного испытания в день, выбор не чаще раза в семь дней. За прирост учебного рейтинга от него предусмотрен бонус 20% (в рамках утверждённой системы).</p><p><b>Путь к титулу.</b> После трёх завершённых разных тренажёров открываются союзы и вызовы; положение определяется рейтингом. Символы бездельника — тапочек, свободного жителя — инструменты. Полученный личный герб сохраняется при изменении титула.</p><p class="t6-annotation">В этой версии новые игровые действия не отправляются в Telegram.</p>`);},true);
+ $('show-houses').addEventListener('click',e=>{e.stopImmediatePropagation();openHouseDirectory();},true);
+ $('edit-name').addEventListener('click',e=>{e.stopImmediatePropagation();openModal('Игровой эпитет',`<p>Имя берётся из списка учеников. Ты можешь выбрать своё прозвание, например «Стремительная» или «Смелый».</p><input id="t6-epithet" maxlength="26" value="${escapeHtml(people[me].epithet)}" placeholder="Эпитет"><button class="btn gold full" id="t6-epithet-save">Примерить имя</button><p class="t6-annotation">Изменение останется только в этом просмотре.</p>`);$('t6-epithet-save').onclick=()=>{let txt=$('t6-epithet').value.trim().replace(/\s+/g,' ');if(txt&&!/^[А-Яа-яЁё -]{2,26}$/.test(txt))return;people[me].epithet=txt;refreshT6();closeModal();};},true);
+ $('my-house').addEventListener('click',e=>{e.stopImmediatePropagation();let k=activeHouse(me);k?openHousePanel(k):openHouseDirectory();},true);
+}
+// Откажемся от всех вымышленных родов, но не от иллюстрации самой карты.
+Object.keys(groups).forEach(k=>delete groups[k]);
+players.splice(0,players.length,...people.map(p=>[p.name,null,p.score]));
+personalCrestHistory.clear();
+membership=null;pendingHouse=null;
+decorateHomeUI();refreshT6();
 
 })();
 </script>
