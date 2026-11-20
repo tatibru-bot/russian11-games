@@ -22,7 +22,8 @@ function textoriaBook_() {
   // Работает внутри того же Apps Script, что и QuizBot.gs.
   // При автономном тестировании можно указать ID в Script Properties.
   var id = PropertiesService.getScriptProperties().getProperty('TEXTORIA_SPREADSHEET_ID');
-  return id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  // QuizBot.gs is standalone: never rely on getActiveSpreadsheet() being non-null.
+  return SpreadsheetApp.openById(id || E4_MAIN);
 }
 function textoriaSheet_(book, name) {
   var sheet = book.getSheetByName(name);
