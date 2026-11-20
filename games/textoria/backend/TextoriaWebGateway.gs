@@ -15,6 +15,7 @@ function textoriaWebPage(e) {
   // через textoriaWebSnapshot и textoriaWebAction.
   return HtmlService.createHtmlOutputFromFile('TextoriaWeb')
     .setTitle('Текстория · Королевство ЕГЭ')
+    .addMetaTag('viewport','width=device-width,initial-scale=1,viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -28,6 +29,16 @@ function textoriaWebAppUrl_() {
 
 function textoriaMainMenuButton_() {
   return {text:'👑 Текстория',web_app:{url:textoriaWebAppUrl_()}};
+}
+
+function textoriaAddToReplyMenu_(replyKeyboard) {
+  // Если главное меню в старом боте — Reply Keyboard, а не Inline Keyboard.
+  var rows=(replyKeyboard||[]).slice();
+  if(rows.some(function(r){return (r||[]).some(function(b){
+    return String(b.text||'').indexOf('Текстория')>=0;
+  });}))return rows;
+  rows.push([textoriaMainMenuButton_()]);
+  return rows;
 }
 
 function textoriaAddToMainMenu_(inlineKeyboard) {
