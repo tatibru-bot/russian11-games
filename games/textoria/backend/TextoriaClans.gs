@@ -56,7 +56,7 @@ function textoriaChangeEpithet(initData,epithet){
 function textoriaCreateClan(initData,name,symbol,color,shape){
   var p=textoriaRequirePupil_(initData),citizen=textoriaCitizen_(p.book,p.id);
   if(citizen.cells[3])throw new Error('Сначала нужно выйти из существующего рода');
-  if(['Городской бездельник','Свободный житель'].indexOf(String(citizen.cells[13]))>=0)
+  if(textoriaStudyRating_(textoriaResultData_(p.book)[p.id]||[]).differentTrainers<3)
     throw new Error('Создать род можно с титула барона или выше');
   var title=textoriaName_(name,34);
   textoriaValidateHeraldry_(symbol,color,shape);
@@ -68,13 +68,14 @@ function textoriaCreateClan(initData,name,symbol,color,shape){
   sh.appendRow([id,title,p.id,p.id,symbol,color,shape,.10,new Date(),JSON.stringify([p.id]),'Активен']);
   citizen.sheet.getRange(citizen.row,4).setValue(id);
   textoriaEvent_(p.book,'clan_founded',p.id,'Основан род «'+title+'»');
+  textoriaRebuild();
   return {ok:true,clanId:id};
 }
 function textoriaSubmitClanRequest(initData,clanId) {
   var p=textoriaRequirePupil_(initData),citizen=textoriaCitizen_(p.book,p.id);
   var clan=textoriaClan_(p.book,clanId);
   if(citizen.cells[3])throw new Error('Сначала выйди из своего рода');
-  if(Number(citizen.cells[12])<3 && ['Городской бездельник'].indexOf(String(citizen.cells[13]))>=0)
+  if(textoriaStudyRating_(textoriaResultData_(p.book)[p.id]||[]).differentTrainers<3)
     throw new Error('Для вступления нужно пройти три разных тренажёра');
   if(textoriaMembers_(clan).length>=TEXTORIA_.maxClanSize)throw new Error('В роду нет свободных мест');
   var events=textoriaRows_(textoriaSheet_(p.book,TEXTORIA_.tabs.events));
@@ -108,6 +109,7 @@ function textoriaResolveClanRequest(initData,requestId,approve) {
     '🏰 Твоё прошение принято! Добро пожаловать в род «'+clan.cells[1]+'».':
     '🏰 Твоё прошение в род «'+clan.cells[1]+'» отклонено.');
   textoriaEvent_(p.book,'clan_request_resolved',p.id,(approve?'Принято':'Отклонено')+' '+requestId);
+  if(approve)textoriaRebuild();
   return {ok:true,joined:!!approve};
 }
 function textoriaWithdrawClanRequest(initData,requestId) {
@@ -132,6 +134,7 @@ function textoriaLeaveClan(initData) {
   }
   citizen.sheet.getRange(citizen.row,4).setValue('');
   textoriaEvent_(p.book,'clan_left',p.id,'Покинул род «'+clan.cells[1]+'»');
+  textoriaRebuild();
   return {ok:true};
 }
 /**
