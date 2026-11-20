@@ -15,8 +15,7 @@ var TEXTORIA_ = {
   },
   totalSubjects: 21, // № 1–15, 21–26; № 16–20 — отдельная активность
   maxDuellingGlory: 12,
-  maxClanSize: 4,
-  seasonless: true
+  maxClanSize: 4
 };
 
 function textoriaBook_() {
@@ -244,6 +243,8 @@ function textoriaRebuild() {
     });
     sh.getRange(2,9,all.length,1).setValues(scores);
     sh.getRange(2,10,all.length,1).setValues(bonuses);
+    sh.getRange(2,12,all.length,1).setValues(all.map(function(p){return [p.study.attempts];}));
+    sh.getRange(2,13,all.length,1).setValues(all.map(function(p){return [p.study.differentTrainers];}));
     sh.getRange(2,14,all.length,1).setValues(titles);
     return {pupils:all.length,eligible:sorted.length,
       monarch:crown?crown.leader.name:null,rulingClan:crown?crown.house:null};
