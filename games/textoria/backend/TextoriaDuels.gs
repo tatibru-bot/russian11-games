@@ -13,8 +13,10 @@ var TEXTORIA_DUEL_GAMES_ = {
 function textoriaBotToken_() {
   // Должен совпадать с токеном существующего @russian11_island_bot.
   // Никогда не добавляйте его в GitHub или ячейки Google-таблицы.
-  var token = PropertiesService.getScriptProperties().getProperty('TEXTORIA_BOT_TOKEN');
-  if (!token) throw new Error('TEXTORIA_BOT_TOKEN отсутствует в Script Properties');
+  // The production bot already keeps its token under TELEGRAM_BOT_TOKEN.
+  // Do not create a second token or copy secrets into source files.
+  var token = PropertiesService.getScriptProperties().getProperty('TELEGRAM_BOT_TOKEN');
+  if (!token) throw new Error('TELEGRAM_BOT_TOKEN отсутствует в Script Properties');
   return token;
 }
 function textoriaHex_(bytes) {
