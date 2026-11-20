@@ -1,9 +1,7 @@
-/* TextoriaServer.gs — единый серверный файл для добавления в существующий QuizBot.gs.
-Не устанавливать одновременно отдельные TextoriaCore/Duels/Clans/BotLaunch/WebGateway.gs!
-Код создавался для существующих QuizBot.gs и Code.gs 11 «К».
-Токен не хранится здесь; используется TELEGRAM_BOT_TOKEN из Script Properties.
-*/
-
+/* TextoriaServer.gs: единственный объединённый серверный файл.
+ * Добавлять в существующий Apps Script проект 11 «К»; не устанавливать вместе с его частями.
+ * Секреты хранятся в Script Properties: TELEGRAM_BOT_TOKEN.
+ */
 
 /* ===== TextoriaCore.gs ===== */
 /**
@@ -325,7 +323,8 @@ function textoriaRequirePupil_(initData) {
   var id=textoriaAuth_(initData),book=textoriaBook_();
   var list=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students));
   var pupil=list.find(function(r){
-    return /^\d+$/.test(String(r[0]||''))&&String(r[3]||'')===id;
+    return /^\d+$/.test(String(r[0]||'')) && String(r[3]||'')===id &&
+      String(r[5]||'')==='Активен';
   });
   if(!pupil) throw new Error('Доступно только ученикам 11 «К»');
   return {id:id,name:String(pupil[1]||'').trim().split(/\s+/).pop(),book:book};
@@ -746,7 +745,7 @@ function textoriaHandleTelegramStart_(update) {
   var book=textoriaBook_();
   var pupils=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students))
     .filter(function(r){return /^\d+$/.test(String(r[0]||''));}).slice(0,13);
-  if(!pupils.some(function(p){return String(p[3]||'')===uid;})){
+  if(!pupils.some(function(p){return String(p[3]||'')===uid && String(p[5]||'')==='Активен';})){
     textoriaReplyKeyboard_(message.chat.id,'Тренажёры Текстории доступны ученикам 11 «К».',null);
     return true;
   }
@@ -853,6 +852,8 @@ function textoriaWebPupilId_(book,idx) {
   var all=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students))
     .filter(function(r){return /^\d+$/.test(String(r[0]||''));}).slice(0,13);
   var uid=String(all[i]&&all[i][3]||'');
+  if(!all[i] || String(all[i][5]||'')!=='Активен')
+    throw new Error('У этого игрока неактивный Telegram-аккаунт');
   if(!/^\d+$/.test(uid))throw new Error('У этого игрока нет привязки Telegram');
   return uid;
 }
