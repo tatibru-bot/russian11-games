@@ -58,6 +58,8 @@ function textoriaWebPupilId_(book,idx) {
   var all=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students))
     .filter(function(r){return /^\d+$/.test(String(r[0]||''));}).slice(0,13);
   var uid=String(all[i]&&all[i][3]||'');
+  if(!all[i] || String(all[i][5]||'')!=='Активен')
+    throw new Error('У этого игрока неактивный Telegram-аккаунт');
   if(!/^\d+$/.test(uid))throw new Error('У этого игрока нет привязки Telegram');
   return uid;
 }
