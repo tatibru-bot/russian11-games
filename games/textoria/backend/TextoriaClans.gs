@@ -53,23 +53,89 @@ function textoriaChangeEpithet(initData,epithet){
   textoriaEvent_(p.book,'epithet_changed',p.id,'Изменён эпитет');
   return {ok:true,displayName:p.name+' '+name};
 }
-function textoriaCreateClan(initData,name,symbol,color,shape){
-  var p=textoriaRequirePupil_(initData),citizen=textoriaCitizen_(p.book,p.id);
-  if(citizen.cells[3])throw new Error('Сначала нужно выйти из существующего рода');
-  if(textoriaStudyRating_(textoriaResultData_(p.book)[p.id]||[]).differentTrainers<3)
-    throw new Error('Создать род можно с титула барона или выше');
+/**
+ * Начало рода: один игрок предлагает имя, герб и зовёт второго.
+ * До согласия приглашённого в таблице «Текстория — рода» записи НЕТ.
+ */
+function textoriaCreateClan(initData,name,symbol,color,shape,inviteeId) {
+  var p=textoriaRequirePupil_(initData),founder=textoriaCitizen_(p.book,p.id);
+  var invitee=String(inviteeId||'');
+  if(invitee===p.id||!/^\d+$/.test(invitee))throw new Error('Нужно пригласить другого ученика');
+  if(founder.cells[3])throw new Error('Сначала выйди из существующего рода');
+  var results=textoriaResultData_(p.book);
+  if(textoriaStudyRating_(results[p.id]||[]).differentTrainers<3)
+    throw new Error('Для основания рода нужно пройти три разных тренажёра');
+  var other=textoriaCitizen_(p.book,invitee);
+  if(other.cells[3]||textoriaStudyRating_(results[invitee]||[]).differentTrainers<3)
+    throw new Error('Приглашённый игрок пока не может вступить в род');
   var title=textoriaName_(name,34);
+  if(!/^Род /.test(title))title='Род '+title;
   textoriaValidateHeraldry_(symbol,color,shape);
   var clans=textoriaRows_(textoriaSheet_(p.book,TEXTORIA_.tabs.clans));
   if(clans.some(function(r){return String(r[1]||'').toLocaleLowerCase()===title.toLocaleLowerCase()&&String(r[10])!=='Распущен';}))
-    throw new Error('Род с таким названием уже существует');
-  if(textoriaActiveSymbols_(p.book)[symbol])throw new Error('Этот геральдический символ уже занят');
-  var id=Utilities.getUuid(),sh=textoriaSheet_(p.book,TEXTORIA_.tabs.clans);
-  sh.appendRow([id,title,p.id,p.id,symbol,color,shape,.10,new Date(),JSON.stringify([p.id]),'Активен']);
-  citizen.sheet.getRange(citizen.row,4).setValue(id);
-  textoriaEvent_(p.book,'clan_founded',p.id,'Основан род «'+title+'»');
+    throw new Error('Такой род уже существует');
+  var events=textoriaRows_(textoriaSheet_(p.book,TEXTORIA_.tabs.events));
+  if(events.some(function(r){return r[1]==='clan_invitation'&&r[5]==='Ожидает'&&
+    (String(r[2])===p.id||JSON.parse(String(r[3]||'{}')).invitee===p.id);}))
+    throw new Error('У тебя уже есть ожидающее приглашение');
+  var occupied=textoriaActiveSymbols_(p.book);
+  events.forEach(function(r){if(r[1]==='clan_invitation'&&r[5]==='Ожидает'){
+    try{occupied[JSON.parse(String(r[3])).symbol]=true;}catch(e){}
+  }});
+  if(occupied[symbol])throw new Error('Этот геральдический символ занят');
+  var details={founder:p.id,invitee:invitee,title:title,symbol:symbol,color:color,shape:shape};
+  var id=Utilities.getUuid(),sheet=textoriaSheet_(p.book,TEXTORIA_.tabs.events);
+  sheet.appendRow([new Date(),'clan_invitation',p.id,JSON.stringify(details),id,'Ожидает','','']);
+  textoriaNotify_(p.book,invitee,'🏰 '+p.name+' приглашает тебя основать «'+title+'» в Текстории. Открой раздел родовых союзов.');
+  return {ok:true,proposalId:id,status:'Ожидает'};
+}
+function textoriaRespondClanInvitation(initData,proposalId,accept) {
+  var p=textoriaRequirePupil_(initData),sheet=textoriaSheet_(p.book,TEXTORIA_.tabs.events);
+  var rows=textoriaRows_(sheet);
+  var idx=rows.findIndex(function(r){return r[1]==='clan_invitation'&&String(r[4])===String(proposalId);});
+  if(idx<0)throw new Error('Приглашение не найдено');
+  var r=rows[idx],info=JSON.parse(String(r[3]||'{}'));
+  if(info.invitee!==p.id)throw new Error('Приглашение адресовано другому игроку');
+  if(String(r[5])!=='Ожидает')throw new Error('Это приглашение уже рассмотрено');
+  if(!accept){sheet.getRange(idx+2,6).setValue('Отклонено');return {ok:true,accepted:false};}
+  var founder=textoriaCitizen_(p.book,info.founder),other=textoriaCitizen_(p.book,p.id);
+  if(founder.cells[3]||other.cells[3])throw new Error('Один из игроков уже состоит в другом роду');
+  var results=textoriaResultData_(p.book);
+  if(textoriaStudyRating_(results[info.founder]||[]).differentTrainers<3||
+     textoriaStudyRating_(results[p.id]||[]).differentTrainers<3)
+    throw new Error('Не выполнено условие трёх разных тренажёров');
+  if(textoriaActiveSymbols_(p.book)[info.symbol])throw new Error('Символ уже используется');
+  var clanId=Utilities.getUuid(),clans=textoriaSheet_(p.book,TEXTORIA_.tabs.clans);
+  clans.appendRow([clanId,info.title,info.founder,info.founder,info.symbol,info.color,info.shape,0.10,new Date(),JSON.stringify([info.founder,p.id]),'Активен']);
+  founder.sheet.getRange(founder.row,4).setValue(clanId);
+  other.sheet.getRange(other.row,4).setValue(clanId);
+  sheet.getRange(idx+2,6).setValue('Принято');
+  textoriaEvent_(p.book,'clan_founded',info.founder,'Основан род «'+info.title+'»');
   textoriaRebuild();
-  return {ok:true,clanId:id};
+  return {ok:true,accepted:true,clanId:clanId};
+}
+function textoriaWithdrawClanInvitation(initData,proposalId) {
+  var p=textoriaRequirePupil_(initData),sheet=textoriaSheet_(p.book,TEXTORIA_.tabs.events);
+  var rows=textoriaRows_(sheet),idx=rows.findIndex(function(r){
+    return r[1]==='clan_invitation'&&String(r[4])===String(proposalId)&&
+      String(r[2])===p.id&&String(r[5])==='Ожидает';
+  });
+  if(idx<0)throw new Error('Нет такого ожидающего предложения');
+  sheet.getRange(idx+2,6).setValue('Отозвано');
+  return {ok:true};
+}
+function textoriaClanForecast(initData,clanId) {
+  var p=textoriaRequirePupil_(initData),clan=textoriaClan_(p.book,clanId);
+  var citizens=textoriaRows_(textoriaSheet_(p.book,TEXTORIA_.tabs.citizens));
+  var members=textoriaMembers_(clan).map(function(uid){
+    return citizens.find(function(c){return String(c[0])===uid;});
+  }).filter(Boolean);
+  var me=textoriaCitizen_(p.book,p.id).cells;
+  var score=function(r){return {total:Number(r[10])||0};};
+  var before=textoriaClanPower_(members.map(score),0.10);
+  var after=textoriaClanPower_(members.concat([me]).map(score),0.10);
+  return {current:Math.round(before*100)/100,ifAccepted:Math.round(after*100)/100,
+          change:Math.round((after-before)*100)/100};
 }
 function textoriaSubmitClanRequest(initData,clanId) {
   var p=textoriaRequirePupil_(initData),citizen=textoriaCitizen_(p.book,p.id);
@@ -125,7 +191,15 @@ function textoriaLeaveClan(initData) {
   var clan=textoriaClan_(p.book,String(citizen.cells[3]));
   var members=textoriaMembers_(clan).filter(function(id){return id!==p.id;});
   clan.sheet.getRange(clan.row,10).setValue(JSON.stringify(members));
-  if(!members.length)clan.sheet.getRange(clan.row,11).setValue('Распущен');
+  // Род существует лишь при двух или более членах.
+  // При последнем выходе остальных участников возвращаем к самостоятельным.
+  if(members.length<2) {
+    clan.sheet.getRange(clan.row,11).setValue('Распущен');
+    members.forEach(function(uid){
+      var alone=textoriaCitizen_(p.book,uid);
+      alone.sheet.getRange(alone.row,4).setValue('');
+    });
+  }
   else if(String(clan.cells[3])===p.id) {
     var standings=textoriaRows_(citizen.sheet);
     standings.sort(function(a,b){return (Number(b[10])||0)-(Number(a[10])||0);});
