@@ -6,6 +6,7 @@ on:
       - ".github/workflows/ege11-cauldron-qa.yml"
   push:
     branches:
+      - "main"
       - "feature/ege11-hell-cauldron-20261114"
     paths:
       - "games/ege11-cauldron/**"
