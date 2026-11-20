@@ -39,7 +39,7 @@ function textoriaAuth_(initData) {
   var check = Object.keys(q).filter(function(k){return k !== 'hash' && k !== 'signature';})
     .sort().map(function(k){return k+'='+q[k];}).join('\n');
   var secret = Utilities.computeHmacSha256Signature(textoriaBotToken_(),'WebAppData');
-  var digest = textoriaHex_(Utilities.computeHmacSha256Signature(check,secret));
+  var digest = textoriaHex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(check).getBytes(),secret));
   var incoming = String(q.hash).toLowerCase();
   if (incoming.length !== digest.length) throw new Error('Подпись Telegram неверна');
   var different=0;
