@@ -86,9 +86,10 @@ function textoriaTimestamp_(v) {
 function textoriaRoundScore_(items, isLego) {
   if (!items.length) return 0;
   if (isLego) {
-    // Разобранные уникальные предложения, а не фиктивные 100% за 1 предложение.
+    // Первое полностью разобранное предложение даёт 40/100, а семь — 100/100.
     // Примечание: окончательное подтверждение уникальности делает ЛЕГОПУНКТ.
-    return Math.min(100, items.reduce(function(s, a) {return s + a.correct;}, 0) * 10);
+    var solved=items.reduce(function(s, a) {return s + a.correct;}, 0);
+    return solved ? Math.min(100, 30 + solved * 10) : 0;
   }
   var best = Math.max.apply(null, items.map(function(r) {return r.accuracy;}));
   var recent = items.slice().sort(function(a,b) {return a.at - b.at;}).slice(-5);
