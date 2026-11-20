@@ -22,7 +22,7 @@ function textoriaHandleTelegramStart_(update) {
   var book=textoriaBook_();
   var pupils=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students))
     .filter(function(r){return /^\d+$/.test(String(r[0]||''));}).slice(0,13);
-  if(!pupils.some(function(p){return String(p[3]||'')===uid;})){
+  if(!pupils.some(function(p){return String(p[3]||'')===uid && String(p[5]||'')==='Активен';})){
     textoriaReplyKeyboard_(message.chat.id,'Тренажёры Текстории доступны ученикам 11 «К».',null);
     return true;
   }
