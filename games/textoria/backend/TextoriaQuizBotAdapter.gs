@@ -34,7 +34,7 @@ function textoriaDryRunMenu_(){
   return keyboard;
 }
 function textoriaCheckIntegration_(){
-  // Без записи. Проверяет наличие исходных листов и всех модулей.
+  // Проверяет листы и модули, обновляет только подготовительные рейтинги.
   var b=SpreadsheetApp.openById(E4_MAIN);
   ['Ученики','Тренажёры','Тренажёры — результаты','Результаты',
    'Текстория — жители','Текстория — рода','Текстория — дуэли',
@@ -47,4 +47,10 @@ function textoriaCheckIntegration_(){
   var status=textoriaAudit();
   Logger.log(JSON.stringify(status));
   return status;
+}
+
+// Публичная обёртка для выпадающего списка Apps Script.
+// Имена с завершающим подчёркиванием редактор может скрывать.
+function textoriaCheckIntegration() {
+  return textoriaCheckIntegration_();
 }
