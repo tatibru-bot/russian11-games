@@ -177,21 +177,44 @@ function textoriaRebuild() {
           total: study.score + (glory[uid] || 0)
         };
       });
-    var sorted = all.filter(function(p){return p.eligible;})
-      .sort(function(a,b) {return b.total-a.total || b.study.attempts-a.study.attempts || a.index-b.index;});
-    var rank = {};
-    sorted.forEach(function(p, i){rank[p.index] = i+1;});
-    var sh = textoriaSheet_(book, TEXTORIA_.tabs.citizens);
-    var oldHeraldry = sh.getRange(2, 8, all.length, 1).getValues();
-    var scores = all.map(function(p){return [p.study.score];});
-    var bonuses = all.map(function(p){return [p.glory];});
-    var titles = all.map(function(p,i) {
-      return [textoriaTitle_(rank[p.index] || 0, p.eligible, p.name, oldHeraldry[i][0]===true)];
+    var sorted=all.filter(function(p){return p.eligible;})
+      .sort(function(a,b){return b.total-a.total || b.study.attempts-a.study.attempts || a.index-b.index;});
+    var rank={};
+    sorted.forEach(function(p,i){rank[p.index]=i+1;});
+    var sh=textoriaSheet_(book,TEXTORIA_.tabs.citizens);
+    var savedCitizens=textoriaRows_(sh).slice(0,all.length);
+    var attached={};
+    savedCitizens.forEach(function(c){if(c[3])attached[String(c[0])]=String(c[3]);});
+    var candidates=all.filter(function(p){return p.eligible&&!attached[p.uid];})
+      .map(function(p){return {power:p.total,leader:p,house:null};});
+    textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.clans)).forEach(function(c) {
+      if(!c[0]||String(c[10])==='Распущен')return;
+      var ids;
+      try{ids=JSON.parse(String(c[9]||'[]')).map(String);}catch(e){return;}
+      var members=all.filter(function(p){return ids.indexOf(p.uid)>=0;});
+      if(!members.length)return;
+      var power=members.reduce(function(sum,p){return sum+p.total;},0);
+      if(members.length>=2)power*=1.10;
+      var lead=members.slice().sort(function(a,b){return b.total-a.total||a.index-b.index;})[0];
+      if(!lead.eligible)return;
+      candidates.push({power:power,leader:lead,house:String(c[1])});
     });
-    sh.getRange(2, 9, all.length, 1).setValues(scores);
-    sh.getRange(2, 10, all.length, 1).setValues(bonuses);
-    sh.getRange(2, 14, all.length, 1).setValues(titles);
-    return {pupils: all.length, eligible: sorted.length, monarch: sorted.length ? sorted[0].name : null};
+    candidates.sort(function(a,b){return b.power-a.power||a.leader.index-b.leader.index;});
+    var crown=candidates.length?candidates[0]:null;
+    var oldHeraldry=sh.getRange(2,8,all.length,1).getValues();
+    var scores=all.map(function(p){return [p.study.score];});
+    var bonuses=all.map(function(p){return [p.glory];});
+    var titles=all.map(function(p,i){
+      var isMonarch=crown&&crown.leader.index===p.index;
+      var r=rank[p.index]||0;
+      if(r===1&&!isMonarch)r=2;
+      return [textoriaTitle_(isMonarch?1:r,p.eligible,p.name,oldHeraldry[i][0]===true)];
+    });
+    sh.getRange(2,9,all.length,1).setValues(scores);
+    sh.getRange(2,10,all.length,1).setValues(bonuses);
+    sh.getRange(2,14,all.length,1).setValues(titles);
+    return {pupils:all.length,eligible:sorted.length,
+      monarch:crown?crown.leader.name:null,rulingClan:crown?crown.house:null};
   } finally {lock.releaseLock();}
 }
 /** Для ручной или плановой проверки, не меняет исходные результаты тренажёров. */
