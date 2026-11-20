@@ -164,12 +164,17 @@ function textoriaSnapshot(initData) {
       };
     }),
     clans:clans.map(function(c){
+      var members=textoriaMembers_({cells:c}).map(function(uid){
+        return citizens.findIndex(function(p){return String(p[0])===uid;});
+      }).filter(function(i){return i>=0;});
+      var bonus=Number(c[7])||0.10;
+      var power=textoriaClanPower_(members.map(function(i){
+        return {total:Number(citizens[i][10])||0};
+      }),bonus);
       return {
         id:String(c[0]),name:String(c[1]),symbol:String(c[4]),
-        color:String(c[5]),shape:String(c[6]),bonus:Number(c[7])||0,
-        members:textoriaMembers_({cells:c}).map(function(uid){
-          return citizens.findIndex(function(p){return String(p[0])===uid;});
-        }).filter(function(i){return i>=0;})
+        color:String(c[5]),shape:String(c[6]),bonus:bonus,
+        members:members,rating:Math.round(power*100)/100
       };
     })
   };
