@@ -84,6 +84,38 @@ async function engineCheck(engine,name,base){
         assert((await a.getAttribute("class")).includes("rank"+item.rank),"rank corresponds to stored average "+item.scores);
         assert.equal(await page.locator(".homeTop .rankTitle").innerText(),item.title);
       }
+      // Recover multiple historical attempts, including pre-update rows with no stored payload.
+      await page.evaluate(()=>localStorage.setItem("russian11:ege11:hell:v1:741159",JSON.stringify({
+        history:[
+          {at:"2026-11-18T09:00:00Z",score:2,attemptId:"e11-old-two",sent:false},
+          {at:"2026-11-19T09:00:00Z",score:3,attemptId:"e11-old-three",sent:true}
+        ],misses:{},mastered:{}
+      })));
+      await page.reload({waitUntil:"load"});
+      assert.equal(await page.locator('[data-action="history"]').count(),1,"history entry point always visible");
+      await page.locator('[data-action="history"]').click();
+      assert.equal(await page.locator('[data-action="send-attempt"]').count(),2,"both old attempts recoverable");
+      const fit=await page.evaluate(()=>({
+        pageOverflow:document.documentElement.scrollHeight>innerHeight+2,
+        historyHeight:document.querySelector(".history").getBoundingClientRect().height,
+        screenHeight:document.querySelector(".screen").getBoundingClientRect().height
+      }));
+      assert.equal(fit.pageOverflow,false,"history stays inside screen");
+      assert(fit.historyHeight<=fit.screenHeight+1,"history height fits available panel");
+      await page.locator('[data-action="send-attempt"][data-id="e11-old-two"]').click();
+      const oldTwo=JSON.parse(await page.evaluate(()=>window.__qaPayload));
+      assert.equal(oldTwo.attemptId,"e11-old-two");
+      assert.equal(oldTwo.correct,2);
+      assert.equal(oldTwo.total,5);
+      assert.equal(Object.values(oldTwo.tested).reduce((a,b)=>a+b,0),5);
+      await page.locator('[data-action="send-attempt"][data-id="e11-old-three"]').click();
+      assert.match(await page.locator("#saveStatus").innerText(),/Ранее уже запрашивали/,"repeat needs explicit confirmation");
+      const beforeConfirm=JSON.parse(await page.evaluate(()=>window.__qaPayload));
+      assert.equal(beforeConfirm.attemptId,"e11-old-two","unconfirmed repeat did not transmit");
+      await page.locator('[data-action="send-attempt"][data-id="e11-old-three"]').click();
+      const oldThree=JSON.parse(await page.evaluate(()=>window.__qaPayload));
+      assert.equal(oldThree.attemptId,"e11-old-three");
+      assert.equal(oldThree.correct,3);
       await page.evaluate(()=>localStorage.removeItem("russian11:ege11:hell:v1:741159"));
       await page.reload({waitUntil:"load"});
     }
@@ -125,11 +157,15 @@ async function engineCheck(engine,name,base){
       await page.locator('[data-action="send"]').click();
       const sent=JSON.parse(await page.evaluate(()=>window.__qaPayload));
       assert.equal(sent.gameId,"ege11-cauldron");
-      assert.equal(sent.correct,5);assert.equal(sent.total,5);assert.equal(Object.values(sent.tested).reduce((x,y)=>x+y,0),50);
+      assert.equal(sent.correct,5);assert.equal(sent.total,5);assert.equal(Object.values(sent.tested).reduce((x,y)=>x+y,0),5);
       await page.locator('[data-action="home"]').click();
-      assert.equal(await page.locator('[data-action="retry-last"]').count(),1,"resume save button available");
+      assert.equal(await page.locator('[data-action="history"]').count(),1,"history button is visible");
+      await page.locator('[data-action="history"]').click();
+      assert.equal(await page.locator('[data-action="send-attempt"]').count(),1,"current finished round in history");
       await page.reload({waitUntil:"load"});
-      assert.equal(await page.locator('[data-action="retry-last"]').count(),1,"save recovery persists");
+      await page.locator('[data-action="history"]').click();
+      assert.equal(await page.locator('[data-action="send-attempt"]').count(),1,"save recovery persists");
+      await page.locator('[data-action="home"]').click();
       await page.locator('[data-action="start-exam"]').click();
       const slots=await page.evaluate(()=>window.__CAULDRON_QA.currentSlots());
       for(let i=0;i<slots.length;i++){
