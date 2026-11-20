@@ -798,3 +798,58 @@ function textoriaRealDuelPanel(){
  const go=document.getElementById('t-live-duel-open-game');if(go)go.onclick=()=>{
   const url='https://t.me/russian11_island_bot?start=textoria_'+encodeURIComponent(duel.gameId);
   if(window.Telegram?.WebApp?.openTelegramLink)window.Telegram.WebApp.openTelegramLink(url);
+  else window.open(url,'_blank','noopener,noreferrer');
+ };
+}
+// Dynamic UI retains its original visual design but all writes go through server actions.
+offerDuel=textoriaRealOfferDuel;
+openDuelPanel=textoriaRealDuelPanel;
+function textoriaClickCapture(e){
+ if(!textoriaLiveLoaded)return;
+ const el=e.target.closest('button');if(!el)return;
+ const act=el.id||'';
+ let verb=null,args={};
+ if(act==='t6-submit-foundation'){
+  verb='found';args={name:document.getElementById('t6-name')?.value,
+   symbol:document.getElementById('t6-symbol')?.value,
+   color:document.getElementById('t6-color')?.value,
+   shape:document.getElementById('t6-shape')?.value,
+   invitee:+document.getElementById('t6-invite')?.value};
+ }else if(el.dataset.fAccept){verb='accept_found';args={id:el.dataset.fAccept};}
+ else if(el.dataset.fDeny){verb='decline_found';args={id:el.dataset.fDeny};}
+ else if(el.dataset.fCancel){verb='withdraw_found';args={id:el.dataset.fCancel};}
+ else if(act==='t6-apply-house'){verb='join';args={clanId:el.dataset.liveClan};}
+ else if(act==='t6-retract-house'){
+  const q=joinProposals.find(q=>q.applicant===me&&q.house===el.dataset.liveClan&&q.status==='pending');
+  if(q){verb='withdraw_join';args={id:q.id};}
+ }else if(el.dataset.jAccept){verb='accept_join';args={id:el.dataset.jAccept};}
+ else if(el.dataset.jDeny){verb='decline_join';args={id:el.dataset.jDeny};}
+ else if(el.dataset.jCancel){verb='withdraw_join';args={id:el.dataset.jCancel};}
+ else if(act==='t6-confirm-leave'){verb='leave';}
+ else if(act==='t6-epithet-save'){verb='epithet';args={epithet:document.getElementById('t6-epithet')?.value};}
+ else if(act==='t6-person-save'){
+  verb='crest';args={symbol:document.getElementById('t6-person-symbol')?.value,
+   color:document.getElementById('t6-person-color')?.value,
+   shape:document.getElementById('t6-person-shape')?.value};
+ }
+ if(verb){e.preventDefault();e.stopImmediatePropagation();textoriaLiveAction(verb,args,()=>openHouseDirectory());return;}
+ if(['choose-daily','royal-decree'].includes(act)){
+  e.preventDefault();e.stopImmediatePropagation();openModal('Дворцовые полномочия','<p>Назначение тренажёра дня и указы появятся после проверки публикации в канале «Будни». Сейчас эти действия недоступны.</p>');
+ }
+}
+document.addEventListener('click',textoriaClickCapture,true);
+function textoriaLiveStart(){
+ const tg=window.Telegram?.WebApp;
+ if(!tg||!tg.initData){textoriaLiveMessage('Открой Тексторию из главного меню бота @russian11_island_bot.');return;}
+ if(!window.google||!google.script||!google.script.run){textoriaLiveMessage('Этот адрес ещё не подключён к серверу Текстории. Открой приложение через Telegram после публикации.');return;}
+ textoriaLiveInit=tg.initData;
+ try{tg.ready();tg.expand();}catch(e){}
+ google.script.run.withSuccessHandler(snap=>{
+  try{textoriaLiveApply(snap);}catch(e){textoriaLiveError(e);}
+ }).withFailureHandler(textoriaLiveError).textoriaWebSnapshot(textoriaLiveInit);
+}
+setTimeout(textoriaLiveStart,0);
+
+})();
+</script>
+</body></html>
