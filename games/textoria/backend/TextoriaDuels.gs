@@ -55,7 +55,8 @@ function textoriaRequirePupil_(initData) {
   var id=textoriaAuth_(initData),book=textoriaBook_();
   var list=textoriaRows_(textoriaSheet_(book,TEXTORIA_.tabs.students));
   var pupil=list.find(function(r){
-    return /^\d+$/.test(String(r[0]||''))&&String(r[3]||'')===id;
+    return /^\d+$/.test(String(r[0]||'')) && String(r[3]||'')===id &&
+      String(r[5]||'')==='Активен';
   });
   if(!pupil) throw new Error('Доступно только ученикам 11 «К»');
   return {id:id,name:String(pupil[1]||'').trim().split(/\s+/).pop(),book:book};
