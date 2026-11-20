@@ -186,7 +186,6 @@ function textoriaCloseExpiredDuels() {
       textoriaEvent_(book,'duel_finished','',String(d[0])+' · '+decision);
       changes++;
     });
-    if(changes)textoriaRebuild();
     return {settled:changes};
   }finally{lock.releaseLock();}
 }
