@@ -20,8 +20,10 @@ function textoriaWebPage(e) {
 }
 
 function textoriaWebAppUrl_() {
-  var base=PropertiesService.getScriptProperties().getProperty('TEXTORIA_WEBAPP_URL') ||
-           ScriptApp.getService().getUrl();
+  var props=PropertiesService.getScriptProperties();
+  // Existing production deployment is already configured as QUIZ_WEBAPP_URL.
+  var base=props.getProperty('TEXTORIA_WEBAPP_URL') ||
+           props.getProperty('QUIZ_WEBAPP_URL') || ScriptApp.getService().getUrl();
   if(!base || !/^https:\/\/script\.google\.com\/macros\/s\//.test(base))
     throw new Error('Нужен HTTPS URL опубликованного Apps Script Web App');
   return base.split('?')[0]+'?page=textoria';
