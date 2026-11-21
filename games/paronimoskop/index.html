@@ -223,7 +223,14 @@ function doCheck(){if(S.checked||!S.current)return;const choice=$('input[name="j
  active.answers.push({id:q.id,correct});
  if(active.answers.length===ROUND_SIZE){
   const errors=ROUND_SIZE-S.correct;
-  const entry={attemptId:active.attemptId,mode:active.mode,total:ROUND_SIZE,correct:S.correct,errors,at:new Date().toISOString(),sent:false};
+  // У каждой карточки известна группа паронимов: собираем данные после 10 ответов.
+   const ruleStats={},ruleNames={};
+   active.answers.forEach(a=>{const q=questionById.get(a.id);if(!q)return;
+    const rid='pg'+q.group; if(!ruleStats[rid])ruleStats[rid]=[0,0];
+    ruleStats[rid][0]++;if(!a.correct)ruleStats[rid][1]++;
+    ruleNames[rid]='Паронимы · '+String(G[q.group]?.title||'группа '+q.group);
+   });
+   const entry={attemptId:active.attemptId,mode:active.mode,total:ROUND_SIZE,correct:S.correct,errors,at:new Date().toISOString(),sent:false,ruleStats,ruleNames};
   if(!R.history.some(h=>h.attemptId===entry.attemptId))R.history.unshift(entry);
   R.active=null;S.completed=entry;S.finished=true;
  }
@@ -254,7 +261,7 @@ function sendTelegram(){
  const status=$('#send-telegram-status');
  if(!tg||!tg.platform||tg.platform==='unknown'||typeof tg.sendData!=='function'||tg.initDataUnsafe?.query_id){status.textContent='Открой игру из меню Telegram-бота, чтобы передать результат.';return;}
  const key='Паронимы';
- const payload={v:1,type:'game_result',gameId:'PARONIMOSKOP',attemptId:h.attemptId,correct:h.correct,total:ROUND_SIZE,errors:h.errors?{[key]:h.errors}:{},tested:{[key]:ROUND_SIZE}};
+ const payload={v:1,type:'game_result',gameId:'PARONIMOSKOP',attemptId:h.attemptId,correct:h.correct,total:ROUND_SIZE,errors:h.errors?{[key]:h.errors}:{},tested:{[key]:ROUND_SIZE},...(h.ruleStats?{ruleStats:h.ruleStats,ruleNames:h.ruleNames,diagKind:'question'}:{})};
  const data=JSON.stringify(payload);
  if(new TextEncoder().encode(data).length>4096){status.textContent='Отчёт превышает лимит Telegram и не отправлен.';return;}
  try{tg.sendData(data);h.sent=true;persistRounds();status.textContent='Запрос на отправку передан Telegram. Запись подтвердится после появления в статистике бота.';}

@@ -223,11 +223,54 @@ function renderResults(){
  on("resultMenu",renderMenu);on("resultErrors",showErrors);on("resultNew",function(){startRound("new");});on("sendTelegram",sendTelegram);
  const send=document.getElementById("sendTelegram");if(send)send.disabled=!telegram||session.sent;
 }
-function sendTelegram(){
+// Источник — формулировка конкретного задания. Если названо несколько средств
+ // связи, это КОМПЛЕКСНАЯ ошибка: не приписываем её каждому правилу отдельно.
+ function diagTopic26(task){
+  const prompt=String(task?.prompt||'').toLocaleLowerCase('ru').replace(/ё/g,'е');
+  const tags=[];
+  const tests=[
+   ['poss','притяжательные местоимения',/притяжательн[^,.]*местоимен/],
+   ['dem','указательные местоимения',/указательн[^,.]*местоимен/],
+   ['pers','личные местоимения',/личн[^,.]*местоимен/],
+   ['indef','неопределённые местоимения',/неопределенн[^,.]*местоимен/],
+   ['otherpron','местоимения',/местоимен/],
+   ['lexrep','лексический повтор',/лексическ[^,.]*повтор/],
+   ['syn','синонимы',/синоним/],
+   ['ant','антонимы',/антоним/],
+   ['root','однокоренные слова',/однокоренн/],
+   ['forms','формы слова',/форм[^,.]*слов/],
+   ['unionword','союзные слова',/союзн[^,.]*слов/],
+   ['union','союзы',/союз(?!н)/],
+   ['adv','наречия',/наречи/],
+   ['part','частицы',/частиц/],
+   ['intro','вводные слова',/вводн/],
+   ['num','числительные',/числител/]
+  ];
+  for(const [id,name,re] of tests){
+   if(id==='otherpron'&&tags.some(x=>['poss','dem','pers','indef'].includes(x[0])))continue;
+   if(re.test(prompt))tags.push([id,name]);
+  }
+  if(!tags.length)return ['unclassified','Не уточнено средство связи'];
+  const code=tags.map(x=>x[0]).sort().join('-');
+  const id=tags.length===1?tags[0][0]:'mixed-'+code;
+  const hash=Array.from(code).reduce((h,ch)=>((h*31+ch.charCodeAt(0))>>>0),0).toString(36);
+  return [id.length<=39?id:'mixed-'+hash,
+   (tags.length===1?tags[0][1]:'Комбинация: '+tags.map(x=>x[1]).join(' + ')).slice(0,120)];
+ }
+ function sendTelegram(){
  if(!session||session.sent||session.answers.length!==5||!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function")return;
  const all=session.answers,correct=all.filter(function(a){return a.ok;}).length,skills="Связь предложений";
  const payload={v:1,type:"game_result",gameId:"TR26",attemptId:session.attemptId,correct,total:5,errors:{},tested:{},wrongRows:all.filter(function(x){return !x.ok;}).map(function(x){return {taskId:x.id,chosen:x.chosen,expected:byId.get(x.id).a};})};
  payload.errors[skills]=5-correct;payload.tested[skills]=5;
+ const ruleStats={},ruleNames={};
+ for(const answer of all){
+  const task=byId.get(answer.id);if(!task)continue;
+  const [rid,title]=diagTopic26(task);
+  if(!ruleStats[rid])ruleStats[rid]=[0,0];
+  ruleStats[rid][0]++;if(!answer.ok)ruleStats[rid][1]++;
+  ruleNames[rid]=title;
+ }
+ payload.ruleStats=ruleStats;payload.ruleNames=ruleNames;payload.diagKind='question';
  try{tg.sendData(JSON.stringify(payload));session.sent=true;renderResults();const e=document.getElementById("sendStatus");if(e)e.textContent="Результат передан боту."; }
  catch(e){const el=document.getElementById("sendStatus");if(el)el.textContent="Не удалось отправить: "+String(e);}
 }
