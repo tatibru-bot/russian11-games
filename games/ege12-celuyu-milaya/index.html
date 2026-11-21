@@ -294,7 +294,7 @@ function e12Archive(d){
  const length=new TextEncoder().encode(JSON.stringify(d)).length;
  if(length>4096)throw Error('Диагностика превышает 4096 байт: '+length+'. Сообщи преподавателю, отчёт сохранён на устройстве.');
  const item={at:now(),attemptId:d.attemptId,mode:d.mode,topic:d.topic,report:d,attemptedAt:null};
- mem.diagnostics.push(item);if(mem.diagnostics.length>80)mem.diagnostics.splice(0,mem.diagnostics.length-80);
+ mem.diagnostics.push(item);
  persist();return item;
 }
 function diagnosticFromDrill(){
