@@ -24,6 +24,17 @@ for(const [g,needles] of games){
  assert(parsed>0,g+" missing parsed scripts");
  console.log("PASS",g,"scripts",parsed,"bytes",Buffer.byteLength(html));
 }
+// Test ambiguous links: do not transform one mixed question into several confirmed deficits.
+const linkHtml=fs.readFileSync(path.join(root,"games/tr26-links/index.html"),"utf8");
+const linkStart=linkHtml.indexOf("function diagTopic26("),linkEnd=linkHtml.indexOf("function sendTelegram()",linkStart);
+assert(linkStart>0&&linkEnd>linkStart,"TR26 classifier found");
+const topicContext=vm.createContext({});
+vm.runInContext(linkHtml.slice(linkStart,linkEnd),topicContext);
+assert.equal(topicContext.diagTopic26({prompt:"при помощи притяжательного местоимения"})[0],"poss");
+const combo=topicContext.diagTopic26({prompt:"при помощи указательного местоимения, контекстных синонимов и форм слова"});
+assert(combo[0].startsWith("mixed-")&&combo[1].includes("синонимы"),"mixed prompts stay mixed");
+assert.equal(topicContext.diagTopic26({prompt:"при помощи союзного слова"})[0],"unionword");
+assert(topicContext.diagTopic26({prompt:"при помощи союза и союзного слова"})[0].startsWith("mixed-"));
 const gs=fs.readFileSync(path.join(__dirname,"GameSkillStats.gs"),"utf8");
 new vm.Script(gs,{filename:"GameSkillStats.gs"});
 for(const id of ["TR8_01","TR8_02","HOSPITAL","TR21_DASH","TR21_COLON","TR21_COMMA","TR22"]){
