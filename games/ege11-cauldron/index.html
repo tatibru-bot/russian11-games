@@ -202,6 +202,11 @@ function payloadForAttempt(h){
  if(!Number.isInteger(score)||score<0||score>5)return null;
  // До обновления сохранились балл, время и ID. Их достаточно, чтобы
  // восстановить итоговый балл, но не ошибки по каждому отдельному слову.
+ // Раунды новой версии хранят точную статистику по словам. При повторной
+ // отправке возвращаем исходный снимок, не заменяя его общим результатом.
+ if(h.payload&&h.payload.v===1&&h.payload.gameId==="ege11-cauldron"&&
+    h.payload.attemptId===h.attemptId&&Number(h.payload.correct)===score&&
+    Number(h.payload.total)===5)return h.payload;
  const rule="ЕГЭ № 11 — суффиксы";
  return {v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:h.attemptId,correct:score,total:5,
   errors:score<5?{[rule]:5-score}:{},tested:{[rule]:5}};
@@ -247,11 +252,32 @@ function check(){if(state.view!=="play"||!state.values.every(Boolean))return;con
 function showFeedback(){state.view="feedback";const x=state.feedback;const title=x.perfect?"Все буквы на месте!":"Котёл разобрал твои ошибки";const subtitle=state.mode==="exam"?"Номер "+(state.examIndex+1)+": "+(x.perfect?"1 балл":"0 баллов")+" · Ошибок в словах: "+x.wrong.length:"Правильно: "+(x.words.length-x.wrong.length)+" из "+x.words.length;const list=x.wrong.length?x.wrong.map(function(w){return '<article class="feedbackItem"><strong>'+esc(w.full)+' · вместо '+esc(w.attempted.toUpperCase())+' нужно '+esc(w.letter.toUpperCase())+'</strong><div class="ruleTag">'+esc(byId[w.rule]?.title||"Суффикс")+'</div><p>'+esc(w.explanation||"Проверь образование слова и суффикс в справочнике.")+'</p></article>'}).join(""):'<div class="panel successNote">Ни одного ошибочного слова. Огонь на твоей стороне! 🔥</div>';
 screen.innerHTML='<div class="feedback"><div class="feedbackHead panel"><h2>'+esc(title)+'</h2><p>'+esc(subtitle)+'</p></div><div class="scroll">'+list+'</div><div class="toolbar"><button class="ghost" data-action="guide">📖 Правила</button><button class="primary" data-action="advance">'+(state.mode==="exam"&&state.examIndex<4?"Следующий номер →":"Завершить раунд →")+'</button></div></div>';updateTop()}
 function advance(){if(state.mode==="exam"){if(state.examIndex<4){state.examIndex++;startEntry()}else finishExam()}else finishDrill()}
-function finishExam(){const score=state.results.filter(function(x){return x.perfect}).length;const errors={},tested={};state.results.forEach(function(r){Object.entries(r.tested).forEach(function(e){const name=byId[e[0]]?.title||e[0];tested[name]=(tested[name]||0)+e[1]});r.wrong.forEach(function(w){const name=byId[w.rule]?.title||w.rule;errors[name]=(errors[name]||0)+1})});
-const botRule="ЕГЭ № 11 — суффиксы"; const botErrors=score<5?{[botRule]:5-score}:{}; const botTested={[botRule]:5};
-state.payload={v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:state.attemptId,correct:score,total:5,errors:botErrors,tested:botTested};
+function finishExam(){const score=state.results.filter(function(x){return x.perfect}).length;
+// Экзаменационный балл (5 полных номеров) не смешивается с диагностикой слов.
+// В ruleStats каждый ID правила хранит [проверено слов, ошибок в словах].
+// Короткие ID сохраняют Telegram-пакет значительно меньше лимита 4096 байт.
+const errors={},tested={},ruleStats={};
+state.results.forEach(function(r){
+ Object.entries(r.tested).forEach(function(e){
+  const id=e[0],name=byId[id]?.title||id,n=Number(e[1])||0;
+  tested[name]=(tested[name]||0)+n;
+  const stat=ruleStats[id]||(ruleStats[id]=[0,0]);stat[0]+=n;
+ });
+ r.wrong.forEach(function(w){
+  const id=w.rule||"other",name=byId[id]?.title||id;
+  errors[name]=(errors[name]||0)+1;
+  const stat=ruleStats[id]||(ruleStats[id]=[0,0]);stat[1]++;
+ });
+});
+const botRule="ЕГЭ № 11 — суффиксы";const botErrors=score<5?{[botRule]:5-score}:{};const botTested={[botRule]:5};
+// Старые поля остаются для текущего QuizBot.gs; отдельное поле будет
+// записываться сервером после добавления приёма ruleStats в QuizBot.gs.
+state.payload={v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:state.attemptId,correct:score,total:5,errors:botErrors,tested:botTested,ruleStats:ruleStats};
+const rulesView=Object.entries(ruleStats).sort(function(a,b){return b[1][1]-a[1][1]||b[1][0]-a[1][0]}).map(function(e){
+ return '<li><strong>'+esc(byId[e[0]]?.title||e[0])+'</strong> · проверено '+e[1][0]+' слов, ошибок '+e[1][1]+'</li>';
+}).join("");
 mem.history.push({at:new Date().toISOString(),score:score,attemptId:state.attemptId,sent:false,payload:state.payload});mem.lastPayload=state.payload;persist();state.view="finish";
-const a=avg(),r=league(a);screen.innerHTML='<div class="finished"><div class="finishHead panel"><h2>🏆 Итоги пяти испытаний</h2><p>Баллы даются только за полностью верный номер ЕГЭ.</p></div><div class="finishBody panel"><div class="finishAvatar">'+avatar(r)+'<div><div class="scoreBig">'+score+' / 5</div><div class="rankTitle">'+esc(TITLES[r])+'</div><p>Средний результат: '+a.toFixed(2)+' / 5 за '+mem.history.length+' раунд(ов)</p></div></div><p>Слов на повторении: '+Object.keys(mem.misses).length+'. Отработка ошибок и тренировки по правилам не добавляют баллы в рейтинг.</p></div><div class="scroll"><div class="panel finishBody"><strong>Статистика раунда</strong><p>Проверено слов: '+Object.values(tested).reduce(function(s,n){return s+n},0)+' · ошибочных вставок: '+Object.values(errors).reduce(function(s,n){return s+n},0)+'</p><p>Для записи результата открой игру через кнопку «🎮 Тренажёры» в личном чате @russian11_island_bot, а не по прямой ссылке. Затем нажми «Сохранить».</p></div></div><div class="toolbar"><button class="ghost" data-action="home">В меню</button><button class="primary" data-action="send" id="saveResult">📩 Сохранить в Telegram</button></div><div class="note" id="saveStatus">'+esc(state.saveStatus)+'</div></div>';updateTop()}
+const a=avg(),r=league(a);screen.innerHTML='<div class="finished"><div class="finishHead panel"><h2>🏆 Итоги пяти испытаний</h2><p>Баллы даются только за полностью верный номер ЕГЭ.</p></div><div class="finishBody panel"><div class="finishAvatar">'+avatar(r)+'<div><div class="scoreBig">'+score+' / 5</div><div class="rankTitle">'+esc(TITLES[r])+'</div><p>Средний результат: '+a.toFixed(2)+' / 5 за '+mem.history.length+' раунд(ов)</p></div></div><p>Слов на повторении: '+Object.keys(mem.misses).length+'. Отработка ошибок и тренировки по правилам не добавляют баллы в рейтинг.</p></div><div class="scroll"><div class="panel finishBody"><strong>Статистика раунда</strong><p>Проверено слов: '+Object.values(tested).reduce(function(s,n){return s+n},0)+' · ошибочных вставок: '+Object.values(errors).reduce(function(s,n){return s+n},0)+'</p><div class="ruleStats"><strong>По отдельным правилам</strong><ul>'+rulesView+'</ul></div><p>Для записи результата открой игру через кнопку «🎮 Тренажёры» в личном чате @russian11_island_bot, а не по прямой ссылке. Затем нажми «Сохранить».</p></div></div><div class="toolbar"><button class="ghost" data-action="home">В меню</button><button class="primary" data-action="send" id="saveResult">📩 Сохранить в Telegram</button></div><div class="note" id="saveStatus">'+esc(state.saveStatus)+'</div></div>';updateTop()}
 function finishDrill(){state.view="drill-finish";screen.innerHTML='<div class="finished">'+heading("Тренировка завершена","Правильные ответы убраны из «Моих ошибок». Ошибочные остались для повторения.")+'<div class="panel finishBody"><div class="scoreBig">'+(state.feedback.words.length-state.feedback.wrong.length)+' / '+state.feedback.words.length+'</div><p>Из них ошибок: '+state.feedback.wrong.length+'. Рейтинг ЕГЭ не изменился.</p><p>Осталось повторить слов: '+Object.keys(mem.misses).length+'.</p></div><div class="toolbar"><button data-action="home" class="primary">Вернуться в котёл</button><button data-action="'+(state.mode==="rule"?"repeat-rule":"errors")+'" class="ghost">Ещё раунд</button></div></div>';updateTop()}
 function send(){
  if(!state.payload)return;
