@@ -62,6 +62,7 @@ let progress=getStorage();if(!progress.right)progress.right={};if(!progress.mist
 if(!progress.lpQueued||typeof progress.lpQueued!=='object')progress.lpQueued={};
 if(!progress.lpSent||typeof progress.lpSent!=='object')progress.lpSent={};
 if(!progress.lpLast||typeof progress.lpLast!=='object')progress.lpLast={};
+if(!progress.lpDiag||typeof progress.lpDiag!=='object')progress.lpDiag={};
 function save(){try{localStorage.setItem(STORE,JSON.stringify(progress))}catch(e){}}
 let app={view:'menu',mode:'construct',num:16,task:null,stage:0,selection:[],marked:{},pending:null,head:null,type:'coord',role:'parts',groupType:'hom',extraType:'intro',turnType:'part',junctionDecision:null,junctionFound:[],punct:{},gap:null,phase:'place',review:[],reviewIndex:0,message:'',messageType:'',failed:false,checks:{extras:false,groups:false},justCompleted:0};
 const queues={};const escapeHTML=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -120,7 +121,10 @@ function markStage(){const a=app.task,s=app.stage,p=uniq(app.selection);if(!p.le
  note('Группа принята. Отмечено '+app.marked[kind].length+' из '+a[kind].length+' групп этого типа. Проверь остальные.','ok');render();return}
 }
 function linkPending(){if(!app.pending)return;const {kind,index}=app.pending;const item=app.task[kind][index];if(app.head!==item.head){markFail('Проверь опорное слово.');return}app.marked[kind].push(index);app.pending=null;app.head=null;note('Зависимость определена верно.','ok');render()}
-function markFail(msg){app.failed=true;progress.mistakes[app.task.id]={id:app.task.id,num:app.num,mode:app.mode};save();note(msg,'error');render()}
+function lpStageFail(stage){if(app.mode!=='construct'||!app.task||![16,17,18,19,20].includes(Number(app.task.num)))return;
+ const rec=progress.lpDiag[app.task.id]||(progress.lpDiag[app.task.id]={fails:{},stages:[]});
+ const key='s'+stage;rec.fails[key]=(rec.fails[key]||0)+1;}
+function markFail(msg){lpStageFail(app.stage);app.failed=true;progress.mistakes[app.task.id]={id:app.task.id,num:app.num,mode:app.mode};save();note(msg,'error');render()}
 function remaining(kind){return (app.task[kind]||[]).length-(app.marked[kind]||[]).length}
 function readyForNext(){const s=app.stage;if(s===0)return app.marked.bases;if(s===1)return !remaining('subs')&&!app.pending;if(s===2)return !remaining('conjs')&&(app.num!==20||(app.junctionDecision!==null&&app.junctionFound.length===app.task.junctions.length));if(s===3)return !remaining('turns')&&!app.pending;if(s===4)return !remaining('extras')&&(app.num!==18||app.checks.extras);if(s===5)return !remaining('hom')&&!remaining('general')&&!remaining('common')&&app.checks.groups;return true}
 function advance(){if(!readyForNext()){note('Сначала закончи действия на этом этапе.','error');return render()}const path=stagesFor(app.task);app.stage=path[path.indexOf(app.stage)+1]??6;app.selection=[];app.head=null;app.pending=null;app.message='';if(app.stage===4)app.checks.extras=false;if(app.stage===5)app.checks.groups=false;if(app.stage===6)app.phase='place';render()}
@@ -140,6 +144,9 @@ function lpNewCompletion(task){
  if(progress.lpSent[key])return;
  const q=Array.isArray(progress.lpQueued[n])?progress.lpQueued[n]:[];
  if(!q.includes(key)){q.push(key);progress.lpQueued[n]=q}
+ // Фиксируем реально пройденные этапы данного предложения для отправки после завершения.
+ const rec=progress.lpDiag[key]||(progress.lpDiag[key]={fails:{},stages:[]});
+ rec.stages=stagesFor(task).map(x=>'s'+x);
 }
 function lpPending(num){const n=String(num);return (Array.isArray(progress.lpQueued[n])?progress.lpQueued[n]:[]).filter(id=>!progress.lpSent[id])}
 function lpBotOpen(){return !!(tg&&tg.platform&&tg.platform!=='unknown'&&typeof tg.sendData==='function')}
@@ -163,6 +170,18 @@ function lpSend(num,retry=false){
  // ID попытки создаётся один раз и сохраняется для идемпотентного повтора.
  const id='LP'+num+'_'+(window.crypto?.randomUUID?.().replace(/-/g,'')||Date.now().toString(36)+Math.random().toString(36).slice(2));
  const payload={v:1,type:'game_result',gameId:'LEGO'+num,attemptId:id,correct:1,total:1,errors:{}};
+ // В отличие от балла 1/1 это количество неудачных проверок на каждом этапе.
+ const diag=progress.lpDiag[ids[0]];
+ if(diag&&Array.isArray(diag.stages)&&diag.stages.length){
+  const stageNames={s0:'Грамматические основы',s1:'Придаточные и их границы',
+   s2:'Союзы и стыки',s3:'Обороты и опорные слова',s4:'Вводные и обращения',
+   s5:'Однородные, общие и обобщающие слова',s6:'Пунктуационные границы'};
+  const ruleStats={},ruleNames={};
+  for(const code of diag.stages){const failed=Math.max(0,Math.min(200,Number(diag.fails?.[code])||0));
+   ruleStats[code]=[failed+1,failed];ruleNames[code]=stageNames[code]||code;
+  }
+  payload.ruleStats=ruleStats;payload.ruleNames=ruleNames;payload.diagKind='stage';
+ }
  const json=JSON.stringify(payload);
  if(json.length>4096)throw Error('Слишком длинное сообщение Telegram');
  const old={queued:(progress.lpQueued[String(num)]||[]).slice(),last:progress.lpLast[String(num)]};
@@ -196,7 +215,7 @@ function lpSavingBlock(num){
 function checkPunctuation(){const a=app.task,correct=a.signs||{},entered=app.punct||{};
  const wrong=uniq([...Object.keys(correct),...Object.keys(entered)].filter(k=>(correct[k]||'')!==(entered[k]||'')).map(Number));
  progress.attempts[a.id]=(progress.attempts[a.id]||0)+1;
- if(wrong.length){app.failed=true;progress.mistakes[a.id]={id:a.id,num:a.num,mode:app.mode};save();app.review=wrong;app.reviewIndex=0;app.gap=wrong[0];app.phase='review';note('Не все запятые на месте. Давай проверим '+wrong.length+' '+(wrong.length===1?'границу.':wrong.length>=2&&wrong.length<=4?'границы.':'границ.')+' Правильные знаки пока не показаны.','error');render();return}
+ if(wrong.length){lpStageFail(6);app.failed=true;progress.mistakes[a.id]={id:a.id,num:a.num,mode:app.mode};save();app.review=wrong;app.reviewIndex=0;app.gap=wrong[0];app.phase='review';note('Не все запятые на месте. Давай проверим '+wrong.length+' '+(wrong.length===1?'границу.':wrong.length>=2&&wrong.length<=4?'границы.':'границ.')+' Правильные знаки пока не показаны.','error');render();return}
  progress.right[a.id]={id:a.id,num:a.num,mode:app.mode,finishedAt:Date.now()};delete progress.mistakes[a.id];lpNewCompletion(a);save();app.view='finish';app.phase='complete';note();render()}
 function numsText(){return app.num==='HARD'?'Сложный уровень':`ЕГЭ № ${app.num}`}
 function typeOfWord(i){const a=app.task,stage=app.stage,cls=[],base=a.bases||[];
