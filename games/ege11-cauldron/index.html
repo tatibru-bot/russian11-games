@@ -272,7 +272,8 @@ state.results.forEach(function(r){
 const botRule="ЕГЭ № 11 — суффиксы";const botErrors=score<5?{[botRule]:5-score}:{};const botTested={[botRule]:5};
 // Старые поля остаются для текущего QuizBot.gs; отдельное поле будет
 // записываться сервером после добавления приёма ruleStats в QuizBot.gs.
-state.payload={v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:state.attemptId,correct:score,total:5,errors:botErrors,tested:botTested,ruleStats:ruleStats};
+const ruleNames=Object.fromEntries(Object.keys(ruleStats).map(function(id){return [id,byId[id]?.title||id]}));
+state.payload={v:1,type:"game_result",gameId:"ege11-cauldron",attemptId:state.attemptId,correct:score,total:5,errors:botErrors,tested:botTested,ruleStats:ruleStats,ruleNames:ruleNames};
 const rulesView=Object.entries(ruleStats).sort(function(a,b){return b[1][1]-a[1][1]||b[1][0]-a[1][0]}).map(function(e){
  return '<li><strong>'+esc(byId[e[0]]?.title||e[0])+'</strong> · проверено '+e[1][0]+' слов, ошибок '+e[1][1]+'</li>';
 }).join("");
