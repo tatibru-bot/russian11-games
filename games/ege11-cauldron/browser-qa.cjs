@@ -162,6 +162,8 @@ async function engineCheck(engine,name,base){
       assert(sent.ruleStats&&typeof sent.ruleStats==="object","per-rule stats included");
       const breakdown=Object.entries(sent.ruleStats);
       assert(breakdown.length>0&&breakdown.length<=23,"valid skill categories");
+      assert(sent.ruleNames&&Object.keys(sent.ruleNames).length===breakdown.length,"all rule names included");
+      assert(breakdown.every(([id])=>typeof sent.ruleNames[id]==="string"&&sent.ruleNames[id].length>1),"human-readable rule names");
       assert(breakdown.every(([id,p])=>/^[a-z][a-z0-9-]{1,39}$/.test(id)&&Array.isArray(p)&&p.length===2&&p[0]>=p[1]&&p[0]>0),"valid word counts");
       assert.equal(breakdown.reduce((s,[,p])=>s+p[0],0),50,"all 50 word slots recorded");
       assert.equal(breakdown.reduce((s,[,p])=>s+p[1],0),0,"no word errors for perfect exam");
