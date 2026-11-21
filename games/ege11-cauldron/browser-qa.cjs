@@ -158,6 +158,16 @@ async function engineCheck(engine,name,base){
       const sent=JSON.parse(await page.evaluate(()=>window.__qaPayload));
       assert.equal(sent.gameId,"ege11-cauldron");
       assert.equal(sent.correct,5);assert.equal(sent.total,5);assert.equal(Object.values(sent.tested).reduce((x,y)=>x+y,0),5);
+      // Five full EGE tasks stay separate from detailed per-word measurements.
+      assert(sent.ruleStats&&typeof sent.ruleStats==="object","per-rule stats included");
+      const breakdown=Object.entries(sent.ruleStats);
+      assert(breakdown.length>0&&breakdown.length<=23,"valid skill categories");
+      assert(sent.ruleNames&&Object.keys(sent.ruleNames).length===breakdown.length,"all rule names included");
+      assert(breakdown.every(([id])=>typeof sent.ruleNames[id]==="string"&&sent.ruleNames[id].length>1),"human-readable rule names");
+      assert(breakdown.every(([id,p])=>/^[a-z][a-z0-9-]{1,39}$/.test(id)&&Array.isArray(p)&&p.length===2&&p[0]>=p[1]&&p[0]>0),"valid word counts");
+      assert.equal(breakdown.reduce((s,[,p])=>s+p[0],0),50,"all 50 word slots recorded");
+      assert.equal(breakdown.reduce((s,[,p])=>s+p[1],0),0,"no word errors for perfect exam");
+      assert(Buffer.byteLength(JSON.stringify(sent),"utf8")<=4096,"Telegram size limit");
       await page.locator('[data-action="home"]').click();
       assert.equal(await page.locator('[data-action="history"]').count(),1,"history button is visible");
       await page.locator('[data-action="history"]').click();
@@ -165,6 +175,11 @@ async function engineCheck(engine,name,base){
       await page.reload({waitUntil:"load"});
       await page.locator('[data-action="history"]').click();
       assert.equal(await page.locator('[data-action="send-attempt"]').count(),1,"save recovery persists");
+      await page.locator('[data-action="send-attempt"]').first().click();
+      assert.match(await page.locator("#saveStatus").innerText(),/Ранее уже запрашивали/,"repeat needs confirmation");
+      await page.locator('[data-action="send-attempt"]').first().click();
+      const repeated=JSON.parse(await page.evaluate(()=>window.__qaPayload));
+      assert.deepEqual(repeated.ruleStats,sent.ruleStats,"history resend retains precise statistics");
       await page.locator('[data-action="home"]').click();
       await page.locator('[data-action="start-exam"]').click();
       const slots=await page.evaluate(()=>window.__CAULDRON_QA.currentSlots());
