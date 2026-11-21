@@ -1,0 +1,36 @@
+name: Unified Game Rule Diagnostics QA
+on:
+  pull_request:
+    paths:
+      - "games/ege9-roots/**"
+      - "games/ege10-pristavgrad/**"
+      - "games/paronimoskop/**"
+      - "games/tr26-links/**"
+      - "games/slovar11/**"
+      - "games/legopunkt/**"
+      - "integration/GameSkillStats.gs"
+      - "integration/check-game-diagnostics.cjs"
+      - ".github/workflows/all-rule-diagnostics-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "games/ege9-roots/**"
+      - "games/ege10-pristavgrad/**"
+      - "games/paronimoskop/**"
+      - "games/tr26-links/**"
+      - "games/slovar11/**"
+      - "games/legopunkt/**"
+      - "integration/GameSkillStats.gs"
+      - "integration/check-game-diagnostics.cjs"
+  workflow_dispatch:
+jobs:
+  diagnostics-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse game scripts and test normalization, append, and deduplication
+        run: node integration/check-game-diagnostics.cjs
