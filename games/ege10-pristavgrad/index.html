@@ -79,6 +79,7 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:6px
 
 .shopLayout > *,.shopPage .districtArea,.homeLayout .districtArea{min-width:0;max-width:100%}.shopPage .districtTabs,.homeLayout .districtTabs{width:100%;max-width:100%;min-width:0}.shopPage .shopAside{min-width:0}
 </style>
+<script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
 </head>
 <body><div class="app"><header class="top"><div class="logo"><div class="logoMark" aria-hidden="true">🏙</div><div class="logoText"><strong>ПриставьГрад</strong><small>ЕГЭ № 10 · строим правильные слова</small></div></div><div class="wallet" id="wallet">🧱 0</div></header><main class="screen" id="screen" aria-live="polite"></main></div>
 <script>
@@ -272,7 +273,7 @@ function buy(id){
  save();shop();
 }
 
-function send(){if(!mem.lastPayload){return}let status=$('sendStatus');function say(s){if(status)status.textContent=s}const t=tg();if(!t||!t.platform||t.platform==='unknown'||typeof t.sendData!=='function'){say('Для передачи результата открой игру кнопкой из личного чата бота. Локальный результат сохранён.');return}if(t.initDataUnsafe&&t.initDataUnsafe.query_id){say('Этот режим запуска Telegram не позволяет отправить sendData. Нужна кнопка из личного чата.');return}try{const payload=JSON.stringify(mem.lastPayload);if(new TextEncoder().encode(payload).length>4096){say('Отчёт слишком большой для Telegram.');return}t.sendData(payload);say('Результат передан Telegram; запись в журнале необходимо проверить отдельно.')}catch(e){say('Не удалось передать: '+String(e.message||e))}}
+function send(){if(!mem.lastPayload){return}let status=$('sendStatus');function say(s){if(status)status.textContent=s}const t=tg();if(!t||!t.platform||t.platform==='unknown'||typeof t.sendData!=='function'){say('Для передачи результата открой игру кнопкой из личного чата бота. Локальный результат сохранён.');return}if(t.initDataUnsafe&&t.initDataUnsafe.query_id){say('Этот режим запуска Telegram не позволяет отправить sendData. Нужна кнопка из личного чата.');return}try{const payload=JSON.stringify(mem.lastPayload);if(new TextEncoder().encode(payload).length>4096){say('Отчёт слишком большой для Telegram.');return}R11Delivery.sendData(payload);say('Результат передан Telegram; запись в журнале необходимо проверить отдельно.')}catch(e){say('Не удалось передать: '+String(e.message||e))}}
 function backGuide(){const origin=state.guideFrom;if(origin==='play')renderQuestion();else if(origin==='feedback')renderFeedback();else if(origin==='exam-finish'){state.view='exam-finish';screen.innerHTML=state.finishHtml||'';updateWallet()}else if(origin==='rule-select')ruleSelector();else home()}
 function repeat(){if(state.mode==='rule')startRule(state.ruleId);else if(state.mode==='all')startAll();else if(state.mode==='errors')startErrors();else startExam()}
 function scrollToRule(id){guide();requestAnimationFrame(()=>{const el=$('rule-'+id);if(el)el.scrollIntoView({block:'start',behavior:'smooth'})})}
