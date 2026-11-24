@@ -135,6 +135,7 @@ button.important{border-color:#ffc882}
 @media(max-height:520px){.brand small{display:none}.top{min-height:27px}.playHead .tip{display:none}.keyboard button{height:30px;min-height:30px}.keyboard{gap:3px;padding:3px}.slot{height:22px;min-height:22px}.controls,.controls button{min-height:36px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
 </head>
 <body>
 <div class="app">
@@ -313,7 +314,7 @@ function send(){
   tell("Ранее уже запрашивали отправку ЭТОГО раунда. Если результата нет в статистике, нажми ту же кнопку ещё раз. ID попытки останется прежним.");return;
  }
  try{
-  tg.sendData(data);
+  R11Delivery.sendData(data);
   if(h){h.sent=true;h.attemptedAt=new Date().toISOString();persist()}
   state.resendArmedFor=null;
   tell("Запрос на отправку передан Telegram. Факт записи подтверждается только появлением результата в журнале.");
