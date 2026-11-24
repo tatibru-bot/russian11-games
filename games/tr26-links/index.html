@@ -215,6 +215,7 @@ function submitAnswer(){
 }
 function nextTask(){if(session.index+1>=session.items.length){renderResults();return;}session.index++;session.selected=[];renderExam();}
 function renderResults(){
+ try{const p=makePayload26();if(p)R11Delivery.enqueue(p)}catch(err){console.warn("LOCAL_REPORT",err)}
  scene="results";const total=session.answers.length,score=session.answers.filter(function(x){return x.ok;}).length,full=total===5,telegram=!!(tg&&tg.platform&&tg.platform!=="unknown"&&typeof tg.sendData==="function");
  main.innerHTML='<section class="results"><span class="medal" aria-hidden="true">'+(score===total?"🏆":"🧩")+'</span><div><div class="eyebrow">'+(session.mode==="error"?"ОТРАБОТКА ЗАВЕРШЕНА":"РАУНД ЗАВЕРШЁН")+'</div><h1>Связь найдена!</h1><div class="score">'+score+' из '+total+'</div></div>'+
  '<p>Всего в базе: '+TASKS.length+' · решено верно: '+count("ok")+' · надо перерешить: '+count("error")+'</p>'+
@@ -258,8 +259,8 @@ function renderResults(){
   return [id.length<=39?id:'mixed-'+hash,
    (tags.length===1?tags[0][1]:'Комбинация: '+tags.map(x=>x[1]).join(' + ')).slice(0,120)];
  }
- function sendTelegram(){
- if(!session||session.sent||session.answers.length!==5||!tg||!tg.platform||tg.platform==="unknown"||typeof tg.sendData!=="function")return;
+ function makePayload26(){
+ if(!session||session.answers.length!==5)return null;
  const all=session.answers,correct=all.filter(function(a){return a.ok;}).length,skills="Связь предложений";
  const payload={v:1,type:"game_result",gameId:"TR26",attemptId:session.attemptId,correct,total:5,errors:{},tested:{},wrongRows:all.filter(function(x){return !x.ok;}).map(function(x){return {taskId:x.id,chosen:x.chosen,expected:byId.get(x.id).a};})};
  payload.errors[skills]=5-correct;payload.tested[skills]=5;
@@ -272,6 +273,11 @@ function renderResults(){
   ruleNames[rid]=title;
  }
  payload.ruleStats=ruleStats;payload.ruleNames=ruleNames;payload.diagKind='question';
+ return payload;
+}
+function sendTelegram(){
+ if(!session||session.sent||session.answers.length!==5||!tg||!tg.platform||tg.platform==='unknown'||typeof tg.sendData!=='function')return;
+ const payload=makePayload26();if(!payload)return;
  try{R11Delivery.sendData(JSON.stringify(payload));session.sent=true;renderResults();const e=document.getElementById("sendStatus");if(e)e.textContent="Результат передан боту."; }
  catch(e){const el=document.getElementById("sendStatus");if(el)el.textContent="Не удалось отправить: "+String(e);}
 }
