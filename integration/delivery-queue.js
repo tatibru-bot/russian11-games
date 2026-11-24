@@ -4,9 +4,9 @@
 'use strict';
 const getApp=()=>window.Telegram&&window.Telegram.WebApp;
 const storageKey=()=>{const app=getApp(),id=app&&app.initDataUnsafe&&app.initDataUnsafe.user&&app.initDataUnsafe.user.id;return 'r11:delivery:v1:'+String(id||'browser')};
-const maxItems=150;
+const maxItems=400;
 const read=()=>{try{const v=JSON.parse(localStorage.getItem(storageKey())||'[]');return Array.isArray(v)?v:[]}catch(_){return []}};
-const save=x=>{try{localStorage.setItem(storageKey(),JSON.stringify(x.slice(-maxItems)));return true}catch(_){return false}};
+const save=x=>{try{localStorage.setItem(storageKey(),JSON.stringify(x));return true}catch(_){return false}};
 const validate=payload=>{const p=typeof payload==='string'?JSON.parse(payload):payload;
 if(!p||p.v!==1||!['game_result','skill_result'].includes(p.type)||!p.gameId||!p.attemptId)throw Error('Некорректный отчёт');
 const data=JSON.stringify(p);if(new TextEncoder().encode(data).length>4096)throw Error('Отчёт превышает лимит Telegram (4096 байт)');
@@ -15,7 +15,7 @@ let open=false;
 function enqueue(payload){
 const {p,data}=validate(payload),list=read(),key=String(p.gameId)+':'+String(p.attemptId);
 let item=list.find(x=>x.key===key);
-if(!item){item={key,gameId:p.gameId,attemptId:p.attemptId,type:p.type,data,createdAt:new Date().toISOString(),lastTriedAt:null,tries:0};list.push(item)}
+if(!item){if(list.length>=maxItems)throw Error('Архив отчётов заполнен. Проверь сохранение прежних результатов с преподавателем, прежде чем удалять их.');item={key,gameId:p.gameId,attemptId:p.attemptId,type:p.type,data,createdAt:new Date().toISOString(),lastTriedAt:null,tries:0};list.push(item)}
 else item.data=data;
 if(!save(list))throw Error('Не удалось сохранить отчёт на этом устройстве');
 render();return data;
