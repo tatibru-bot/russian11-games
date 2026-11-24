@@ -2,12 +2,11 @@
    sendData acknowledges only handoff to Telegram, NOT acceptance by the bot. */
 (function(){
 'use strict';
-const app=window.Telegram&&window.Telegram.WebApp;
-const identity=app&&app.initDataUnsafe&&app.initDataUnsafe.user&&app.initDataUnsafe.user.id;
-const storageKey='r11:delivery:v1:'+String(identity||'browser');
+const getApp=()=>window.Telegram&&window.Telegram.WebApp;
+const storageKey=()=>{const app=getApp(),id=app&&app.initDataUnsafe&&app.initDataUnsafe.user&&app.initDataUnsafe.user.id;return 'r11:delivery:v1:'+String(id||'browser')};
 const maxItems=150;
-const read=()=>{try{const v=JSON.parse(localStorage.getItem(storageKey)||'[]');return Array.isArray(v)?v:[]}catch(_){return []}};
-const save=x=>{try{localStorage.setItem(storageKey,JSON.stringify(x.slice(-maxItems)));return true}catch(_){return false}};
+const read=()=>{try{const v=JSON.parse(localStorage.getItem(storageKey())||'[]');return Array.isArray(v)?v:[]}catch(_){return []}};
+const save=x=>{try{localStorage.setItem(storageKey(),JSON.stringify(x.slice(-maxItems)));return true}catch(_){return false}};
 const validate=payload=>{const p=typeof payload==='string'?JSON.parse(payload):payload;
 if(!p||p.v!==1||!['game_result','skill_result'].includes(p.type)||!p.gameId||!p.attemptId)throw Error('Некорректный отчёт');
 const data=JSON.stringify(p);if(new TextEncoder().encode(data).length>4096)throw Error('Отчёт превышает лимит Telegram (4096 байт)');
@@ -23,6 +22,7 @@ render();return data;
 }
 function sendData(payload){
 const data=enqueue(payload);
+const app=getApp();
 if(!app||typeof app.sendData!=='function'||app.platform==='unknown')throw Error('Открой тренажёр через кнопку Telegram-бота');
 if(app.initDataUnsafe&&app.initDataUnsafe.query_id)throw Error('Этот способ открытия Telegram не поддерживает отправку отчёта. Открой игру из кнопки бота');
 const p=JSON.parse(data),list=read(),item=list.find(x=>x.key===p.gameId+':'+p.attemptId);
