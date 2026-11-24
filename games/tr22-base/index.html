@@ -201,6 +201,6 @@ function saveGame22(){
  try{$('saveGame22').disabled=true;R11Delivery.sendData(JSON.stringify(data));gameSaved=true;status.textContent='Результат отправлен боту.';}
  catch(e){$('saveGame22').disabled=false;status.textContent='Не удалось отправить: '+String(e.message||e);}
 }
-function finish(){closeModal();$('play').classList.add('hidden');$('final').classList.remove('hidden');const total=rounds.reduce((s,r)=>s+r.items.length,0);$('finalScore').textContent=totalCorrect+' / '+total;$('finalDesc').textContent='Верно '+Math.round(totalCorrect/total*100)+'%. Пройдено раундов: '+rounds.length+'. Можно сыграть снова: следующее задание выбирается случайно из всей базы.';}
+function finish(){try{const tested={},errors={};results.forEach(round=>round.r.items.forEach((it,i)=>{tested[it.term]=(tested[it.term]||0)+1;if(round.selected[i]!==it.term)errors[it.term]=(errors[it.term]||0)+1;}));const count=Object.values(tested).reduce((n,x)=>n+x,0);if(count===5)R11Delivery.enqueue({v:1,type:'game_result',gameId:'TR22',attemptId,correct:totalCorrect,total:5,errors,tested});}catch(err){console.warn('LOCAL_REPORT',err);}closeModal();$('play').classList.add('hidden');$('final').classList.remove('hidden');const total=rounds.reduce((s,r)=>s+r.items.length,0);$('finalScore').textContent=totalCorrect+' / '+total;$('finalDesc').textContent='Верно '+Math.round(totalCorrect/total*100)+'%. Пройдено раундов: '+rounds.length+'. Можно сыграть снова: следующее задание выбирается случайно из всей базы.';}
 document.addEventListener('DOMContentLoaded',init);
 </script></body></html>
