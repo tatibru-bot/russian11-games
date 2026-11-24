@@ -57,6 +57,7 @@ button:disabled{opacity:.48;cursor:default}
 @media(min-width:650px){.app{padding-left:20px;padding-right:20px}.choices{grid-auto-rows:minmax(58px,auto)}.choice{min-height:58px}}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
 </head>
 <body>
 <div class="app">
@@ -153,7 +154,7 @@ function showFinish(){
   }
   try{
    el("save").disabled=true;
-   tg.sendData(JSON.stringify(data));
+   R11Delivery.sendData(JSON.stringify(data));
    el("saveStatus").textContent="Результат отправлен боту.";
   }catch(err){
    el("save").disabled=false;
