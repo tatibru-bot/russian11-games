@@ -20,7 +20,7 @@ function e4GameInboxAccept_(update) {
   if (!m.from || !m.chat || !m.web_app_data || typeof m.web_app_data.data !== 'string')
     throw Error('GAME_INBOX malformed Telegram message');
   const raw = m.web_app_data.data;
-  if (new TextEncoder().encode(raw).length > 4096)
+  if (Utilities.newBlob(raw).getBytes().length > 4096)
     throw Error('GAME_INBOX excessive payload');
   const key = E4_INBOX_PREFIX_ + id;
   if (CacheService.getScriptCache().get('E4_DONE_' + id)) return true;
