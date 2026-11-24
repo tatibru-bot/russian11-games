@@ -94,7 +94,8 @@ body.large .quote,body.large .choice{font-size:inherit}
 /* Восстановленная типографская маркировка оригинальных заданий № 22 */
 .quote .emph{font-weight:950;font-style:italic;color:#ffe6a1;text-shadow:0 0 1px rgba(255,255,255,.25)}
 .quote .phoneme{font-weight:950;text-decoration:underline;text-underline-offset:.13em;text-decoration-thickness:.085em;color:#fce7b0}
-</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body>
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
+</head><body>
 <div id="root">
 <header><div class="identity"><div class="emblem" id="emblem">✦</div><div style="min-width:0"><div class="title" id="title"></div><div class="subtitle" id="subtitle"></div></div></div><div class="tools"><button class="tool" id="homeBtn">⌂ Начало</button><button class="tool" id="fontBtn">А+</button><button class="tool help" id="helpBtn">ⓘ Справка</button></div></header>
 <section id="intro"><div class="introCard"><div class="introBadge">✦</div><h1 id="introTitle"></h1><p id="introDesc"></p><div class="startRow"><select id="countSelect" class="hidden" aria-label="Количество заданий"><option value="10">10 случайных заданий</option><option value="20">20 случайных заданий</option><option value="73">Все 73 задания</option></select><button class="action primary" id="startBtn">Начать →</button><button class="action ghost" id="introHelp">ⓘ Справочник</button></div></div></section>
@@ -197,7 +198,7 @@ function saveGame22(){
  const total=Object.values(tested).reduce((n,x)=>n+x,0);
  if(total!==5){status.textContent='Не удалось проверить завершённый раунд.';return;}
  const data={v:1,type:'game_result',gameId:'TR22',attemptId,correct:totalCorrect,total,errors,tested};
- try{$('saveGame22').disabled=true;tg.sendData(JSON.stringify(data));gameSaved=true;status.textContent='Результат отправлен боту.';}
+ try{$('saveGame22').disabled=true;R11Delivery.sendData(JSON.stringify(data));gameSaved=true;status.textContent='Результат отправлен боту.';}
  catch(e){$('saveGame22').disabled=false;status.textContent='Не удалось отправить: '+String(e.message||e);}
 }
 function finish(){closeModal();$('play').classList.add('hidden');$('final').classList.remove('hidden');const total=rounds.reduce((s,r)=>s+r.items.length,0);$('finalScore').textContent=totalCorrect+' / '+total;$('finalDesc').textContent='Верно '+Math.round(totalCorrect/total*100)+'%. Пройдено раундов: '+rounds.length+'. Можно сыграть снова: следующее задание выбирается случайно из всей базы.';}
