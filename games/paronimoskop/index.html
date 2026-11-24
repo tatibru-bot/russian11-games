@@ -233,6 +233,7 @@ function doCheck(){if(S.checked||!S.current)return;const choice=$('input[name="j
    });
    const entry={attemptId:active.attemptId,mode:active.mode,total:ROUND_SIZE,correct:S.correct,errors,at:new Date().toISOString(),sent:false,ruleStats,ruleNames};
   if(!R.history.some(h=>h.attemptId===entry.attemptId))R.history.unshift(entry);
+  try{const key='Паронимы';R11Delivery.enqueue({v:1,type:'game_result',gameId:'PARONIMOSKOP',attemptId:entry.attemptId,correct:entry.correct,total:ROUND_SIZE,errors:entry.errors?{[key]:entry.errors}:{},tested:{[key]:ROUND_SIZE},ruleStats:entry.ruleStats,ruleNames:entry.ruleNames,diagKind:'question'});}catch(err){console.warn('LOCAL_REPORT',err);}
   R.active=null;S.completed=entry;S.finished=true;
  }
  persistRounds();renderHome();
