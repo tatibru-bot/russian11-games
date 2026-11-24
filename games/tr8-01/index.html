@@ -133,6 +133,7 @@ function showFinish(){
  saveMemory(proposed);
  const wrong=cards.map((c,i)=>({card:c,answer:answers[i],i})).filter(x=>x.card.kind!==x.answer);
  const correct=15-wrong.length;
+ try{const errors={},tested={};wrong.forEach(x=>{const k=CFG.names[x.card.kind];errors[k]=(errors[k]||0)+1;});cards.forEach(c=>{const k=CFG.names[c.kind];tested[k]=(tested[k]||0)+1;});R11Delivery.enqueue({v:1,type:'game_result',gameId:CFG.id,attemptId,correct,total:15,errors,tested});}catch(err){console.warn('LOCAL_REPORT',err);}
  el("scoreTitle").textContent=correct+" из 15 · "+Math.round(100*correct/15)+"%";
  el("scoreSub").textContent=wrong.length?("Ошибок: "+wrong.length+". Ниже — разбор по правилам."):"Все типы ошибок определены верно!";
  const review=el("review");
