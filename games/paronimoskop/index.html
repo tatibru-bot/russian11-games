@@ -24,6 +24,7 @@
 @media(max-width:365px){.stats-overview{grid-template-columns:1fr 1fr}.stats-overview .stat-tile:last-child{grid-column:span 2}.finish-actions .btn{flex:1}}
 @media(max-width:750px){.hero h1{font-size:clamp(22px,6.5vw,35px);line-height:1.13;letter-spacing:-1px}.progress-line{flex-wrap:wrap;gap:4px;font-size:11px}}@media(max-width:365px){.brand{font-size:0;gap:0}.brandmark{font-size:13px}.nav button{min-width:36px;padding:8px 6px}.topin{justify-content:space-between}}</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
 </head>
 <body>
 <header class="topbar"><div class="topin"><button class="brand" id="brand-home" aria-label="На главную"><span class="brandmark">11К</span> Русский · ЕГЭ</button><nav class="nav" aria-label="Основная навигация"><button id="nav-home" class="active" title="Главная">⌂ <span>Главная</span></button><button id="nav-list" title="Список">☷ <span>Список</span><span class="selected-tag hidden" id="selected-counter">0</span></button><button id="nav-dict" title="Словарь">▣ <span>Словарь</span></button><button id="nav-train" title="Тренировка">▶ <span>Тренировка</span></button><button id="nav-stats" title="Мои подходы">▥ <span>Статистика</span></button></nav></div></header>
@@ -264,7 +265,7 @@ function sendTelegram(){
  const payload={v:1,type:'game_result',gameId:'PARONIMOSKOP',attemptId:h.attemptId,correct:h.correct,total:ROUND_SIZE,errors:h.errors?{[key]:h.errors}:{},tested:{[key]:ROUND_SIZE},...(h.ruleStats?{ruleStats:h.ruleStats,ruleNames:h.ruleNames,diagKind:'question'}:{})};
  const data=JSON.stringify(payload);
  if(new TextEncoder().encode(data).length>4096){status.textContent='Отчёт превышает лимит Telegram и не отправлен.';return;}
- try{tg.sendData(data);h.sent=true;persistRounds();status.textContent='Запрос на отправку передан Telegram. Запись подтвердится после появления в статистике бота.';}
+ try{R11Delivery.sendData(data);h.sent=true;persistRounds();status.textContent='Запрос на отправку передан Telegram. Запись подтвердится после появления в статистике бота.';}
  catch(e){status.textContent='Ошибка отправки: '+String(e.message||e);}
 }
 // One-time event wiring
