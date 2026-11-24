@@ -349,6 +349,7 @@ function e12Archive(d){
  if(length>4096)throw Error('Диагностика превышает 4096 байт: '+length+'. Сообщи преподавателю, отчёт сохранён на устройстве.');
  const item={at:now(),attemptId:d.attemptId,mode:d.mode,topic:d.topic,report:d,attemptedAt:null};
  mem.diagnostics.push(item);
+ try{R11Delivery.enqueue(d)}catch(err){console.warn('LOCAL_REPORT',err)}
  persist();return item;
 }
 function diagnosticFromDrill(){
