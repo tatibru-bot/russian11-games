@@ -51,7 +51,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}.screen{display:none
 #screen-finish #save-telegram-status{line-height:1.2;text-align:center}
 @media(max-width:700px){#screen-finish .finish{padding:12px;gap:5px}#screen-finish .finish .stamp{font-size:26px}#screen-finish .finish h2{font-size:23px;margin-bottom:0}#screen-finish .finish p{font-size:13px;margin:2px}#screen-finish .finish .btn{min-height:44px;width:100%;padding:7px 12px;font-size:13px}}
 </style>
-<script src="https://telegram.org/js/telegram-web-app.js"></script></head>
+<script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://tatibru-bot.github.io/russian11-games/integration/delivery-queue.js"></script>
+</head>
 <body><div id="app"><header><div><div class="eyebrow">Русский язык · 11 «К»</div><h1 class="brand">СЛОВАРНЫЙ <span>ШТУРМ</span></h1></div><div class="topactions"><button class="btn ghost small" id="go-home">⌂ Меню</button><button class="btn ghost small" id="open-help">ⓘ Как играть</button></div></header>
 <div class="statrow" aria-label="Личный прогресс"><div class="stat"><span class="count" id="count-learned">0</span><small>Выучено</small></div><div class="stat"><span class="count" id="count-working">0</span><small>В работе</small></div><div class="stat"><span class="count" id="count-waiting">0</span><small>Ждут изучения</small></div></div>
 <main>
@@ -133,7 +134,7 @@ $('save-telegram').onclick=()=>{if(session.sent||!session.attempts)return;const 
   });
   if(allMisses.length>chosen.length)payload.omittedWords=allMisses.length-chosen.length;
  }
- const data=JSON.stringify(payload);if(new TextEncoder().encode(data).length>4096){status.textContent='Слишком длинный отчёт. Попробуй завершить следующий подход раньше.';return;}try{$('save-telegram').disabled=true;tg.sendData(data);session.sent=true;status.textContent='Результат отправлен боту; запись появится после обработки Telegram.';}catch(e){$('save-telegram').disabled=false;status.textContent='Ошибка отправки: '+String(e.message||e);}};
+ const data=JSON.stringify(payload);if(new TextEncoder().encode(data).length>4096){status.textContent='Слишком длинный отчёт. Попробуй завершить следующий подход раньше.';return;}try{$('save-telegram').disabled=true;R11Delivery.sendData(data);session.sent=true;status.textContent='Результат отправлен боту; запись появится после обработки Telegram.';}catch(e){$('save-telegram').disabled=false;status.textContent='Ошибка отправки: '+String(e.message||e);}};
 $('export-stats').onclick=()=>{const x=stages(),rows=[`Словарный штурм · ${identityLabel()}`,`Выучено: ${x.learned}; в работе: ${x.working}; ждут: ${x.waiting}`,`Всего слов: ${WORDS.length}`,`Последний подход: ${session.correct}/${session.attempts}`];copyText(rows.join('\n'),'Отчёт скопирован');};
 function renderDictionary(){const q=$('word-search').value.trim().toLowerCase();const filter=$('dict-filter').value;const list=WORDS.filter(w=>(!q||w.word.includes(q)||(w.context||'').toLowerCase().includes(q))&&(filter==='all'||filter==='dictation'&&config.dictation.has(w.id)||filter==='review'&&config.review.has(w.id)||filter==='newpdf'&&w.source==='дополнение из PDF'));
 $('word-list').innerHTML=list.map(w=>`<label class="word-item"><input type="checkbox" data-id="${w.id}" ${config.dictation.has(w.id)?'checked':''} aria-label="К диктанту: ${ESC(w.word)}"><span><b>${ESC(w.word)}</b><small>${ESC(w.context|| (config.review.has(w.id)?'В повторении':w.source))}</small></span></label>`).join('');$('word-list').querySelectorAll('input').forEach(el=>el.onchange=()=>{let id=Number(el.dataset.id);if(el.checked)config.dictation.add(id);else config.dictation.delete(id);saveConfig();updateCounters();scheduleCloudConfig()});}
